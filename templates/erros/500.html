@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block titulo %}Erro no Servidor - 500{% endblock %}
+
+{% block conteudo %}
+<div class="container text-center" style="padding: 5rem 0;">
+    <div class="fade-in">
+        <i class="bi bi-exclamation-triangle display-1 text-danger mb-4" style="font-size: 6rem;"></i>
+        <h1 class="display-4 fw-bold mb-3">500 - Erro no Servidor</h1>
+        <p class="lead text-muted mb-5">
+            Desculpe, algo deu errado no nosso servidor. Nossa equipe já foi notificada e está trabalhando para resolver o problema.
+        </p>
+        
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'home' %}" class="btn btn-custom btn-primario">
+                <i class="bi bi-arrow-counterclockwise me-2"></i>
+                Tentar Novamente
+            </a>
+            <a href="mailto:suporte@viajantesconectados.com" class="btn btn-outline-primary">
+                <i class="bi bi-envelope me-2"></i>
+                Reportar Problema
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

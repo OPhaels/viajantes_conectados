@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block titulo %}Acesso Negado - 403{% endblock %}
+
+{% block conteudo %}
+<div class="container text-center" style="padding: 5rem 0;">
+    <div class="fade-in">
+        <i class="bi bi-shield-x display-1 text-warning mb-4" style="font-size: 6rem;"></i>
+        <h1 class="display-4 fw-bold mb-3">403 - Acesso Negado</h1>
+        <p class="lead text-muted mb-5">
+            Você não tem permissão para acessar esta página.
+        </p>
+        
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="{% url 'home' %}" class="btn btn-custom btn-primario">
+                <i class="bi bi-house-door me-2"></i>
+                Voltar para Início
+            </a>
+            {% if not user.is_authenticated %}
+                <a href="{% url 'usuarios:login' %}" class="btn btn-custom btn-secundario">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>
+                    Fazer Login
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

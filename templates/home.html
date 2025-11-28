@@ -1,0 +1,573 @@
+{% extends "base.html" %}
+
+{% block titulo %}Viajantes Conectados - Encontre Companheiros de Viagem{% endblock %}
+
+{% block conteudo %}
+<div class="landing-page">
+    <!-- Hero Section -->
+    <section class="cta-section mx-0">
+        <div class="container">
+            <div class="row align-items-center min-vh-100">
+                <div class="col-lg-6 fade-in">
+                    <h1 class="display-3 fw-bold text-white mb-1">
+                        Conecte-se com Viajantes do Mundo Todo
+                    </h1>
+                    <p class="lead text-white mb-5">
+                        Encontre pessoas que compartilham o mesmo destino e período de viagem. 
+                        Faça amigos, compartilhe custos e crie memórias inesquecíveis juntos.
+                    </p>
+                    <div class="d-flex gap-3 flex-wrap">
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-primario btn-lg">
+                                <i class="bi bi-search me-2"></i>
+                                Buscar Viajantes
+                            </a>
+                            <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-secundario btn-lg">
+                                <i class="bi bi-plus-circle me-2"></i>
+                                Criar Plano de Viagem
+                            </a>
+                        {% else %}
+                            <a href="{% url 'usuarios:cadastro' %}" class="btn btn-custom btn-primario btn-lg">
+                                <i class="bi bi-person-plus me-2"></i>
+                                Comece Agora - Grátis
+                            </a>
+                            <a href="{% url 'usuarios:login' %}" class="btn btn-outline-light btn-lg">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Já Tenho Conta
+                            </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block slide-in-right">
+                    <div class="hero-image-container">
+                        <div class="floating-card card-1">
+                            <i class="bi bi-airplane-engines"></i>
+                            <span>150+ Destinos</span>
+                        </div>
+                        <div class="floating-card card-2">
+                            <i class="bi bi-people"></i>
+                            <span>5.000+ Viajantes</span>
+                        </div>
+                        <div class="floating-card card-3">
+                            <i class="bi bi-chat-dots"></i>
+                            <span>Chat em Tempo Real</span>
+                        </div>
+                        <div class="hero-illustration">
+                            <i class="bi bi-globe2 display-1 text-white"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features-section py-5">
+        <div class="container">
+            <div class="text-center mb-5 fade-in">
+                <h2 class="display-5 fw-bold mb-3">Como Funciona?</h2>
+                <p class="lead text-muted">Simples, rápido e seguro</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4 fade-in" style="animation-delay: 0.1s">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-person-check"></i>
+                        </div>
+                        <h3>1. Cadastre-se</h3>
+                        <p>Crie sua conta gratuitamente e configure seu perfil com suas preferências de viagem.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 fade-in" style="animation-delay: 0.2s">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-pin-map"></i>
+                        </div>
+                        <h3>2. Planeje sua Viagem</h3>
+                        <p>Adicione seu destino, datas e preferências. Use nosso mapa interativo para explorar.</p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 fade-in" style="animation-delay: 0.3s">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <h3>3. Conecte-se</h3>
+                        <p>Encontre viajantes com planos similares, envie solicitações e comece a conversar!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="benefits-section py-5">
+        <div class="container">
+            <div class="row align-items-center px-5">
+                <div class="col-lg-6 mb-4 mb-lg-0 slide-in-left">
+                    <h2 class="display-5 fw-bold mb-4">Por Que Viajar Conectado?</h2>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-shield-check"></i>
+                        </div>
+                        <div>
+                            <h4>Segurança em Grupo</h4>
+                            <p>Viajar com outras pessoas aumenta sua segurança, especialmente em destinos desconhecidos.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-wallet2"></i>
+                        </div>
+                        <div>
+                            <h4>Economize Dinheiro</h4>
+                            <p>Divida custos de hospedagem, transporte e passeios com seus novos amigos de viagem.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-emoji-smile"></i>
+                        </div>
+                        <div>
+                            <h4>Faça Amizades</h4>
+                            <p>Conheça pessoas com interesses similares e crie conexões que duram para sempre.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="benefit-item">
+                        <div class="benefit-icon">
+                            <i class="bi bi-lightbulb"></i>
+                        </div>
+                        <div>
+                            <h4>Troca de Experiências</h4>
+                            <p>Aprenda com viajantes experientes e compartilhe suas próprias dicas e conhecimentos.</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-6 slide-in-right">
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="stat-number">5.000+</div>
+                            <div class="stat-label">Viajantes Registrados</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">150+</div>
+                            <div class="stat-label">Países Disponíveis</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">10.000+</div>
+                            <div class="stat-label">Conexões Realizadas</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Satisfação dos Usuários</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="testimonials-section py-5">
+        <div class="container">
+            <div class="text-center mb-5 fade-in">
+                <h2 class="display-5 fw-bold mb-3">O Que Nossos Viajantes Dizem</h2>
+                <p class="lead text-muted">Histórias reais de conexões incríveis</p>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4 fade-in" style="animation-delay: 0.1s">
+                    <div class="testimonial-card">
+                        <div class="stars mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p>"Conheci pessoas incríveis que se tornaram grandes amigos! A viagem para a Tailândia ficou muito mais especial."</p>
+                        <div class="testimonial-author">
+                            <strong>Maria Silva</strong>
+                            <small class="text-muted d-block">Viajou para Bangkok</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 fade-in" style="animation-delay: 0.2s">
+                    <div class="testimonial-card">
+                        <div class="stars mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p>"Economizei muito dividindo os custos! E ainda fiz amigos de diferentes países. Experiência única!"</p>
+                        <div class="testimonial-author">
+                            <strong>João Santos</strong>
+                            <small class="text-muted d-block">Viajou para Portugal</small>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-4 fade-in" style="animation-delay: 0.3s">
+                    <div class="testimonial-card">
+                        <div class="stars mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                            <i class="bi bi-star-fill text-warning"></i>
+                        </div>
+                        <p>"Plataforma segura e fácil de usar. O chat em tempo real facilitou muito o planejamento conjunto!"</p>
+                        <div class="testimonial-author">
+                            <strong>Ana Costa</strong>
+                            <small class="text-muted d-block">Viajou para França</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="hero-section py-5 mx-0">
+        <div class="container">
+            <div class="cta-content text-center fade-in">
+                <h2 class="display-4 fw-bold text-white mb-4">
+                    Pronto Para Sua Próxima Aventura?
+                </h2>
+                <p class="lead text-white mb-5">
+                    Junte-se a milhares de viajantes e comece a planejar sua próxima viagem hoje mesmo!
+                </p>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'usuarios:cadastro' %}" class="btn btn-light btn-lg px-5">
+                    <i class="bi bi-rocket-takeoff me-2"></i>
+                    Criar Conta Gratuita
+                </a>
+                {% else %}
+                <a href="{% url 'destinos:criar_plano' %}" class="btn btn-light btn-lg px-5">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Criar Meu Plano de Viagem
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+
+<style>
+    /* Hero Section */
+    .hero-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: -2rem -2rem 0 -2rem;
+        padding: 0 2rem;
+    }
+    
+    .hero-image-container {
+        position: relative;
+        height: 500px;
+    }
+    
+    .hero-illustration {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 300px;
+        height: 300px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: float 6s ease-in-out infinite;
+    }
+    
+    .floating-card {
+        position: absolute;
+        background: white;
+        padding: 1rem 1.5rem;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    .floating-card i {
+        font-size: 1.5rem;
+        color: var(--cor-primaria);
+    }
+    
+    .floating-card span {
+        font-weight: 600;
+        color: var(--cor-texto);
+    }
+    
+    .card-1 {
+        top: 10%;
+        left: 10%;
+        animation-delay: 0s;
+    }
+    
+    .card-2 {
+        top: 50%;
+        right: 5%;
+        animation-delay: 1s;
+    }
+    
+    .card-3 {
+        bottom: 10%;
+        left: 20%;
+        animation-delay: 2s;
+    }
+    
+    /* Features Section */
+    .features-section {
+        background: white;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: var(--sombra-suave);
+        text-align: center;
+        transition: var(--transicao-padrao);
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: var(--sombra-media);
+    }
+    
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--cor-primaria), #357abd);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2rem;
+        color: white;
+    }
+    
+    .feature-card h3 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: var(--cor-texto);
+    }
+    
+    .feature-card p {
+        color: var(--cor-texto-secundario);
+        margin: 0;
+    }
+    
+    /* Benefits Section */
+    .benefits-section {
+        background: var(--cor-fundo);
+    }
+    
+    .benefit-item {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .benefit-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, var(--cor-secundaria), #3da55e);
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        flex-shrink: 0;
+    }
+    
+    .benefit-item h4 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--cor-texto);
+    }
+    
+    .benefit-item p {
+        color: var(--cor-texto-secundario);
+        margin: 0;
+    }
+    
+    /* Stats Container */
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    
+    .stat-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: var(--sombra-suave);
+        text-align: center;
+        transition: var(--transicao-padrao);
+    }
+    
+    .stat-card:hover {
+        transform: scale(1.05);
+        box-shadow: var(--sombra-media);
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--cor-primaria), var(--cor-secundaria));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-label {
+        color: var(--cor-texto-secundario);
+        font-weight: 500;
+        margin-top: 0.5rem;
+    }
+    
+    /* Testimonials Section */
+    .testimonials-section {
+        background: white;
+    }
+    
+    .testimonial-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        box-shadow: var(--sombra-suave);
+        height: 100%;
+        transition: var(--transicao-padrao);
+    }
+    
+    .testimonial-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--sombra-media);
+    }
+    
+    .testimonial-card p {
+        font-style: italic;
+        color: var(--cor-texto);
+        margin-bottom: 1.5rem;
+    }
+    
+    .testimonial-author strong {
+        color: var(--cor-texto);
+    }
+    
+    /* CTA Section */
+    .cta-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        margin: 0 -2rem -2rem -2rem;
+        padding: 5rem 2rem;
+    }
+    
+    .cta-content {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .hero-section {
+            padding: 0 1rem;
+        }
+        
+        .display-3 {
+            font-size: 2rem;
+        }
+        
+        .display-5 {
+            font-size: 1.75rem;
+        }
+        
+        .stats-container {
+            grid-template-columns: 1fr;
+        }
+        
+        .benefit-item {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts_extras %}
+<script>
+    // Animação de contadores
+    function animarContadores() {
+        const contadores = document.querySelectorAll('.stat-number');
+        
+        contadores.forEach(contador => {
+            const textoFinal = contador.textContent;
+            const temNumero = textoFinal.match(/\d+/);
+            
+            if (temNumero) {
+                const numeroFinal = parseInt(temNumero[0]);
+                const temMais = textoFinal.includes('+');
+                const temPorcentagem = textoFinal.includes('%');
+                
+                contador.textContent = '0';
+                
+                const duracao = 2000;
+                const incremento = numeroFinal / (duracao / 16);
+                let numeroAtual = 0;
+                
+                const timer = setInterval(() => {
+                    numeroAtual += incremento;
+                    
+                    if (numeroAtual >= numeroFinal) {
+                        numeroAtual = numeroFinal;
+                        clearInterval(timer);
+                    }
+                    
+                    let texto = Math.floor(numeroAtual).toLocaleString('pt-BR');
+                    if (temMais) texto += '+';
+                    if (temPorcentagem) texto += '%';
+                    
+                    contador.textContent = texto;
+                }, 16);
+            }
+        });
+    }
+    
+    // Observador de interseção para animar quando visível
+    const observador = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                animarContadores();
+                observador.disconnect();
+            }
+        });
+    }, { threshold: 0.5 });
+    
+    const statsSection = document.querySelector('.stats-container');
+    if (statsSection) {
+        observador.observe(statsSection);
+    }
+</script>
+{% endblock %}

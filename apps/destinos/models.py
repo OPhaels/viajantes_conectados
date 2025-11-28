@@ -1,0 +1,167 @@
+from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
+from django.utils.translation import gettext_lazy as _
+from apps.usuarios.models import Usuario
+import uuid
+
+
+
+class Pais(models.Model):
+    """Modelo para armazenar países."""
+    
+    codigo_iso = models.CharField(
+        _('código ISO'),
+        max_length=2,
+        unique=True,
+        help_text=_('Código ISO 3166-1 alpha-2')
+    )
+    nome = models.CharField(_('nome'), max_length=100, unique=True)
+    nome_completo = models.CharField(_('nome completo'), max_length=200)
+    continente = models.CharField(_('continente'), max_length=50)
+    latitude = models.DecimalField(_('latitude'), max_digits=9, decimal_places=6)
+    longitude = models.DecimalField(_('longitude'), max_digits=9, decimal_places=6)
+    ativo = models.BooleanField(_('ativo'), default=True)
+    
+    class Meta:
+        verbose_name = _('país')
+        verbose_name_plural = _('países')
+        ordering = ['nome']
+    
+    def __str__(self):
+        return self.nome
+
+
+class PlanoViagem(models.Model):
+    """
+    Modelo para armazenar os planos de viagem dos usuários.
+    Contém informações sensíveis que devem ser protegidas.
+    """
+    
+    MOTIVO_VIAGEM_CHOICES = [
+        ('turismo', _('Turismo')),
+        ('trabalho', _('Trabalho')),
+        ('estudo', _('Estudo')),
+        ('voluntariado', _('Voluntariado')),
+        ('outro', _('Outro')),
+    ]
+    
+    NIVEL_PRIVACIDADE_CHOICES = [
+        ('publico', _('Público - Visível para todos')),
+        ('amigos', _('Apenas Amigos')),
+        ('privado', _('Privado - Não visível')),
+    ]
+    
+    # Identificação
+    uuid = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    usuario = models.ForeignKey(
+        Usuario,
+        on_delete=models.CASCADE,
+        related_name='planos_viagem',
+        verbose_name=_('usuário')
+    )
+    
+    # Destino
+    pais_destino = models.ForeignKey(
+        Pais,
+        on_delete=models.PROTECT,
+        related_name='planos_viagem',
+        verbose_name=_('país de destino')
+    )
+    cidade_destino = models.CharField(
+        _('cidade de destino'),
+        max_length=100,
+        blank=True
+    )
+    regiao_destino = models.CharField(
+        _('região de destino'),
+        max_length=100,
+        blank=True
+    )
+    
+    # Datas
+    data_inicio = models.DateField(_('data de início'))
+    data_fim = models.DateField(_('data de término'))
+    flexibilidade_datas = models.BooleanField(
+        _('datas flexíveis'),
+        default=False,
+        help_text=_('Indica se as datas podem ser ajustadas')
+    )
+    
+    # Detalhes da Viagem
+    motivo_viagem = models.CharField(
+        _('motivo da viagem'),
+        max_length=20,
+        choices=MOTIVO_VIAGEM_CHOICES,
+        default='turismo'
+    )
+    descricao = models.TextField(
+        _('descrição'),
+        max_length=1000,
+        blank=True,
+        help_text=_('Descreva seus planos e interesses para a viagem')
+    )
+    
+    # Privacidade
+    nivel_privacidade = models.CharField(
+        _('nível de privacidade'),
+        max_length=10,
+        choices=NIVEL_PRIVACIDADE_CHOICES,
+        default='publico'
+    )
+    
+    # Orçamento (opcional)
+    orcamento_diario_min = models.DecimalField(
+        _('orçamento diário mínimo'),
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)]
+    )
+    orcamento_diario_max = models.DecimalField(
+        _('orçamento diário máximo'),
+        max_digits=10,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)]
+    )
+    
+    # Status
+    ativo = models.BooleanField(_('ativo'), default=True)
+    viagem_concluida = models.BooleanField(_('viagem concluída'), default=False)
+    data_criacao = models.DateTimeField(_('data de criação'), auto_now_add=True)
+    data_atualizacao = models.DateTimeField(_('data de atualização'), auto_now=True)
+    
+    class Meta:
+        verbose_name = _('plano de viagem')
+        verbose_name_plural = _('planos de viagem')
+        ordering = ['-data_inicio']
+        indexes = [
+            models.Index(fields=['usuario', 'ativo']),
+            models.Index(fields=['pais_destino', 'data_inicio']),
+            models.Index(fields=['nivel_privacidade']),
+        ]
+    
+    def __str__(self):
+        return f"{self.usuario.get_nome_exibicao()} - {self.pais_destino.nome}"
+    
+    @property
+    def duracao_dias(self):
+        """Calcula a duração da viagem em dias."""
+        return (self.data_fim - self.data_inicio).days
+    
+    def pode_ser_visto_por(self, usuario_solicitante):
+        """Verifica se um usuário pode ver este plano de viagem."""
+        if self.usuario == usuario_solicitante:
+            return True
+        
+        if self.nivel_privacidade == 'publico':
+            return True
+        
+        if self.nivel_privacidade == 'privado':
+            return False
+        
+        # Nível 'amigos'
+        from apps.conexoes.models import Amizade
+        return Amizade.sao_amigos(self.usuario, usuario_solicitante)

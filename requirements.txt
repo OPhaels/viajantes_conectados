@@ -1,0 +1,58 @@
+# Framework Principal
+Django==5.0.1
+djangorestframework==3.14.0
+
+# Banco de Dados
+psycopg2-binary==2.9.9
+
+# Segurança e Autenticação
+django-allauth==0.57.0
+django-cors-headers==4.3.1
+djangorestframework-simplejwt==5.3.1
+cryptography==42.0.0
+argon2-cffi==23.1.0
+
+# WebSockets para Chat em Tempo Real
+channels==4.0.0
+channels-redis==4.1.0
+daphne==4.0.0
+
+# Validação e Formulários
+django-crispy-forms==2.1
+crispy-bootstrap5==2024.2
+
+# Imagens e Arquivos
+Pillow==10.2.0
+
+# Geolocalização e Mapas
+geopy==2.4.1
+
+# Variáveis de Ambiente
+python-decouple==3.8
+
+# Celery para Tarefas Assíncronas
+celery==5.3.4
+redis==5.0.1
+
+# Segurança Adicional
+django-ratelimit==4.1.0
+django-csp==3.8
+
+# Testes
+pytest==7.4.4
+pytest-django==4.7.0
+factory-boy==3.3.0
+
+# Qualidade de Código
+black==24.1.1
+flake8==7.0.0
+isort==5.13.2
+
+# Logging
+sentry-sdk==1.40.0
+
+# WSGI Server
+gunicorn==21.2.0
+
+# Timezone
+pytz==2024.1

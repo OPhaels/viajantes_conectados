@@ -189,6 +189,8 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 CRISPY_ALLOWED_TEMPLATE_PACKS = 'bootstrap5'
 CRISPY_TEMPLATE_PACK = 'bootstrap5'
 
+LOGIN_URL = '/usuarios/login/'
+
 # Logging
 LOGGING = {
     'version': 1,
@@ -231,6 +233,3 @@ if not DEBUG:
     )
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-print("✅ Estrutura do projeto Django criada!")
-print("📦 Próximo passo: Criar os modelos de dados")

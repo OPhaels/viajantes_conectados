@@ -1,0 +1,428 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block estilos_extras %}
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+<style>
+.hero-busca {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.card-viajante {
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.card-viajante:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.card-header-custom {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0 !important;
+    padding: 1rem;
+}
+
+.badge-motivo {
+    font-size: 0.85rem;
+    padding: 0.4rem 0.8rem;
+}
+
+.usuario-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.avatar-viajante {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.filtros-section {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-bottom: 2rem;
+}
+
+.destino-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.data-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.9rem;
+}
+
+#mapa-geral {
+    width: 100%;
+    height: 400px;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    text-align: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #667eea;
+}
+
+.stats-label {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .hero-busca {
+        padding: 2rem 0;
+    }
+    #mapa-geral {
+        height: 300px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block conteudo %}
+<!-- Hero Section -->
+<div class="hero-busca">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <h1 class="display-5 fw-bold mb-3">
+                    <i class="bi bi-globe-americas"></i> Descubra Viajantes
+                </h1>
+                <p class="lead mb-0">
+                    Encontre pessoas viajando para os mesmos destinos que você e faça conexões incríveis!
+                </p>
+            </div>
+            <div class="col-lg-4 text-lg-end">
+                <a href="{% url 'planos:criar' %}" class="btn btn-light btn-lg">
+                    <i class="bi bi-plus-circle"></i> Criar Meu Plano
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <!-- Estatísticas -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-6">
+            <div class="stats-card">
+                <div class="stats-number">{{ total_resultados }}</div>
+                <div class="stats-label">Viajantes Ativos</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stats-card">
+                <div class="stats-number">{{ total_paises }}</div>
+                <div class="stats-label">Países</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stats-card">
+                <div class="stats-number">{{ meus_planos.count }}</div>
+                <div class="stats-label">Meus Planos</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="stats-card">
+                <div class="stats-number">{{ amigos_ids|length }}</div>
+                <div class="stats-label">Conexões</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mapa Geral -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title mb-3">
+                <i class="bi bi-map"></i> Mapa de Viajantes
+            </h5>
+            <div id="mapa-geral"></div>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filtros-section">
+        <h5 class="mb-3"><i class="bi bi-funnel"></i> Filtrar Viajantes</h5>
+        <form method="get" id="form-filtros">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">País</label>
+                    <input type="text" name="pais" class="form-control" placeholder="Ex: Brasil" value="{{ request.GET.pais }}">
+                </div>
+                
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Cidade</label>
+                    <input type="text" name="cidade" class="form-control" placeholder="Ex: São Paulo" value="{{ request.GET.cidade }}">
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Data Início</label>
+                    <input type="date" name="data_inicio" class="form-control" value="{{ request.GET.data_inicio }}">
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label fw-bold">Motivo</label>
+                    <select name="motivo_viagem" class="form-select">
+                        <option value="">Todos</option>
+                        <option value="turismo" {% if request.GET.motivo_viagem == 'turismo' %}selected{% endif %}>Turismo</option>
+                        <option value="trabalho" {% if request.GET.motivo_viagem == 'trabalho' %}selected{% endif %}>Trabalho</option>
+                        <option value="estudo" {% if request.GET.motivo_viagem == 'estudo' %}selected{% endif %}>Estudo</option>
+                        <option value="voluntariado" {% if request.GET.motivo_viagem == 'voluntariado' %}selected{% endif %}>Voluntariado</option>
+                        <option value="outro" {% if request.GET.motivo_viagem == 'outro' %}selected{% endif %}>Outro</option>
+                    </select>
+                </div>
+                
+                <div class="col-md-2 d-flex align-items-end gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'planos:listar' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-clockwise"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Lista de Viajantes -->
+    <div class="mb-4">
+        <h4 class="mb-3">
+            <i class="bi bi-people"></i> Viajantes Encontrados 
+            <span class="badge bg-primary">{{ total_resultados }}</span>
+        </h4>
+        
+        {% if planos %}
+            <div class="row g-4">
+                {% for plano in planos %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="card card-viajante">
+                        <div class="card-header-custom">
+                            <div class="destino-info">
+                                <i class="bi bi-geo-alt-fill fs-5"></i>
+                                <div>
+                                    <h6 class="mb-0">{{ plano.pais_destino.nome }}</h6>
+                                    {% if plano.cidade_destino %}
+                                        <small>{{ plano.cidade_destino }}{% if plano.regiao_destino %}, {{ plano.regiao_destino }}{% endif %}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <div class="mb-2">
+                                <span class="badge badge-motivo bg-info">
+                                    <i class="bi bi-tag"></i> {{ plano.get_motivo_viagem_display }}
+                                </span>
+                                
+                                {% if plano.flexibilidade_datas %}
+                                <span class="badge bg-warning text-dark">
+                                    <i class="bi bi-calendar-check"></i> Datas Flexíveis
+                                </span>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="data-badge text-muted">
+                                    <i class="bi bi-calendar-event"></i>
+                                    <span>{{ plano.data_inicio|date:"d/m/Y" }}</span>
+                                    {% if plano.data_fim %}
+                                        <span>→ {{ plano.data_fim|date:"d/m/Y" }}</span>
+                                    {% endif %}
+                                </div>
+                                {% if plano.data_fim %}
+                                <small class="text-muted d-block mt-1">
+                                    <i class="bi bi-clock"></i> {{ plano.duracao_dias }} dias
+                                </small>
+                                {% endif %}
+                            </div>
+                            
+                            {% if plano.descricao %}
+                            <p class="card-text text-muted small">
+                                {{ plano.descricao|truncatewords:20 }}
+                            </p>
+                            {% endif %}
+                            
+                            <div class="usuario-info">
+                                {% if plano.usuario.foto_perfil %}
+                                    <img src="{{ plano.usuario.foto_perfil.url }}" alt="{{ plano.usuario.get_nome_exibicao }}" class="avatar-viajante">
+                                {% else %}
+                                    <div class="avatar-viajante bg-primary text-white d-flex align-items-center justify-content-center">
+                                        {{ plano.usuario.get_nome_exibicao|first|upper }}
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="flex-grow-1">
+                                    <strong>{{ plano.usuario.get_nome_exibicao }}</strong>
+                                    {% if plano.usuario.id in amigos_ids %}
+                                        <span class="badge bg-success badge-sm ms-1">
+                                            <i class="bi bi-check-circle"></i> Amigo
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2 mt-3">
+                                <a href="{% url 'planos:detalhe' plano.uuid %}" class="btn btn-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Paginação -->
+            {% if planos.has_other_pages %}
+            <nav aria-label="Navegação de páginas" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if planos.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ planos.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-left"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in planos.paginator.page_range %}
+                        {% if planos.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > planos.number|add:'-3' and num < planos.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if planos.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ planos.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        {% else %}
+            <div class="alert alert-info text-center py-5">
+                <i class="bi bi-info-circle fs-1 d-block mb-3"></i>
+                <h5>Nenhum viajante encontrado</h5>
+                <p class="mb-3">Tente ajustar os filtros ou seja o primeiro a criar um plano para este destino!</p>
+                <a href="{% url 'planos:criar' %}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Criar Meu Plano
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts_extras %}
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const TOKEN = "{{ MAPBOX_TOKEN|default:'' }}";
+    if (!TOKEN || TOKEN.length < 10) {
+        console.error("MAPBOX_TOKEN inválido.");
+        return;
+    }
+
+    mapboxgl.accessToken = TOKEN;
+
+    // Inicializa o mapa
+    const mapa = new mapboxgl.Map({
+        container: 'mapa-geral',
+        style: 'mapbox://styles/mapbox/streets-v12',
+        center: [-46.6333, -23.5505],
+        zoom: 2
+    });
+
+    mapa.addControl(new mapboxgl.NavigationControl());
+
+    const planos = [
+        {% for plano in destinos %}
+            {% if plano.endereco_plano and plano.endereco_plano.latitude and plano.endereco_plano.longitude %}
+            {
+                lat: {{ plano.endereco_plano.latitude }},
+                lng: {{ plano.endereco_plano.longitude }},
+                pais: "{{ plano.pais_destino.nome }}",
+                cidade: "{{ plano.cidade_destino|default:'' }}",
+                usuario: "{{ plano.usuario.get_nome_exibicao }}",
+                data: "{{ plano.data_inicio|date:'d/m/Y' }}",
+                motivo: "{{ plano.get_motivo_viagem_display }}",
+                url: "{% url 'planos:detalhe' plano.uuid %}"    
+            },
+            {% endif %}
+        {% endfor %}
+    ];
+
+
+    // Adiciona marcadores ao mapa
+    mapa.on('load', () => {
+        planos.forEach(plano => {
+            const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(`
+                <div style="padding: 8px;">
+                    <h6 class="mb-2"><strong>${plano.pais}</strong></h6>
+                    ${plano.cidade ? `<p class="mb-1 small">${plano.cidade}</p>` : ''}
+                    <p class="mb-1 small"><strong>${plano.usuario}</strong></p>
+                    <p class="mb-1 small"><i class="bi bi-calendar"></i> ${plano.data}</p>
+                    <p class="mb-2 small"><i class="bi bi-tag"></i> ${plano.motivo}</p>
+                    <a href="${plano.url}" class="btn btn-primary btn-sm w-100">Ver Detalhes</a>
+                </div>
+            `);
+
+            new mapboxgl.Marker({ color: '#667eea' })
+                .setLngLat([plano.lng, plano.lat])
+                .setPopup(popup)
+                .addTo(mapa);
+        });
+
+        // Ajusta o zoom para mostrar todos os marcadores
+        if (planos.length > 0) {
+            const bounds = new mapboxgl.LngLatBounds();
+            planos.forEach(plano => {
+                bounds.extend([plano.lng, plano.lat]);
+            });
+            mapa.fitBounds(bounds, { padding: 50 });
+        }
+    });
+});
+</script>
+{% endblock %}

@@ -10,158 +10,238 @@ from django.utils import timezone
 from datetime import timedelta
 import logging
 
-from .models import PlanoViagem, Pais
+from django.db import transaction
+from django.conf import settings
 from .forms import FormularioPlanoViagem, FormularioBuscaViajantes
+from .models import PlanoViagem, Pais, EnderecoPlano
 from apps.usuarios.models import Usuario
 from apps.conexoes.models import Amizade
 
 logger = logging.getLogger(__name__)
 
-
 @login_required
 @require_http_methods(["GET", "POST"])
 def view_criar_plano_viagem(request):
     """
-    View para criar um novo plano de viagem.
+    View para criar plano de viagem com país automático.
+    Não precisa passar lista de países - tudo é criado dinamicamente!
     """
     if request.method == 'POST':
-        formulario = FormularioPlanoViagem(request.POST)
+        # Extrai dados de localização do formulário
+        pais_nome = request.POST.get('pais_nome', '').strip()
+        pais_codigo_iso = request.POST.get('pais_codigo_iso', '').strip()
+        cidade = request.POST.get('cidade_destino', '').strip()
+        regiao = request.POST.get('regiao_destino', '').strip()
+        latitude = request.POST.get('latitude', '').strip()
+        longitude = request.POST.get('longitude', '').strip()
         
-        if formulario.is_valid():
-            try:
-                plano = formulario.save(commit=False)
-                plano.usuario = request.user
+        # Valida se o usuário selecionou uma localização
+        if not pais_nome:
+            messages.error(request, 'Por favor, selecione uma localização no mapa.')
+            form = FormularioPlanoViagem(request.POST)
+            context = {
+                'titulo': 'Criar Plano de Viagem',
+                'formulario': form,
+                'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
+            }
+            return render(request, 'destinos/criar_plano.html', context)
+        
+        try:
+            with transaction.atomic():
+                # 1. Busca ou cria o país automaticamente
+                pais = None
                 
-                # Validar datas
-                if plano.data_inicio < timezone.now().date():
-                    messages.error(request, _('A data de início não pode ser no passado.'))
-                    return render(request, 'destinos/criar_plano.html', {'formulario': formulario})
+                if pais_codigo_iso:
+                    # Tenta buscar por código ISO primeiro
+                    pais = Pais.objects.filter(
+                        codigo_iso__iexact=pais_codigo_iso
+                    ).first()
                 
-                if plano.data_fim <= plano.data_inicio:
-                    messages.error(request, _('A data de término deve ser posterior à data de início.'))
-                    return render(request, 'destinos/criar_plano.html', {'formulario': formulario})
+                if not pais:
+                    # Tenta buscar por nome
+                    pais = Pais.objects.filter(
+                        nome__iexact=pais_nome
+                    ).first()
                 
-                plano.save()
+                if not pais:
+                    # Cria o país automaticamente
+                    logger.info(f"Criando novo país: {pais_nome} ({pais_codigo_iso})")
+                    
+                    # Define coordenadas padrão ou usa as fornecidas
+                    lat = float(latitude) if latitude else 0.0
+                    lng = float(longitude) if longitude else 0.0
+                    
+                    pais = Pais.objects.create(
+                        codigo_iso=pais_codigo_iso or 'XX',  # Código genérico se não tiver
+                        nome=pais_nome,
+                        nome_completo=pais_nome,
+                        continente='Não especificado',  # Pode ser melhorado depois
+                        latitude=lat,
+                        longitude=lng,
+                        ativo=True
+                    )
+                    
+                    messages.success(
+                        request, 
+                        f'País "{pais_nome}" adicionado automaticamente ao sistema!'
+                    )
                 
-                messages.success(
-                    request,
-                    _('Plano de viagem criado com sucesso! Agora você pode encontrar outros viajantes.')
-                )
-                logger.info(f'Plano de viagem criado: {request.user.email} - {plano.pais_destino.nome}')
+                # 2. Cria uma cópia mutável do POST para adicionar o país
+                dados_post = request.POST.copy()
+                dados_post['pais_destino'] = pais.id  # Adiciona o ID do país ao formulário
+                dados_post['cidade_destino'] = cidade
+                dados_post['regiao_destino'] = regiao
                 
-                return redirect('destinos:buscar')
-            
-            except Exception as erro:
-                logger.error(f'Erro ao criar plano de viagem: {str(erro)}')
-                messages.error(request, _('Erro ao criar plano de viagem. Tente novamente.'))
-        else:
-            for campo, erros in formulario.errors.items():
-                for erro in erros:
-                    messages.error(request, erro)
+                # Processa o formulário com o país já preenchido
+                form = FormularioPlanoViagem(dados_post)
+                
+                if form.is_valid():
+                    plano = form.save(commit=False)
+                    plano.usuario = request.user
+                    plano.save()
+                    
+                    # 3. Salva endereço completo com coordenadas (opcional)
+                    if latitude and longitude:
+                        EnderecoPlano.objects.create(
+                            plano=plano,
+                            cidade=cidade,
+                            estado=regiao,
+                            pais_texto=pais_nome,
+                            latitude=float(latitude),
+                            longitude=float(longitude)
+                        )
+                    
+                    messages.success(
+                        request, 
+                        f'Plano de viagem para {pais_nome} criado com sucesso!'
+                    )
+                    return redirect('destinos:detalhes_plano', uuid=plano.uuid)
+                else:
+                    messages.error(request, 'Corrija os erros no formulário.')
+                    logger.error(f"Erros no formulário: {form.errors}")
+                    # Renderiza novamente com os erros
+                    context = {
+                        'titulo': 'Criar Plano de Viagem',
+                        'formulario': form,
+                        'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
+                    }
+                    return render(request, 'destinos/criar_plano.html', context)
+        
+        except Exception as e:
+            logger.error(f"Erro ao criar plano de viagem: {e}", exc_info=True)
+            messages.error(
+                request, 
+                'Erro ao salvar o plano de viagem. Tente novamente.'
+            )
+            # Recria o formulário com os dados enviados
+            form = FormularioPlanoViagem(request.POST)
+            context = {
+                'titulo': 'Criar Plano de Viagem',
+                'formulario': form,
+                'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
+            }
+            return render(request, 'destinos/criar_plano.html', context)
+    
     else:
-        formulario = FormularioPlanoViagem()
+        form = FormularioPlanoViagem()
     
-    # Obter lista de países para o mapa
-    paises = Pais.objects.filter(ativo=True).values('codigo_iso', 'nome', 'latitude', 'longitude')
-    
-    contexto = {
-        'formulario': formulario,
-        'paises': list(paises),
-        'titulo': _('Criar Plano de Viagem')
+    context = {
+        'titulo': 'Criar Plano de Viagem',
+        'formulario': form,
+        'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
     }
     
-    return render(request, 'destinos/criar_plano.html', contexto)
-
+    return render(request, 'destinos/criar_plano.html', context)
 
 @login_required
 @require_http_methods(["GET"])
 def view_buscar_viajantes(request):
-    """
-    View para buscar viajantes com destinos similares.
-    Implementa filtros avançados e paginação.
-    """
     formulario = FormularioBuscaViajantes(request.GET)
-    
-    # Query base - apenas planos públicos e de outros usuários
-    queryset_planos = PlanoViagem.objects.filter(
-        ativo=True,
-        viagem_concluida=False
-    ).exclude(
-        usuario=request.user
-    ).select_related('pais_destino', 'usuario')
-    
+
+    # Query base — sem o campo INVALIDO "endereco_plano"
+    queryset_destinos = (
+        PlanoViagem.objects
+        .filter(
+            ativo=True,
+            viagem_concluida=False
+        )
+        .exclude(usuario=request.user)
+        .select_related('pais_destino', 'usuario')  # <- CORRETO
+    )
+
     # Aplicar filtros
     if formulario.is_valid():
-        dados_limpos = formulario.cleaned_data
-        
-        # Filtro por país
-        if dados_limpos.get('pais_destino'):
-            queryset_planos = queryset_planos.filter(pais_destino=dados_limpos['pais_destino'])
-        
-        # Filtro por período
-        if dados_limpos.get('data_inicio'):
-            # Buscar viagens que se sobrepõem ao período especificado
-            data_inicio = dados_limpos['data_inicio']
-            data_fim = dados_limpos.get('data_fim', data_inicio + timedelta(days=30))
-            
-            queryset_planos = queryset_planos.filter(
-                Q(data_inicio__lte=data_fim) & Q(data_fim__gte=data_inicio)
+        dados = formulario.cleaned_data
+
+        # País
+        if dados.get('pais_destino'):
+            queryset_destinos = queryset_destinos.filter(
+                pais_destino=dados['pais_destino']
             )
-        
-        # Filtro por motivo
-        if dados_limpos.get('motivo_viagem'):
-            queryset_planos = queryset_planos.filter(motivo_viagem=dados_limpos['motivo_viagem'])
-        
-        # Filtro por duração
-        if dados_limpos.get('duracao_minima'):
-            # Filtrar por duração (calculada dinamicamente)
-            from django.db.models import F, ExpressionWrapper, fields
-            queryset_planos = queryset_planos.annotate(
+
+        # Período
+        if dados.get('data_inicio'):
+            data_inicio = dados['data_inicio']
+            data_fim = dados.get('data_fim') or data_inicio + timedelta(days=30)
+
+            queryset_destinos = queryset_destinos.filter(
+                Q(data_inicio__lte=data_fim) &
+                Q(data_fim__gte=data_inicio)
+            )
+
+        # Motivo
+        if dados.get('motivo_viagem'):
+            queryset_destinos = queryset_destinos.filter(
+                motivo_viagem=dados['motivo_viagem']
+            )
+
+        # Duração mínima
+        if dados.get('duracao_minima'):
+            from django.db.models import F, ExpressionWrapper, DurationField
+            queryset_destinos = queryset_destinos.annotate(
                 duracao=ExpressionWrapper(
                     F('data_fim') - F('data_inicio'),
-                    output_field=fields.DurationField()
+                    output_field=DurationField()
                 )
-            ).filter(duracao__gte=timedelta(days=dados_limpos['duracao_minima']))
-    
-    # Aplicar filtros de privacidade
-    planos_filtrados = []
-    for plano in queryset_planos:
-        if plano.pode_ser_visto_por(request.user):
-            planos_filtrados.append(plano)
-    
+            ).filter(duracao__gte=timedelta(days=dados['duracao_minima']))
+
+    # Filtro de privacidade
+    destinos_filtrados = [
+        plano for plano in queryset_destinos
+        if plano.pode_ser_visto_por(request.user)
+    ]
+
     # Paginação
-    paginador = Paginator(planos_filtrados, 12)
-    numero_pagina = request.GET.get('page', 1)
-    planos_paginados = paginador.get_page(numero_pagina)
-    
-    # Verificar amizades existentes
+    paginador = Paginator(destinos_filtrados, 12)
+    destinos_paginados = paginador.get_page(request.GET.get('page', 1))
+
+    # Amizades
     amigos_ids = set()
     if request.user.is_authenticated:
         amizades = Amizade.objects.filter(
             Q(usuario1=request.user) | Q(usuario2=request.user),
             ativa=True
         )
-        for amizade in amizades:
-            if amizade.usuario1 == request.user:
-                amigos_ids.add(amizade.usuario2.id)
-            else:
-                amigos_ids.add(amizade.usuario1.id)
-    
-    # Obter planos do usuário atual
-    meus_planos = PlanoViagem.objects.filter(
-        usuario=request.user,
-        ativo=True
-    ).select_related('pais_destino')
-    
+        for a in amizades:
+            amigos_ids.add(a.usuario2.id if a.usuario1 == request.user else a.usuario1.id)
+
+    # Meus destinos
+    meus_destinos = (
+        PlanoViagem.objects
+        .filter(usuario=request.user, ativo=True)
+        .select_related('pais_destino')
+    )
+
     contexto = {
         'formulario': formulario,
-        'planos': planos_paginados,
-        'meus_planos': meus_planos,
+        'destinos': destinos_paginados,
+        'meus_destinos': meus_destinos,
         'amigos_ids': amigos_ids,
-        'total_resultados': len(planos_filtrados),
-        'titulo': _('Buscar Viajantes')
+        'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
+        'total_resultados': len(destinos_filtrados),
+        'title': _('Buscar Viajantes'), 
     }
-    
+
     return render(request, 'destinos/buscar.html', contexto)
 
 
@@ -191,6 +271,7 @@ def view_detalhes_plano(request, uuid):
         'plano': plano,
         'sao_amigos': sao_amigos,
         'solicitacao_pendente': solicitacao_pendente,
+        'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
         'titulo': f'{plano.pais_destino.nome} - {plano.usuario.get_nome_exibicao()}'
     }
     
@@ -202,7 +283,6 @@ def view_detalhes_plano(request, uuid):
 def api_paises_autocomplete(request):
     """
     API para autocomplete de países.
-    Retorna lista de países que correspondem ao termo de busca.
     """
     termo = request.GET.get('q', '').strip()
     
@@ -234,24 +314,24 @@ def api_estatisticas_destino(request, pais_id):
     try:
         pais = get_object_or_404(Pais, id=pais_id)
         
-        planos = PlanoViagem.objects.filter(
+        destinos = PlanoViagem.objects.filter(
             pais_destino=pais,
             ativo=True,
             viagem_concluida=False
         )
         
-        total_viajantes = planos.count()
+        total_viajantes = destinos.count()
         
         # Período mais popular
         from django.db.models import Count
-        periodos = planos.extra(
+        periodos = destinos.extra(
             select={'mes': 'EXTRACT(month FROM data_inicio)'}
         ).values('mes').annotate(total=Count('id')).order_by('-total')
         
         mes_popular = periodos.first()['mes'] if periodos else None
         
         # Motivo mais comum
-        motivos = planos.values('motivo_viagem').annotate(
+        motivos = destinos.values('motivo_viagem').annotate(
             total=Count('id')
         ).order_by('-total')
         
@@ -261,6 +341,7 @@ def api_estatisticas_destino(request, pais_id):
             'total_viajantes': total_viajantes,
             'mes_popular': mes_popular,
             'motivo_popular': motivo_popular,
+            'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
             'nome_pais': pais.nome
         }
         

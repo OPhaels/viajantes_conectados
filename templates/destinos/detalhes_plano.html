@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block titulo %}Detalhes do Plano{% endblock %}
+
+{% block conteudo %}
+<div class="container my-5">
+    <div class="card bg-none shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">{{ plano.pais_destino.nome|default:"Indefinido" }}</h2>
+            <small class="text-light">Usuário: {{ plano.usuario.get_nome_exibicao|default:"Indefinido" }}</small>
+        </div>
+        <div class="card-body">
+            <div class="mb-3">
+                <strong>Data de início:</strong>
+                <p>{{ plano.data_inicio|date:"d/m/Y"|default:"Indefinido" }}</p>
+            </div>
+
+            <div class="mb-3">
+                <strong>Data de fim:</strong>
+                <p>{{ plano.data_fim|date:"d/m/Y"|default:"Indefinido" }}</p>
+            </div>
+
+            <div class="mb-3">
+                <strong>País de destino:</strong>
+                <p>{{ plano.pais_destino.nome|default:"Indefinido" }}</p>
+            </div>
+
+            <div class="mb-3">
+                <strong>Região/Cidade:</strong>
+                <p>
+                    {% if plano.enderecoplano_set.exists %}
+                        {{ plano.enderecoplano_set.first.regiao|default:"-" }}, {{ plano.enderecoplano_set.first.cidade|default:"-" }}
+                    {% else %}
+                        Indefinido
+                    {% endif %}
+                </p>
+            </div>
+
+            <div class="mb-3">
+                <strong>Descrição:</strong>
+                <p>{{ plano.descricao|default:"Indefinido" }}</p>
+            </div>
+
+            <div class="mb-3">
+                <strong>Atividades planejadas:</strong>
+                {% if plano.atividades.exists %}
+                    <ul>
+                        {% for atividade in plano.atividades.all %}
+                            <li>{{ atividade.nome|default:"Indefinido" }} - {{ atividade.data|date:"d/m/Y"|default:"Indefinido" }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>-</p>
+                {% endif %}
+            </div>
+
+            <div class="text-end">
+                <a href="{% url 'destinos:buscar' %}" class="btn btn-secondary">Voltar</a>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

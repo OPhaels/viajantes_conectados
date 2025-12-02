@@ -83,5 +83,3 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-
-console.log('🌍 Viajantes Conectados - Sistema inicializado com sucesso!');

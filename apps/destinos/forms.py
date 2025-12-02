@@ -32,7 +32,8 @@ class FormularioPlanoViagem(forms.ModelForm):
             }),
             'data_inicio': forms.DateInput(attrs={
                 'class': 'form-control form-control-custom',
-                'type': 'date'
+                'type': 'date',
+                'required': True
             }),
             'data_fim': forms.DateInput(attrs={
                 'class': 'form-control form-control-custom',
@@ -69,8 +70,12 @@ class FormularioPlanoViagem(forms.ModelForm):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'needs-validation'
-        
-        # Carregar apenas países ativos
+
+        # definir obrigatoriedade correta
+        self.fields['data_inicio'].required = True
+        self.fields['data_fim'].required = False
+
+        # carregar países ativos
         self.fields['pais_destino'].queryset = Pais.objects.filter(ativo=True).order_by('nome')
     
     def clean(self):
@@ -81,13 +86,19 @@ class FormularioPlanoViagem(forms.ModelForm):
         data_fim = dados_limpos.get('data_fim')
         orcamento_min = dados_limpos.get('orcamento_diario_min')
         orcamento_max = dados_limpos.get('orcamento_diario_max')
-        
+
+        # data_inicio obrigatória
+        if not data_inicio:
+            raise ValidationError(_('A data de início é obrigatória.'))
+
+        # data_fim opcional – só validar se preenchida
         if data_inicio and data_fim:
             if data_fim <= data_inicio:
                 raise ValidationError(
                     _('A data de término deve ser posterior à data de início.')
                 )
         
+        # orçamento
         if orcamento_min and orcamento_max:
             if orcamento_max < orcamento_min:
                 raise ValidationError(

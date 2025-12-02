@@ -1,16 +1,192 @@
-.env
-.venv
-venv
-venv/
-.venv/
-__pycache__/
-*.pyc
-.infos
-infos
-.sqlite3
-db.sqlite3
+# =========================
+#   SISTEMA OPERACIONAL
+# =========================
 
-.log
-.logs
-log
-django.log
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+.nfs*
+
+# Ambiente Virtual 
+env
+.env
+venv 
+.venv
+infos
+.infos
+
+# =========================
+#       EDITORES
+# =========================
+
+# VSCode
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# JetBrains (PyCharm, WebStorm etc)
+.idea/
+*.iml
+out/
+
+# =========================
+#      AMBIENTES
+# =========================
+
+# Python virtual env
+.venv/
+venv/
+ENV/
+env/
+
+# Node
+node_modules/
+
+# =========================
+#        PYTHON
+# =========================
+
+# Compilados
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Build
+build/
+dist/
+sdist/
+pip-wheel-metadata/
+*.egg-info/
+.eggs/
+
+# Virtualenv leftovers
+.python-version
+
+# Jupyter
+.ipynb_checkpoints
+*.ipynb_convert
+
+# PyInstaller
+*.spec
+
+# pytest
+.cache/
+.pytest_cache/
+coverage.xml
+coverage/
+
+# =========================
+#        JAVASCRIPT
+# =========================
+
+# Log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build
+coverage/
+build/
+dist/
+.cache/
+.eslintcache
+
+# =========================
+#       DOCKER
+# =========================
+
+docker-compose.override.yml
+*.pid
+*.seed
+*.pid.lock
+
+# =========================
+#       DJANGO / FLASK
+# =========================
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+
+# Flask
+instance/
+*.db
+
+# =========================
+#        REACT / VITE
+# =========================
+
+*.local
+*.bundle
+*.map
+*.min.js
+*.min.css
+
+# =========================
+#         GIT
+# =========================
+
+# Ignore tudo na pasta secrets
+secrets/
+*.key
+*.pem
+*.crt
+
+# =========================
+#        OUTROS
+# =========================
+
+# Logs
+*.log
+logs/
+
+# Compilados binários
+*.exe
+*.dll
+*.so
+*.o
+*.a
+*.out
+
+# Arquivos temporários
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+
+# Uploads
+uploads/
+tmp/
+temp/
+
+# Arquivos grandes
+*.zip
+*.7z
+*.tar
+*.rar
+*.gz
+
+# ====== FIM ======

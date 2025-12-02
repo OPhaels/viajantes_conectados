@@ -80,7 +80,7 @@ class PlanoViagem(models.Model):
     
     # Datas
     data_inicio = models.DateField(_('data de início'))
-    data_fim = models.DateField(_('data de término'))
+    data_fim = models.DateField(_('data de término'), null=True, blank=True)
     flexibilidade_datas = models.BooleanField(
         _('datas flexíveis'),
         default=False,
@@ -111,7 +111,7 @@ class PlanoViagem(models.Model):
     
     # Orçamento (opcional)
     orcamento_diario_min = models.DecimalField(
-        _('orçamento diário mínimo'),
+        _('orçamento mensal mínimo'),
         max_digits=10,
         decimal_places=2,
         null=True,
@@ -119,7 +119,7 @@ class PlanoViagem(models.Model):
         validators=[MinValueValidator(0)]
     )
     orcamento_diario_max = models.DecimalField(
-        _('orçamento diário máximo'),
+        _('orçamento mensal máximo'),
         max_digits=10,
         decimal_places=2,
         null=True,
@@ -165,3 +165,60 @@ class PlanoViagem(models.Model):
         # Nível 'amigos'
         from apps.conexoes.models import Amizade
         return Amizade.sao_amigos(self.usuario, usuario_solicitante)
+    
+
+class EnderecoPlano(models.Model):
+    """
+    Endereço e coordenadas associados a um PlanoViagem (1:1).
+    Não altera o PlanoViagem original.
+    """
+    plano = models.OneToOneField(
+        PlanoViagem,
+        on_delete=models.CASCADE,
+        related_name="endereco_plano",
+        verbose_name=_("plano de viagem")
+    )
+    cep = models.CharField(_("CEP"), max_length=20, blank=True, null=True)
+    endereco = models.CharField(_("endereço"), max_length=255, blank=True)
+    numero = models.CharField(_("número"), max_length=30, blank=True)
+    bairro = models.CharField(_("bairro"), max_length=120, blank=True)
+    cidade = models.CharField(_("cidade"), max_length=120, blank=True)
+    estado = models.CharField(_("estado"), max_length=120, blank=True)
+    pais_texto = models.CharField(_("país (texto)"), max_length=120, blank=True)
+
+    latitude = models.DecimalField(_("latitude"), max_digits=10, decimal_places=7, blank=True, null=True)
+    longitude = models.DecimalField(_("longitude"), max_digits=10, decimal_places=7, blank=True, null=True)
+
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+    atualizado_em = models.DateTimeField(_("atualizado em"), auto_now=True)
+
+    class Meta:
+        verbose_name = _("endereço do plano")
+        verbose_name_plural = _("endereços dos planos")
+
+    def __str__(self):
+        return f"{self.endereco} — {self.cidade} / {self.estado}"
+
+class OfertaResidencia(models.Model):
+    """
+    Informações da oferta de residência (opcional), vinculada a um PlanoViagem.
+    Criada somente se o usuário marcar 'oferece_residencia' no formulário.
+    """
+    plano = models.OneToOneField(
+        PlanoViagem,
+        on_delete=models.CASCADE,
+        related_name="oferta_residencia",
+        verbose_name=_("plano de viagem")
+    )
+    nome_anfitriao = models.CharField(_("nome do anfitrião"), max_length=150)
+    contato_anfitriao = models.CharField(_("contato do anfitrião"), max_length=150)
+    descricao_local = models.TextField(_("descrição da residência"), blank=True)
+
+    criado_em = models.DateTimeField(_("criado em"), auto_now_add=True)
+
+    class Meta:
+        verbose_name = _("oferta de residência")
+        verbose_name_plural = _("ofertas de residência")
+
+    def __str__(self):
+        return f"{self.nome_anfitriao} — {self.contato_anfitriao}"

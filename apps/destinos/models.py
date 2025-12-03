@@ -148,8 +148,9 @@ class PlanoViagem(models.Model):
     
     @property
     def duracao_dias(self):
-        """Calcula a duração da viagem em dias."""
-        return (self.data_fim - self.data_inicio).days
+        if self.data_fim:
+            return (self.data_fim - self.data_inicio).days
+        return None
     
     def pode_ser_visto_por(self, usuario_solicitante):
         """Verifica se um usuário pode ver este plano de viagem."""

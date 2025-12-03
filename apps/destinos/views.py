@@ -125,7 +125,7 @@ def view_criar_plano_viagem(request):
                         'formulario': form,
                         'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
                     }
-                    return render(request, 'destinos/criar_plano.html', context)
+                    return render(request, 'destinos/detalhes_plano.html', context)
         
         except Exception as e:
             logger.error(f"Erro ao criar plano de viagem: {e}", exc_info=True)
@@ -158,7 +158,6 @@ def view_criar_plano_viagem(request):
 def view_buscar_viajantes(request):
     formulario = FormularioBuscaViajantes(request.GET)
 
-    # Query base — sem o campo INVALIDO "endereco_plano"
     queryset_destinos = (
         PlanoViagem.objects
         .filter(
@@ -166,7 +165,7 @@ def view_buscar_viajantes(request):
             viagem_concluida=False
         )
         .exclude(usuario=request.user)
-        .select_related('pais_destino', 'usuario')  # <- CORRETO
+        .select_related('pais_destino', 'usuario')  
     )
 
     # Aplicar filtros
@@ -250,7 +249,7 @@ def view_buscar_viajantes(request):
 def view_detalhes_plano(request, uuid):
     """View para visualizar detalhes de um plano de viagem."""
     plano = get_object_or_404(PlanoViagem, uuid=uuid)
-    
+    print(plano)
     # Verificar permissão de visualização
     if not plano.pode_ser_visto_por(request.user):
         messages.error(request, _('Você não tem permissão para visualizar este plano.'))

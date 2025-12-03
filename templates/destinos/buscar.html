@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-
+{% load static %}
 {% block titulo %}{{title}}{% endblock %}
 
 {% block conteudo %}
 <div class="buscar-container">
 
-    <!-- Hero -->
+    <!-- Hero Section -->
     <section class="busca-hero">
         <div class="container">
             <div class="row">
@@ -15,60 +15,59 @@
                         Encontre Seu Companheiro de Viagem
                     </h1>
                     <p class="hero-subtitle">
-                        Descubra viajantes que compartilham o mesmo destino e
-                        período
+                        Conecte-se com viajantes que compartilham os mesmos destinos e experiências
                     </p>
                 </div>
             </div>
 
-            <!-- Filtros -->
+            <!-- Filtros Avançados -->
             <div class="row justify-content-center">
-                <div class="col-12 col-lg-10 col-xl-9">
-                    <div class="filtros-card fade-in"
-                        style="animation-delay:0.1s">
-                        <form method="get" action="{% url 'destinos:buscar' %}"
-                            id="formBusca">
-                            <div class="row g-3">
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="filtro-label"><i
-                                            class="bi bi-geo-alt-fill me-2"></i>Destino
-                                        *</label>
-                                    <select name="pais_destino" id="paisDestino"
-                                        class="form-select form-select-custom">
-                                        <option value>Todos os países</option>
-                                        <option value="1">🇧🇷 Brasil</option>
-                                        <option value="2">🇵🇹 Portugal</option>
-                                        <option value="3">🇫🇷 França</option>
-                                    </select>
+                <div class="col-12 col-lg-11 col-xl-10">
+                    <div class="filtros-card fade-in" style="animation-delay:0.1s">
+                        <form method="get" action="{% url 'destinos:buscar' %}" id="formBusca">
+                            <div class="row g-3 align-items-end">
+                                <!-- País -->
+                                <div class="col-12 col-md-4">
+                                    <label class="filtro-label">
+                                        <i class="bi bi-geo-alt-fill me-2"></i>País de Destino
+                                    </label>
+                                    <input type="text" name="pais" 
+                                        class="form-control form-control-custom" 
+                                        placeholder="Ex: Brasil, Portugal..."
+                                        value="{{ request.GET.pais }}">
                                 </div>
 
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="filtro-label"><i
-                                            class="bi bi-calendar-check me-2"></i>Data
-                                        Início *</label>
-                                    <input type="date" name="data_inicio"
+                                <!-- Cidade -->
+                                <div class="col-12 col-md-4">
+                                    <label class="filtro-label">
+                                        <i class="bi bi-pin-map me-2"></i>Cidade
+                                    </label>
+                                    <input type="text" name="cidade" 
                                         class="form-control form-control-custom"
-                                        required>
+                                        placeholder="Ex: Lisboa, Porto..."
+                                        value="{{ request.GET.cidade }}">
                                 </div>
 
-                                <div class="col-12 col-md-6 col-lg-4">
-                                    <label class="filtro-label"><i
-                                            classm="bi bi-calendar-x me-2"></i>Data
-                                        Fim</label>
-                                    <input type="date" name="data_fim"
-                                        class="form-control form-control-custom">
-                                    <p class="text-muted opacity-50 m-0 p-0"
-                                        style="font-size: 0.60rem;">Se nenhuma
-                                        data for selecionada não terá previsão
-                                        de retorno.</p>
+                                <!-- Data -->
+                                <div class="col-12 col-md-4">
+                                    <label class="filtro-label">
+                                        <i class="bi bi-calendar-check me-2"></i>Data de Início
+                                    </label>
+                                    <input type="date" name="data_inicio" 
+                                        class="form-control form-control-custom"
+                                        value="{{ request.GET.data_inicio }}">
                                 </div>
 
-                                <div class="col-12 col-lg-12">
-                                    <button type="submit"
-                                        class="btn btn-custom btn-primario w-100">
-                                        <i class="bi bi-search me-2"></i>Buscar
-                                        Viajantes
-                                    </button>
+                                <!-- Botões de Ação -->
+                                <div class="col-12">
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="submit" class="btn btn-custom btn-primario flex-grow-1">
+                                            <i class="bi bi-search me-2"></i>Buscar Viajantes
+                                        </button>
+                                        <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-limpar">
+                                            <i class="bi bi-x-circle me-2"></i>Limpar Filtros
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -78,74 +77,229 @@
         </div>
     </section>
 
-    <!-- Lista de Viajantes -->
-    <section class="py-5">
+    <!-- Resultados -->
+    <section class="py-5 bg-light">
         <div class="container">
-            <h2 class="text-center mb-4">
-                <i class="bi bi-people-fill me-2"></i>
-                Viajantes Encontrados
-                <span class="badge bg-primary ms-2">{{ total_resultados|default:0 }}</span>
-                <p style="color:red;">Total: {{ destinos|length }}</p>
-            </h2>
-
-            <div class="row g-4">
-                {% for plano in destinos %}
-                <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card viajante-card h-100">
-                        <div class="card-img-top position-relative"
-                            style="height: 200px; overflow: hidden;">
-                            <img
-                                src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600"
-                                class="w-100 h-100" style="object-fit: cover;"
-                                alt="{{ plano.pais_destino.nome }}">
-                            <span
-                                class="position-absolute top-0 end-0 m-2 fs-1">🇫🇷</span>
-                            <div
-                                class="position-absolute bottom-0 start-0 end-0 p-3 text-white"
-                                style="background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);">
-                                <h5 class="mb-0">{{ plano.pais_destino.nome }}</h5>
-                            </div>
-                        </div>
-
-                        <div class="card-body">
-                            <h6 class="card-title">{{ plano.usuario.get_nome_exibicao }}</h6>
-                            <p class="card-text small text-muted">
-                                <i class="bi bi-calendar"></i> {{ plano.data_inicio|date:"d/m/Y" }} - {{ plano.data_fim|date:"d/m/Y" }}<br>
-                                <i class="bi bi-hourglass"></i> {{ plano.duracao_dias }} dias
-                            </p>
-
-                            {% if plano.descricao %}
-                            <p class="card-text">{{ plano.descricao|truncatewords:15 }}</p>
-                            {% endif %}
-
-                            <div class="d-grid gap-2">
-                                <a href="#"
-                                    class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-eye"></i> Ver Perfil
-                                </a>
-                                <button class="btn btn-primary btn-sm">
-                                    <i class="bi bi-person-plus"></i> Conectar
-                                </button>
-                            </div>
+            <!-- Header dos Resultados -->
+            <div class="resultados-header mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                    <div>
+                        <h2 class="mb-1">
+                            <i class="bi bi-people-fill me-2"></i>Viajantes Encontrados
+                        </h2>
+                        <p class="text-muted mb-0">
+                            {{ total_resultados|default:0 }} 
+                            {% if total_resultados == 1 %}resultado{% else %}resultados{% endif %} 
+                            encontrado{% if total_resultados != 1 %}s{% endif %}
+                        </p>
+                    </div>
+                    <div class="view-toggle">
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-secondary active" id="viewGrid">
+                                <i class="bi bi-grid-3x3-gap"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="viewList">
+                                <i class="bi bi-list"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Grid de Viajantes -->
+            <div class="row g-4" id="viagensGrid">
+                {% for plano in destinos %}
+                <div class="col-12 col-md-6 col-lg-4 viagem-item">
+                    <div class="card viajante-card h-100" data-pais="{{ plano.pais_destino.id|default:'' }}">
+                        <!-- Imagem do Destino -->
+                        <div class="card-img-wrapper position-relative">
+                            {% if plano.pais_destino %}
+                                <img src="{{ plano.pais_destino.imagem_url|default:'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800' }}" 
+                                    class="card-img-top" 
+                                    alt="{{ plano.pais_destino.nome }}"
+                                    loading="lazy">
+                            {% else %}
+                                <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800" 
+                                    class="card-img-top" 
+                                    alt="Destino a definir"
+                                    loading="lazy">
+                            {% endif %}
+                            <div class="img-overlay"></div>
+                            
+                            <!-- Badge do País -->
+                            <span class="country-badge">
+                                <span class="country-flag">
+                                    {% if plano.pais_destino %}
+                                        {{ plano.pais_destino.emoji|default:'🌍' }}
+                                    {% else %}
+                                        ❓
+                                    {% endif %}
+                                </span>
+                            </span>
+                            
+                            <!-- Nome do Destino -->
+                            <div class="country-name">
+                                <h5 class="mb-0">
+                                    {% if plano.pais_destino %}
+                                        {{ plano.pais_destino.nome }}
+                                    {% else %}
+                                        Destino a Definir
+                                    {% endif %}
+                                </h5>
+                                {% if plano.cidade_destino %}
+                                <small>{{ plano.cidade_destino }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Conteúdo do Card -->
+                        <div class="card-body d-flex flex-column">
+                            <!-- Informações do Viajante -->
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <div class="avatar-circle me-2">
+                                        {{ plano.usuario.get_nome_exibicao|first|upper }}
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0">{{ plano.usuario.get_nome_exibicao|title }}</h6>
+                                        <small class="text-muted">
+                                            <i class="bi bi-geo-alt"></i> 
+                                            {% if plano.usuario.cidade %}
+                                                {{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais }}{% endif %}
+                                            {% elif plano.usuario.pais %}
+                                                {{ plano.usuario.pais }}
+                                            {% else %}
+                                                Brasil
+                                            {% endif %}
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Informações da Viagem -->
+                            <div class="viagem-info mb-3">
+                                <div class="info-item">
+                                    <i class="bi bi-calendar-event text-primary"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Período</small>
+                                        <span class="fw-medium">
+                                            {{ plano.data_inicio|date:"d/m/Y" }}
+                                            {% if plano.data_fim %}
+                                                - {{ plano.data_fim|date:"d/m/Y" }}
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="info-item">
+                                    <i class="bi bi-hourglass-split text-primary"></i>
+                                    <div>
+                                        <small class="text-muted d-block">Duração</small>
+                                        <span class="fw-medium">
+                                            {% if plano.duracao_dias %}
+                                                {{ plano.duracao_dias }} 
+                                                {% if plano.duracao_dias == 1 %}dia{% else %}dias{% endif %}
+                                            {% else %}
+                                                <span class="text-warning">Indefinida</span>
+                                            {% endif %}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Descrição -->
+                            {% if plano.descricao %}
+                            <p class="card-text text-muted small mb-3">
+                                {{ plano.descricao|truncatewords:20 }}
+                            </p>
+                            {% endif %}
+
+                            <!-- Ações -->
+                            <div class="mt-auto">
+                                <div class="d-grid gap-2">
+                                    <a href="{% url 'destinos:detalhes_plano' plano.uuid %}" 
+                                       class="btn btn-primary btn-sm btn-ver-detalhes">
+                                        <i class="bi bi-eye me-1"></i> Ver Detalhes
+                                    </a>
+                                    
+                                    {% if plano.usuario.id not in amigos_ids %}
+                                    <button class="btn btn-outline-primary btn-sm btn-conectar">
+                                        <i class="bi bi-person-plus me-1"></i> Conectar
+                                    </button>
+                                    {% else %}
+                                    <button class="btn btn-success btn-sm" disabled>
+                                        <i class="bi bi-check-circle me-1"></i> Já Conectado
+                                    </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status Badge -->
+                        <div class="status-badge">
+                            {% if plano.data_inicio %}
+                                {% with dias=plano.data_inicio|timeuntil %}
+                                    {% if "day" in dias or "hour" in dias %}
+                                        <span class="badge bg-danger">Viagem em breve</span>
+                                    {% elif "week" in dias %}
+                                        <span class="badge bg-warning">Próxima viagem</span>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
                 {% empty %}
                 <div class="col-12">
-                    <div class="text-center py-5">
-                        <i class="bi bi-search display-1 text-muted"></i>
-                        <h4 class="mt-3">Nenhum viajante encontrado</h4>
-                        <p class="text-muted">Tente ajustar os filtros ou seja o
-                            primeiro a criar um plano!</p>
-                        <a href="{% url 'destinos:criar_plano' %}"
-                            class="btn btn-primary mt-3">
-                            <i class="bi bi-plus-circle"></i> Criar Plano de
-                            Viagem
+                    <div class="empty-state">
+                        <i class="bi bi-search display-1 text-muted mb-3"></i>
+                        <h4>Nenhum viajante encontrado</h4>
+                        <p class="text-muted mb-4">
+                            Tente ajustar os filtros de busca ou seja o primeiro a criar um plano para este destino!
+                        </p>
+                        <a href="{% url 'destinos:criar_plano' %}" class="btn btn-primary">
+                            <i class="bi bi-plus-circle me-2"></i>Criar Plano de Viagem
                         </a>
                     </div>
                 </div>
                 {% endfor %}
             </div>
+
+            <!-- Paginação -->
+            {% if destinos.has_other_pages %}
+            <nav class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if destinos.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ destinos.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in destinos.paginator.page_range %}
+                        {% if destinos.number == num %}
+                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                        {% elif num > destinos.number|add:'-3' and num < destinos.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                    {{ num }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if destinos.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ destinos.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
         </div>
     </section>
 
@@ -154,116 +308,304 @@
 
 {% block estilos_extras %}
 <style>
+    :root {
+        --primary-color: #4a90e2;
+        --primary-dark: #357abd;
+        --secondary-color: #667eea;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --light-gray: #f8f9fa;
+        --border-color: #e9ecef;
+        --text-muted: #6c757d;
+        --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
+        --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
+        --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+        --shadow-xl: 0 20px 60px rgba(0,0,0,0.2);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+        box-sizing: border-box;
+    }
+
     .buscar-container {
         background: white;
         min-height: 100vh;
     }
 
+    /* Hero Section */
     .busca-hero {
-        background: linear-gradient(to bottom, #667eea 0%, #ffffff00 100%);
+        background: linear-gradient(135deg, var(--secondary-color) 0%, var(--primary-color) 100%);
         padding: 4rem 0 3rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .busca-hero::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.3;
     }
 
     .hero-title {
-        font-size: 2.5rem;
+        font-size: 2.75rem;
         font-weight: 800;
         color: white;
-        text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        letter-spacing: -0.5px;
+        position: relative;
     }
 
     .hero-subtitle {
         font-size: 1.25rem;
-        color: rgba(255,255,255,0.9);
+        color: rgba(255,255,255,0.95);
+        font-weight: 400;
+        position: relative;
     }
 
+    /* Filtros Card */
     .filtros-card {
         background: white;
         padding: 2rem;
-        border-radius: 20px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+        border-radius: 24px;
+        box-shadow: var(--shadow-xl);
+        border: 1px solid rgba(255,255,255,0.8);
+        backdrop-filter: blur(10px);
     }
 
     .filtro-label {
         font-weight: 600;
         margin-bottom: 0.5rem;
         display: block;
+        color: #2c3e50;
+        font-size: 0.9rem;
     }
 
     .form-control-custom,
     .form-select-custom {
-        padding: 0.75rem 1rem;
-        border: 2px solid #e9ecef;
+        padding: 0.85rem 1.1rem;
+        border: 2px solid var(--border-color);
         border-radius: 12px;
-        transition: all 0.3s ease;
+        transition: var(--transition);
+        font-size: 0.95rem;
+        background: white;
     }
 
     .form-control-custom:focus,
     .form-select-custom:focus {
-        border-color: #4a90e2;
+        border-color: var(--primary-color);
         box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.15);
+        outline: none;
     }
 
+    /* Botões */
     .btn-custom {
         padding: 0.875rem 2rem;
         border-radius: 12px;
         font-weight: 600;
-        transition: all 0.3s ease;
+        transition: var(--transition);
+        border: none;
+        font-size: 0.95rem;
     }
 
     .btn-primario {
-        background: linear-gradient(135deg, #4a90e2, #357abd);
-        border: none;
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
         color: white;
+        box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
     }
 
     .btn-primario:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(74, 144, 226, 0.4);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(74, 144, 226, 0.4);
+        color: white;
     }
 
+    .btn-limpar {
+        background: white;
+        color: var(--text-muted);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-limpar:hover {
+        background: var(--light-gray);
+        color: #495057;
+        border-color: #dee2e6;
+    }
+
+    /* Resultados Header */
+    .resultados-header h2 {
+        color: #2c3e50;
+        font-weight: 700;
+        font-size: 1.75rem;
+    }
+
+    .view-toggle .btn {
+        border-radius: 8px;
+    }
+
+    .view-toggle .btn.active {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    /* Cards de Viajantes */
     .viajante-card {
-        transition: all 0.3s ease;
+        transition: var(--transition);
         border: none;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        border-radius: 16px;
+        box-shadow: var(--shadow-md);
+        border-radius: 20px;
         overflow: hidden;
+        background: white;
+        position: relative;
     }
 
     .viajante-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
     }
 
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+    .card-img-wrapper {
+        height: 220px;
+        overflow: hidden;
+        position: relative;
     }
 
-    .fade-in {
-        animation: fadeIn 0.6s ease-out;
+    .card-img-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
     }
 
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 2rem;
-        }
-        .filtros-card {
-            padding: 1.5rem;
-        }
+    .viajante-card:hover .card-img-wrapper img {
+        transform: scale(1.08);
     }
+
+    .img-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(to bottom, 
+            rgba(0,0,0,0) 0%, 
+            rgba(0,0,0,0.3) 60%,
+            rgba(0,0,0,0.7) 100%);
+        pointer-events: none;
+    }
+
+    .country-badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--shadow-md);
+        z-index: 2;
+    }
+
+    .country-flag {
+        font-size: 1.75rem;
+    }
+
+    .country-name {
+        position: absolute;
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        color: white;
+        z-index: 2;
+    }
+
+    .country-name h5 {
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        font-size: 1.25rem;
+    }
+
+    .country-name small {
+        opacity: 0.95;
+        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+
+    /* Avatar */
+    .avatar-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    .avatar-circle-large {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 2rem;
+    }
+
+    /* Informações da Viagem */
+    .viagem-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .info-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+        padding: 0.75rem;
+        background: var(--light-gray);
+        border-radius: 10px;
+    }
+
+    .info-item i {
+        font-size: 1.25rem;
+        margin-top: 0.15rem;
+    }
+
+    .info-item small {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    /* Status Badge */
+    .status-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        z-index: 2;
+    }
+
+    .status-badge .badge {
+        font-size: 0.75rem;
+        padding: 0.35rem 0.75rem;}
 </style>
-{% endblock %}
-
-{% block scripts_extras %}
-<script>
-    // Adicionar feedback visual aos botões
-    document.querySelectorAll('.btn').forEach(btn => {
-        btn.addEventListener('click', function(e) {
-            this.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 100);
-        });
-    });
-</script>
 {% endblock %}

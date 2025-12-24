@@ -18,11 +18,11 @@
                     </p>
                     <div class="d-flex gap-3 flex-wrap">
                         {% if user.is_authenticated %}
-                            <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-primario btn-lg">
+                            <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-primario btn-sm-lg">
                                 <i class="bi bi-search me-2"></i>
                                 Buscar Viajantes
                             </a>
-                            <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-secundario btn-lg">
+                            <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-secundario btn-sm-lg">
                                 <i class="bi bi-plus-circle me-2"></i>
                                 Criar Plano de Viagem
                             </a>
@@ -31,7 +31,7 @@
                                 <i class="bi bi-person-plus me-2"></i>
                                 Comece Agora - Grátis
                             </a>
-                            <a href="{% url 'usuarios:login' %}" class="btn btn-outline-light btn-lg">
+                            <a href="{% url 'usuarios:login' %}" class="btn btn-light btn-lg">
                                 <i class="bi bi-box-arrow-in-right me-2"></i>
                                 Já Tenho Conta
                             </a>
@@ -62,7 +62,7 @@
     </section>
 
     <!-- Features Section -->
-    <section class="features-section py-5">
+    <section class="features-section pt-1 pb-5">
         <div class="container">
             <div class="text-center mb-5 fade-in">
                 <h2 class="display-5 fw-bold mb-3">Como Funciona?</h2>
@@ -242,14 +242,14 @@
     <section class="hero-section py-5 mx-0">
         <div class="container">
             <div class="cta-content text-center fade-in">
-                <h2 class="display-4 fw-bold text-white mb-4">
+                <h2 class="display-4 fw-bold text-black opacity-75 mb-4">
                     Pronto Para Sua Próxima Aventura?
                 </h2>
-                <p class="lead text-white mb-5">
+                <p class="lead text-dark mb-5">
                     Junte-se a milhares de viajantes e comece a planejar sua próxima viagem hoje mesmo!
                 </p>
                 {% if not user.is_authenticated %}
-                <a href="{% url 'usuarios:cadastro' %}" class="btn btn-light btn-lg px-5">
+                <a href="{% url 'usuarios:cadastro' %}" class="btn btn-dark opacity-75 shadow-sm btn-lg px-5">
                     <i class="bi bi-rocket-takeoff me-2"></i>
                     Criar Conta Gratuita
                 </a>
@@ -267,6 +267,7 @@
 <style>
     /* Hero Section */
     .hero-section {
+        background: linear-gradient(to top, #4964dfaf 0%, #ffffff 100%);
         margin: 0 -2rem;
         padding: 0 2rem;
     }
@@ -479,7 +480,7 @@
     
     /* CTA Section */
     .cta-section {
-        background: linear-gradient(to bottom, #667eea 0%, #ffffff 100%);
+        background: linear-gradient(to bottom, #4965df 0%, #ffffff 100%);
         margin: 0 -2rem ;
         padding: 0 2rem 5rem 2rem;
     }

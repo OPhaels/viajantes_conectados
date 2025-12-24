@@ -252,14 +252,27 @@
             animation: pulse 2s infinite;
         }
         
-        /* Alertas */
         .alert-custom {
-            border: none;
-            border-radius: 15px;
-            padding: 1rem 1.5rem;
-            animation: slideInRight 0.5s ease-out;
+            padding: 12px 18px;
+            border-radius: 12px;
+            font-weight: 500;
+            box-shadow: 0 4px 18px rgba(0,0,0,.05);
+            border-left: 6px solid transparent;
+            backdrop-filter: blur(6px);
         }
-        
+
+        /* Cores personalizadas */
+        .alert-success { background:#d1e7dd; border-left-color:#0f5132; color:#0f5132;}
+        .alert-danger, .alert-error { background:#f8d7da; border-left-color:#842029; color:#842029;}
+        .alert-warning { background:#fff3cd; border-left-color:#664d03; color:#664d03;}
+        .alert-info { background:#cff4fc; border-left-color:#055160; color:#055160;}
+
+        .icon-alert {
+            font-size:1.35rem;
+            filter: drop-shadow(0 1px 1px rgba(0,0,0,.22));
+        }
+
+                
         /* Mapa */
         #mapa-container {
             height: 500px;
@@ -463,16 +476,28 @@
     
     <!-- Mensagens -->
     {% if messages %}
-        <div class="container mt-3">
-            {% for mensagem in messages %}
-                <div class="alert alert-{{ mensagem.tags }} alert-custom alert-dismissible fade show" role="alert">
-                    <i class="bi bi-{% if mensagem.tags == 'success' %}check-circle{% elif mensagem.tags == 'error' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
-                    {{ mensagem }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
-        </div>
+    <div class="container mt-3">
+        {% for mensagem in messages %}
+            <div class="alert alert-{{ mensagem.tags }} alert-custom alert-dismissible fade show d-flex align-items-center gap-3" role="alert">
+
+                <i class="
+                    bi
+                    {% if mensagem.tags == 'success' %} bi-check-circle-fill
+                    {% elif mensagem.tags == 'error' or mensagem.tags == 'danger' %} bi-exclamation-octagon-fill
+                    {% elif mensagem.tags == 'warning' %} bi-exclamation-triangle-fill
+                    {% else %} bi-info-circle-fill
+                    {% endif %}
+                    icon-alert
+                "></i>
+
+                <span>{{ mensagem }}</span>
+
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
     {% endif %}
+
     
     
     <!-- Conteúdo Principal -->

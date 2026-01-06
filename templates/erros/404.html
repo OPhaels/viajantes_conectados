@@ -10,22 +10,22 @@
         <p class="lead text-muted mb-5">
             Ops! A página que você está procurando não existe ou foi movida.
         </p>
-        
+
         <div class="d-flex gap-3 justify-content-center flex-wrap">
             <a href="{% url 'home' %}" class="btn btn-custom btn-primario">
                 <i class="bi bi-house-door me-2"></i>
                 Voltar para Início
             </a>
             {% if user.is_authenticated %}
-                <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-secundario">
-                    <i class="bi bi-search me-2"></i>
-                    Buscar Viajantes
-                </a>
+            <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-secundario">
+                <i class="bi bi-search me-2"></i>
+                Buscar Viagens
+            </a>
             {% else %}
-                <a href="{% url 'usuarios:cadastro' %}" class="btn btn-custom btn-secundario">
-                    <i class="bi bi-person-plus me-2"></i>
-                    Criar Conta
-                </a>
+            <a href="{% url 'usuarios:cadastro' %}" class="btn btn-custom btn-secundario">
+                <i class="bi bi-person-plus me-2"></i>
+                Criar Conta
+            </a>
             {% endif %}
         </div>
     </div>

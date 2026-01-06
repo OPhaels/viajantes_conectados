@@ -238,7 +238,7 @@ def view_buscar_viajantes(request):
         'amigos_ids': amigos_ids,
         'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
         'total_resultados': len(destinos_filtrados),
-        'title': _('Buscar Viajantes'), 
+        'title': _('Buscar Viagens'), 
     }
 
     return render(request, 'destinos/buscar.html', contexto)

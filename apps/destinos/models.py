@@ -21,12 +21,19 @@ class Pais(models.Model):
     latitude = models.DecimalField(_('latitude'), max_digits=9, decimal_places=6)
     longitude = models.DecimalField(_('longitude'), max_digits=9, decimal_places=6)
     ativo = models.BooleanField(_('ativo'), default=True)
-    
+
+    imagem = models.ImageField(
+        _('imagem do país'),
+        upload_to='paises/',
+        blank=True,
+        null=True
+    )
+
     class Meta:
         verbose_name = _('país')
         verbose_name_plural = _('países')
         ordering = ['nome']
-    
+
     def __str__(self):
         return self.nome
 

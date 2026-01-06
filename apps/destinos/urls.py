@@ -6,7 +6,7 @@ app_name = 'destinos'
 urlpatterns = [
     # Criar plano
     path('criar-plano/', views.view_criar_plano_viagem, name='criar_plano'),
-    # Buscar viajantes
+    # Buscar viagens
     path('viajantes/', views.view_buscar_viajantes, name='buscar_viajantes'),
     path('buscar/', views.view_buscar_viajantes, name='buscar'),
     

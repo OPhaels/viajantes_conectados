@@ -31,10 +31,8 @@
                                     <label class="filtro-label">
                                         <i class="bi bi-geo-alt-fill me-2"></i>País de Destino
                                     </label>
-                                    <input type="text" name="pais" 
-                                        class="form-control form-control-custom" 
-                                        placeholder="Ex: Brasil, Portugal..."
-                                        value="{{ request.GET.pais }}">
+                                    <input type="text" name="pais" class="form-control form-control-custom"
+                                        placeholder="Ex: Brasil, Portugal..." value="{{ request.GET.pais }}">
                                 </div>
 
                                 <!-- Cidade -->
@@ -42,10 +40,8 @@
                                     <label class="filtro-label">
                                         <i class="bi bi-pin-map me-2"></i>Cidade
                                     </label>
-                                    <input type="text" name="cidade" 
-                                        class="form-control form-control-custom"
-                                        placeholder="Ex: Lisboa, Porto..."
-                                        value="{{ request.GET.cidade }}">
+                                    <input type="text" name="cidade" class="form-control form-control-custom"
+                                        placeholder="Ex: Lisboa, Porto..." value="{{ request.GET.cidade }}">
                                 </div>
 
                                 <!-- Data -->
@@ -53,8 +49,7 @@
                                     <label class="filtro-label">
                                         <i class="bi bi-calendar-check me-2"></i>Data de Início
                                     </label>
-                                    <input type="date" name="data_inicio" 
-                                        class="form-control form-control-custom"
+                                    <input type="date" name="data_inicio" class="form-control form-control-custom"
                                         value="{{ request.GET.data_inicio }}">
                                 </div>
 
@@ -62,7 +57,7 @@
                                 <div class="col-12">
                                     <div class="d-flex gap-2 flex-wrap">
                                         <button type="submit" class="btn btn-custom btn-primario flex-grow-1">
-                                            <i class="bi bi-search me-2"></i>Buscar Viajantes
+                                            <i class="bi bi-search me-2"></i>Buscar Viagens
                                         </button>
                                         <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-limpar">
                                             <i class="bi bi-x-circle me-2"></i>Limpar Filtros
@@ -85,11 +80,11 @@
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div>
                         <h2 class="mb-1">
-                            <i class="bi bi-people-fill me-2"></i>Viajantes Encontrados
+                            <i class="bi bi-people-fill me-2"></i>Viagens Encontradas
                         </h2>
                         <p class="text-muted mb-0">
-                            {{ total_resultados|default:0 }} 
-                            {% if total_resultados == 1 %}resultado{% else %}resultados{% endif %} 
+                            {{ total_resultados|default:0 }}
+                            {% if total_resultados == 1 %}resultado{% else %}resultados{% endif %}
                             encontrado{% if total_resultados != 1 %}s{% endif %}
                         </p>
                     </div>
@@ -105,7 +100,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Grid de Viajantes -->
             <div class="row g-4" id="viagensGrid">
                 {% for plano in destinos %}
@@ -114,36 +109,39 @@
                         <!-- Imagem do Destino -->
                         <div class="card-img-wrapper position-relative">
                             {% if plano.pais_destino %}
-                                <img src="{{ plano.pais_destino.imagem_url|default:'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800' }}" 
-                                    class="card-img-top" 
-                                    alt="{{ plano.pais_destino.nome }}"
-                                    loading="lazy">
+                            <img src="{{ plano.pais_destino.imagem_url|default:'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800' }}"
+                                class="card-img-top" alt="{{ plano.pais_destino.nome }}" loading="lazy">
                             {% else %}
-                                <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800" 
-                                    class="card-img-top" 
-                                    alt="Destino a definir"
-                                    loading="lazy">
+                            <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800"
+                                class="card-img-top" alt="Destino a definir" loading="lazy">
                             {% endif %}
                             <div class="img-overlay"></div>
-                            
+
                             <!-- Badge do País -->
                             <span class="country-badge">
                                 <span class="country-flag">
-                                    {% if plano.pais_destino %}
-                                        {{ plano.pais_destino.emoji|default:'🌍' }}
+                                    {% if plano.pais_destino.codigo_iso %}
+                                    <img src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower }}.png"
+                                        alt="Bandeira de {{ plano.pais_destino.nome }}"
+                                        class="rounded-pill border border-white"
+                                        style="object-fit: cover; height: 50px; width: 50px;"
+                                        onerror="this.style.display='none'">
                                     {% else %}
-                                        ❓
+                                    <div class="bg-white rounded d-flex align-items-center justify-content-center"
+                                        style="width: 60px; height: 40px;">
+                                        <i class="bi bi-flag text-primary fs-4"></i>
+                                    </div>
                                     {% endif %}
                                 </span>
                             </span>
-                            
+
                             <!-- Nome do Destino -->
                             <div class="country-name">
                                 <h5 class="mb-0">
                                     {% if plano.pais_destino %}
-                                        {{ plano.pais_destino.nome }}
+                                    {{ plano.pais_destino.nome }}
                                     {% else %}
-                                        Destino a Definir
+                                    Destino a Definir
                                     {% endif %}
                                 </h5>
                                 {% if plano.cidade_destino %}
@@ -163,13 +161,14 @@
                                     <div>
                                         <h6 class="mb-0">{{ plano.usuario.get_nome_exibicao|title }}</h6>
                                         <small class="text-muted">
-                                            <i class="bi bi-geo-alt"></i> 
+                                            <i class="bi bi-geo-alt"></i>
                                             {% if plano.usuario.cidade %}
-                                                {{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais }}{% endif %}
+                                            {{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais
+                                            }}{% endif %}
                                             {% elif plano.usuario.pais %}
-                                                {{ plano.usuario.pais }}
+                                            {{ plano.usuario.pais }}
                                             {% else %}
-                                                Brasil
+                                            Brasil
                                             {% endif %}
                                         </small>
                                     </div>
@@ -185,7 +184,7 @@
                                         <span class="fw-medium">
                                             {{ plano.data_inicio|date:"d/m/Y" }}
                                             {% if plano.data_fim %}
-                                                - {{ plano.data_fim|date:"d/m/Y" }}
+                                            - {{ plano.data_fim|date:"d/m/Y" }}
                                             {% endif %}
                                         </span>
                                     </div>
@@ -197,10 +196,10 @@
                                         <small class="text-muted d-block">Duração</small>
                                         <span class="fw-medium">
                                             {% if plano.duracao_dias %}
-                                                {{ plano.duracao_dias }} 
-                                                {% if plano.duracao_dias == 1 %}dia{% else %}dias{% endif %}
+                                            {{ plano.duracao_dias }}
+                                            {% if plano.duracao_dias == 1 %}dia{% else %}dias{% endif %}
                                             {% else %}
-                                                <span class="text-warning">Indefinida</span>
+                                            <span class="text-warning">Indefinida</span>
                                             {% endif %}
                                         </span>
                                     </div>
@@ -217,13 +216,13 @@
                             <!-- Ações -->
                             <div class="mt-auto">
                                 <div class="d-grid gap-2">
-                                    <a href="{% url 'destinos:detalhes_plano' plano.uuid %}" 
-                                       class="btn btn-primary btn-sm btn-ver-detalhes">
+                                    <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
+                                        class="btn btn-primary btn-sm btn-ver-detalhes p-2">
                                         <i class="bi bi-eye me-1"></i> Ver Detalhes
                                     </a>
-                                    
+
                                     {% if plano.usuario.id not in amigos_ids %}
-                                    <button class="btn btn-outline-primary btn-sm btn-conectar">
+                                    <button class="btn btn-outline-primary btn-sm btn-conectar p-2">
                                         <i class="bi bi-person-plus me-1"></i> Conectar
                                     </button>
                                     {% else %}
@@ -238,13 +237,13 @@
                         <!-- Status Badge -->
                         <div class="status-badge">
                             {% if plano.data_inicio %}
-                                {% with dias=plano.data_inicio|timeuntil %}
-                                    {% if "day" in dias or "hour" in dias %}
-                                        <span class="badge bg-danger">Viagem em breve</span>
-                                    {% elif "week" in dias %}
-                                        <span class="badge bg-warning">Próxima viagem</span>
-                                    {% endif %}
-                                {% endwith %}
+                            {% with dias=plano.data_inicio|timeuntil %}
+                            {% if "day" in dias or "hour" in dias %}
+                            <span class="badge bg-danger">Viagem em breve</span>
+                            {% elif "week" in dias %}
+                            <span class="badge bg-warning">Próxima viagem</span>
+                            {% endif %}
+                            {% endwith %}
                             {% endif %}
                         </div>
                     </div>
@@ -272,31 +271,33 @@
                 <ul class="pagination justify-content-center">
                     {% if destinos.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ destinos.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                        <a class="page-link"
+                            href="?page={{ destinos.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
                             <i class="bi bi-chevron-left"></i>
                         </a>
                     </li>
                     {% endif %}
 
                     {% for num in destinos.paginator.page_range %}
-                        {% if destinos.number == num %}
-                            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                        {% elif num > destinos.number|add:'-3' and num < destinos.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                                    {{ num }}
-                                </a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if destinos.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ destinos.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                            <i class="bi bi-chevron-right"></i>
+                    {% if destinos.number == num %}
+                    <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                    {% elif num > destinos.number|add:'-3' and num < destinos.number|add:'3' %} <li class="page-item">
+                        <a class="page-link"
+                            href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                            {{ num }}
                         </a>
-                    </li>
-                    {% endif %}
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if destinos.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ destinos.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+                                <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
                 </ul>
             </nav>
             {% endif %}
@@ -318,10 +319,10 @@
         --light-gray: #f8f9fa;
         --border-color: #e9ecef;
         --text-muted: #6c757d;
-        --shadow-sm: 0 2px 4px rgba(0,0,0,0.08);
-        --shadow-md: 0 4px 15px rgba(0,0,0,0.1);
-        --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
-        --shadow-xl: 0 20px 60px rgba(0,0,0,0.2);
+        --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+        --shadow-md: 0 4px 15px rgba(0, 0, 0, 0.1);
+        --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.15);
+        --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.2);
         --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
@@ -357,14 +358,14 @@
         font-size: 2.75rem;
         font-weight: 800;
         color: white;
-        text-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         letter-spacing: -0.5px;
         position: relative;
     }
 
     .hero-subtitle {
         font-size: 1.25rem;
-        color: rgba(255,255,255,0.95);
+        color: rgba(255, 255, 255, 0.95);
         font-weight: 400;
         position: relative;
     }
@@ -375,7 +376,7 @@
         padding: 2rem;
         border-radius: 24px;
         box-shadow: var(--shadow-xl);
-        border: 1px solid rgba(255,255,255,0.8);
+        border: 1px solid rgba(255, 255, 255, 0.8);
         backdrop-filter: blur(10px);
     }
 
@@ -494,10 +495,10 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(to bottom, 
-            rgba(0,0,0,0) 0%, 
-            rgba(0,0,0,0.3) 60%,
-            rgba(0,0,0,0.7) 100%);
+        background: linear-gradient(to bottom,
+                rgba(0, 0, 0, 0) 0%,
+                rgba(0, 0, 0, 0.3) 60%,
+                rgba(0, 0, 0, 0.7) 100%);
         pointer-events: none;
     }
 
@@ -506,8 +507,6 @@
         top: 1rem;
         right: 1rem;
         background: white;
-        width: 50px;
-        height: 50px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -532,13 +531,13 @@
     .country-name h5 {
         font-weight: 700;
         margin-bottom: 0.25rem;
-        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
         font-size: 1.25rem;
     }
 
     .country-name small {
         opacity: 0.95;
-        text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
 
     /* Avatar */
@@ -606,6 +605,7 @@
 
     .status-badge .badge {
         font-size: 0.75rem;
-        padding: 0.35rem 0.75rem;}
+        padding: 0.35rem 0.75rem;
+    }
 </style>
 {% endblock %}

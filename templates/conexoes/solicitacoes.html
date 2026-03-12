@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block estilos_extras %}
+<link rel="stylesheet" href="{% static 'css/conexoes.css' %}">
+{% endblock %}
+
+{% block conteudo %}
+<div class="hero-solicitacoes">
+    <div class="container">
+        <h1><i class="bi bi-person-plus"></i> {{ titulo }}</h1>
+        <p>Gerencie suas solicitações de amizade e conecte-se com novos viajantes</p>
+    </div>
+</div>
+
+<div class="container mb-5">
+    {% if solicitacoes_recebidas %}
+    <h2 class="section-title">
+        <i class="bi bi-inbox"></i> Solicitações Recebidas
+    </h2>
+
+    {% for solicitacao in solicitacoes_recebidas %}
+    <div class="card card-solicitacao">
+        <div class="solicitacao-body">
+            <div class="solicitacao-info">
+                <div class="user-avatar">
+                    {% if solicitacao.remetente.foto_perfil %}
+                    <img src="{{ solicitacao.remetente.foto_perfil.url }}"
+                        alt="{{ solicitacao.remetente.get_nome_exibicao }}">
+                    {% else %}
+                    {{ solicitacao.remetente.get_nome_exibicao|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="user-details">
+                    <div>
+                        <h5>
+                            {{ solicitacao.remetente.get_nome_exibicao }}
+                            <span class="badge-novo">Novo</span>
+                        </h5>
+                        <p class="user-email">{{ solicitacao.remetente.email }}</p>
+                    </div>
+                    <p class="solicitacao-data">
+                        <i class="bi bi-calendar"></i>
+                        {% now "SHORT_DATE_FORMAT" as today %}
+                        {% if solicitacao.data_criacao|date:"Y-m-d" == today|date:"Y-m-d" %}
+                        Hoje às {{ solicitacao.data_criacao|time:"H:i" }}
+                        {% else %}
+                        {{ solicitacao.data_criacao|date:"d/m/Y" }}
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="solicitacao-actions">
+                <form method="post"
+                    action="{% url 'conexoes:responder_solicitacao' uuid_solicitacao=solicitacao.uuid acao='aceitar' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-small btn-aceitar">
+                        <i class="bi bi-check-circle"></i> Aceitar
+                    </button>
+                </form>
+
+                <form method="post"
+                    action="{% url 'conexoes:responder_solicitacao' uuid_solicitacao=solicitacao.uuid acao='rejeitar' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-small btn-rejeitar">
+                        <i class="bi bi-x-circle"></i> Rejeitar
+                    </button>
+                </form>
+
+                <a href="{% url 'usuarios:perfil' uuid=solicitacao.remetente.uuid %}"
+                    class="btn btn-small btn-outline-secondary">
+                    <i class="bi bi-person"></i> Ver Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="empty-state">
+        <i class="bi bi-inbox"></i>
+        <h4>Nenhuma solicitação recebida</h4>
+        <p>Você não tem novas solicitações de amizade no momento</p>
+    </div>
+    {% endif %}
+
+    {% if solicitacoes_enviadas %}
+    <h2 class="section-title">
+        <i class="bi bi-send"></i> Solicitações Enviadas
+    </h2>
+
+    {% for solicitacao in solicitacoes_enviadas %}
+    <div class="card card-solicitacao">
+        <div class="solicitacao-body">
+            <div class="solicitacao-info">
+                <div class="user-avatar">
+                    {% if solicitacao.destinatario.foto_perfil %}
+                    <img src="{{ solicitacao.destinatario.foto_perfil.url }}"
+                        alt="{{ solicitacao.destinatario.get_nome_exibicao }}">
+                    {% else %}
+                    {{ solicitacao.destinatario.get_nome_exibicao|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="user-details">
+                    <div>
+                        <h5>{{ solicitacao.destinatario.get_nome_exibicao }}</h5>
+                        <p class="user-email">{{ solicitacao.destinatario.email }}</p>
+                    </div>
+                    <p class="solicitacao-data">
+                        <i class="bi bi-calendar"></i>
+                        Enviada em {{ solicitacao.data_criacao|date:"d/m/Y" }}
+                        <span class="status-badge status-enviada">
+                            <i class="bi bi-clock"></i> Pendente
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="solicitacao-actions">
+                <form method="post"
+                    action="{% url 'conexoes:cancelar_solicitacao' uuid_solicitacao=solicitacao.uuid %}">
+                    <button type="submit" class="btn btn-small btn-cancelar"
+                        onclick="return confirm('Tem certeza que deseja cancelar esta solicitação?')">
+                        <i class="bi bi-trash"></i> Cancelar
+                    </button>
+                </form>
+
+                <a href="{% url 'usuarios:perfil' uuid=solicitacao.destinatario.uuid %}"
+                    class="btn btn-small btn-outline-secondary">
+                    <i class="bi bi-person"></i> Ver Perfil
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    {% if not solicitacoes_recebidas %}
+    <div class="empty-state">
+        <i class="bi bi-send"></i>
+        <h4>Nenhuma solicitação enviada</h4>
+        <p>Comece a adicionar amigos para conectar-se com outros viajantes</p>
+    </div>
+    {% endif %}
+    {% endif %}
+
+    {% if not solicitacoes_recebidas and not solicitacoes_enviadas %}
+    <div class="alert alert-info mt-4">
+        <i class="bi bi-info-circle"></i>
+        <strong>Dica:</strong> Visite a aba "Buscar Viajantes" para encontrar pessoas com interesses similares!
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

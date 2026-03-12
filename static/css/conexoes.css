@@ -1,0 +1,765 @@
+/* ========================================
+   CONEXÕES PAGES STYLES
+   ======================================== */
+
+/* Conexões Container */
+.conexoes-container {
+    min-height: 100vh;
+    background: white;
+}
+
+/* Hero Section */
+.conexoes-hero {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.conexoes-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.conexoes-hero p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin: 0;
+}
+
+/* Tabs de Navegação */
+.nav-tabs-custom {
+    border-bottom: 2px solid #e9ecef;
+    gap: 1rem;
+}
+
+.nav-link-custom {
+    color: #6c757d;
+    border: none;
+    border-bottom: 3px solid transparent;
+    padding: 1rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.nav-link-custom:hover {
+    color: #4a90e2;
+    border-bottom-color: #4a90e2;
+}
+
+.nav-link-custom.active {
+    color: #4a90e2;
+    border-bottom-color: #4a90e2;
+}
+
+/* Card de Usuário/Solicitação */
+.conexao-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    height: 100%;
+}
+
+.conexao-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* Card Header com Foto */
+.conexao-header {
+    height: 180px;
+    background: #f0f0f0;
+    overflow: hidden;
+    position: relative;
+}
+
+.conexao-photo {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.conexao-photo-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+}
+
+/* Status Badge */
+.status-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #50c878;
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-badge.offline {
+    background: #6c757d;
+}
+
+.status-badge.pending {
+    background: #ffc107;
+    color: #000;
+}
+
+/* Card Body */
+.conexao-body {
+    padding: 1.5rem;
+}
+
+.conexao-name {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.conexao-bio {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+    min-height: 2.7em;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.conexao-info {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.conexao-info i {
+    color: #4a90e2;
+}
+
+/* Card Footer com Botões */
+.conexao-footer {
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    gap: 0.75rem;
+}
+
+.conexao-footer .btn {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-aceitar {
+    background: linear-gradient(135deg, #50c878, #3da55e);
+    color: white;
+}
+
+.btn-aceitar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(80, 200, 120, 0.3);
+    color: white;
+}
+
+.btn-rejeitar {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #e9ecef;
+}
+
+.btn-rejeitar:hover {
+    background: #e9ecef;
+    color: #495057;
+    border-color: #dee2e6;
+}
+
+.btn-mensaje {
+    background: #4a90e2;
+    color: white;
+}
+
+.btn-mensaje:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    color: white;
+}
+
+.btn-remover {
+    background: #f8f9fa;
+    color: #dc3545;
+    border: 1px solid #f5c6cb;
+}
+
+.btn-remover:hover {
+    background: #f5c6cb;
+    color: #842029;
+    border-color: #f1b0b7;
+}
+
+/* Lista Vazia */
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h5 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    margin: 0;
+}
+
+/* Seção de Filtros */
+.filtros-conexoes {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+}
+
+.filtro-label {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-size: 0.9rem;
+}
+
+.form-control-custom {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.form-control-custom:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.15);
+    outline: none;
+}
+
+/* Badge de Contagem */
+.conexoes-badge {
+    background: linear-gradient(135deg, #4a90e2, #667eea);
+    color: white;
+    border-radius: 20px;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 0.5rem;
+}
+
+/* ========================================
+   LISTA AMIGOS STYLES
+   ======================================== */
+
+.hero-amigos {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.hero-amigos h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.info-stats {
+    font-size: 1.1rem;
+    opacity: 0.95;
+}
+
+.amigos-count {
+    display: inline-block;
+    margin-left: 0.5rem;
+}
+
+.card-amigo {
+    border: none;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.card-amigo:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-gradient {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+}
+
+.user-avatar-large {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-size: 3rem;
+    font-weight: 700;
+    overflow: hidden;
+    color: white;
+}
+
+.user-avatar-large img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-header-gradient h5 {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.user-status {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin: 0;
+}
+
+.card-body-custom {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.amigo-info-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #e9ecef;
+    color: #6c757d;
+    font-size: 0.95rem;
+}
+
+.amigo-info-row:last-of-type {
+    border-bottom: none;
+}
+
+.amigo-info-row i {
+    color: #667eea;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+
+.amigo-info-row span {
+    word-break: break-all;
+}
+
+.planos-section {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+
+.planos-section h6 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.plano-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-right: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.plano-badge i {
+    margin-right: 0.3rem;
+}
+
+.plano-badge small {
+    display: block;
+    font-size: 0.75rem;
+    opacity: 0.9;
+    margin-top: 0.2rem;
+}
+
+.card-actions {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    border-top: 1px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.btn-action {
+    flex: 1;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-chat {
+    background: linear-gradient(135deg, #4a90e2, #357abd);
+    color: white;
+}
+
+.btn-chat:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
+    color: white;
+}
+
+.btn-perfil {
+    background: linear-gradient(135deg, #50c878, #3da55e);
+    color: white;
+}
+
+.btn-perfil:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(80, 200, 120, 0.3);
+    color: white;
+}
+
+.btn-desfazer {
+    background: #f8f9fa;
+    color: #dc3545;
+    border: 2px solid #f5c6cb;
+}
+
+.btn-desfazer:hover {
+    background: #f5c6cb;
+    color: #842029;
+    border-color: #e74c3c;
+}
+
+/* ========================================
+   SOLICITAÇÕES STYLES
+   ======================================== */
+
+.hero-solicitacoes {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 3rem 0;
+    margin-bottom: 2rem;
+}
+
+.hero-solicitacoes h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.hero-solicitacoes p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    margin: 0;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-top: 2rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.card-solicitacao {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.card-solicitacao:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.solicitacao-body {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem;
+    gap: 2rem;
+}
+
+.solicitacao-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    flex: 1;
+}
+
+.user-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.user-details {
+    flex: 1;
+}
+
+.user-details h5 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #2c3e50;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.badge-novo {
+    background: #ff6b6b;
+    color: white;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+}
+
+.user-email {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    word-break: break-all;
+}
+
+.solicitacao-data {
+    font-size: 0.85rem;
+    color: #95a5a6;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.3rem 0.7rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-left: 0.75rem;
+}
+
+.status-enviada {
+    background: #fff3cd;
+    color: #664d03;
+}
+
+.solicitacao-actions {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.btn-small {
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+}
+
+.btn-aceitar {
+    background: linear-gradient(135deg, #50c878, #3da55e);
+    color: white;
+}
+
+.btn-aceitar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(80, 200, 120, 0.3);
+    color: white;
+}
+
+.btn-rejeitar {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 1px solid #e9ecef;
+}
+
+.btn-rejeitar:hover {
+    background: #e9ecef;
+    color: #495057;
+}
+
+.btn-cancelar {
+    background: #f8f9fa;
+    color: #dc3545;
+    border: 1px solid #f5c6cb;
+}
+
+.btn-cancelar:hover {
+    background: #f5c6cb;
+    color: #842029;
+}
+
+.btn-outline-secondary {
+    background: white;
+    color: #6c757d;
+    border: 1px solid #dee2e6;
+}
+
+.btn-outline-secondary:hover {
+    background: #f8f9fa;
+    color: #495057;
+    border-color: #adb5bd;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.empty-state h4 {
+    color: #2c3e50;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state p {
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+/* ========================================
+   RESPONSIVIDADE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .conexoes-hero h1 {
+        font-size: 1.75rem;
+    }
+
+    .conexao-card {
+        margin-bottom: 1rem;
+    }
+
+    .conexao-footer {
+        flex-direction: column;
+    }
+
+    .conexao-footer .btn {
+        width: 100%;
+    }
+
+    .nav-tabs-custom {
+        flex-wrap: wrap;
+    }
+
+    .nav-link-custom {
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .conexao-name {
+        font-size: 1.1rem;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-state-icon {
+        font-size: 3rem;
+    }
+}

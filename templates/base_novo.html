@@ -29,79 +29,7 @@
     <!-- Mapbox GL -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
 
-    <!-- Design System CSS -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
-
-    <!-- Estilos Extras (Compatibilidade) -->
-    <style>
-        /* Estilos customizados extras */
-        .navbar-custom {
-            background: rgba(255, 255, 255, 0.95) !important;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--sombra-xs);
-        }
-
-        .card-viajante {
-            border: none;
-            transition: all var(--transicao-normal);
-        }
-
-        .card-viajante:hover {
-            transform: translateY(-10px);
-            box-shadow: var(--sombra-lg);
-        }
-
-        .btn-custom {
-            border-radius: var(--raio-completo);
-            font-weight: 600;
-        }
-
-        /* Mapa */
-        #mapa-container {
-            height: 500px;
-            border-radius: var(--raio-xl);
-            overflow: hidden;
-            box-shadow: var(--sombra-lg);
-        }
-
-        #mapa {
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Chat */
-        .chat-container {
-            height: 600px;
-            border-radius: var(--raio-xl);
-            overflow: hidden;
-            box-shadow: var(--sombra-lg);
-        }
-
-        .mensagem {
-            max-width: 70%;
-            margin-bottom: var(--espaco-4);
-            padding: var(--espaco-3) var(--espaco-4);
-            border-radius: var(--raio-xl);
-        }
-
-        .mensagem-enviada {
-            background-color: var(--cor-primaria);
-            color: white;
-            margin-left: auto;
-        }
-
-        .mensagem-recebida {
-            background-color: var(--cor-fundo-secundario);
-            color: var(--cor-texto);
-        }
-
-        @media (max-width: 768px) {
-            #mapa-container {
-                height: 300px;
-            }
-        }
-    </style>
-
+    <!-- CSS está em static/css/ -->
     {% block estilos_extras %}{% endblock %}
 </head>
 
@@ -164,7 +92,7 @@
                                 <hr class="dropdown-divider">
                             </li>
                             <li>
-                                <form method="post" action="{% url 'usuarios:logout' %}" style="margin: 0;">
+                                <form method="post" action="{% url 'usuarios:logout' %}">
                                     {% csrf_token %}
                                     <button type="submit" class="dropdown-item">
                                         <i class="bi bi-box-arrow-right"></i> Sair

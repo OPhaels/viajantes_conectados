@@ -3,6 +3,10 @@
 
 {% block titulo %}Meus Planos de Viagem{% endblock %}
 
+{% block estilos_extras %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
 {% block conteudo %}
 <div class="meus-planos-container">
     <!-- Hero Section -->
@@ -235,7 +239,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     Cancelar
                 </button>
-                <form method="post" action="" id="formDeletar" style="display: inline;">
+                <form method="post" action="" id="formDeletar">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger" id="confirmarDeletar">
                         <i class="bi bi-trash me-1"></i>Deletar Definitivamente
@@ -246,103 +250,7 @@
     </div>
 </div>
 
-<style>
-    .meus-planos-container {
-        min-height: 100vh;
-    }
 
-    .planos-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 4rem 0;
-        margin-bottom: 3rem;
-    }
-
-    .hero-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-    }
-
-    .plano-card {
-        transition: all 0.3s ease;
-        border-radius: 0.75rem;
-        overflow: hidden;
-    }
-
-    .plano-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .plano-image-container {
-        position: relative;
-        height: 200px;
-        overflow: hidden;
-        background: #f0f0f0;
-    }
-
-    .plano-image-container img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .plano-card:hover .plano-image-container img {
-        transform: scale(1.05);
-    }
-
-    .bg-gradient-placeholder {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 3rem;
-    }
-
-    .badge-container {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-        right: 10px;
-        display: flex;
-        gap: 5px;
-        flex-wrap: wrap;
-    }
-
-    .badge-privacidade {
-        background-color: rgba(0, 0, 0, 0.6) !important;
-        margin-left: auto;
-    }
-
-    .plano-info {
-        font-size: 0.9rem;
-        line-height: 1.6;
-    }
-
-    .card-footer {
-        padding: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 1.75rem;
-        }
-
-        .plano-card {
-            margin-bottom: 1rem;
-        }
-    }
-</style>
 
 <script>
     // Busca em tempo real

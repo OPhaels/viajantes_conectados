@@ -4,6 +4,10 @@
 
 {% block titulo %}{{ titulo }}{% endblock %}
 
+{% block estilos_extras %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
 {% block conteudo %}
 <div class="container mt-5 mb-5">
     <div class="row justify-content-center">
@@ -218,41 +222,6 @@
         </div>
     </div>
 </div>
-
-<style>
-    .form-control-custom {
-        border: 2px solid #e9ecef;
-        border-radius: 0.5rem;
-        padding: 0.75rem 1rem;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-control-custom:focus {
-        border-color: #4a90e2;
-        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
-    }
-
-    .form-check-input {
-        width: 1.25em;
-        height: 1.25em;
-        margin-top: 0.3em;
-        cursor: pointer;
-    }
-
-    .form-check-input:checked {
-        background-color: #50c878;
-        border-color: #50c878;
-    }
-
-    .card {
-        transition: all 0.3s ease;
-    }
-
-    .card:hover {
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
-    }
-</style>
 
 <script>
     function previewFoto(input) {

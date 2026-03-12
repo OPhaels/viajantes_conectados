@@ -74,33 +74,34 @@ TEMPLATES = [
 ]
 
 # Banco de Dados
+SENTRY_DSN = config('SENTRY_DSN', default=None)
+
+if not DEBUG and SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': config('DB_ENGINE'),
         'NAME': config('DB_NAME'),
         'USER': config('DB_USER'),
         'PASSWORD': config('DB_PASSWORD'),
         'HOST': config('DB_HOST'),
         'PORT': config('DB_PORT', cast=int),
-        
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
+        'CONN_MAX_AGE': 600,
     }
 }
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
-
-#DATABASES = {
-#    'default': {
-#        'ENGINE': config('DB_ENGINE'),
-#        'NAME': config('DB_NAME'),
-#        'USER': config('DB_USER'),
-#        'PASSWORD': config('DB_PASSWORD'),
-#        'HOST': config('DB_HOST'),
-#        'PORT': config('DB_PORT', cast=int),
-#        'OPTIONS': {
-#            'sslmode': 'require',
-#        },
-#        'CONN_MAX_AGE': 600,
-#    }
-#}
 
 # Modelo de Usuário Customizado
 AUTH_USER_MODEL = 'usuarios.Usuario'
@@ -149,21 +150,33 @@ CSP_FONT_SRC = ("'self'", "https://cdn.jsdelivr.net")
 CSP_CONNECT_SRC = ("'self'", "wss:", "https://api.mapbox.com")
 
 # Channels (WebSockets)
+# Banco de Dados
 if DEBUG:
-    CHANNEL_LAYERS = {
+    # Desenvolvimento local (SQLite)
+    DATABASES = {
         'default': {
-            'BACKEND': 'channels.layers.InMemoryChannelLayer',
-        },
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
+
 else:
-    CHANNEL_LAYERS = {
+    # Produção (Railway - PostgreSQL)
+    DATABASES = {
         'default': {
-            'BACKEND': 'channels_redis.core.RedisChannelLayer',
-            'CONFIG': {
-                'hosts': [config('REDIS_URL')],
+            'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': config('DB_NAME'),
+            'USER': config('DB_USER'),
+            'PASSWORD': config('DB_PASSWORD'),
+            'HOST': config('DB_HOST'),
+            'PORT': config('DB_PORT', cast=int),
+            'OPTIONS': {
+                'sslmode': 'require',
             },
-        },
+            'CONN_MAX_AGE': 600,
+        }
     }
+    
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -271,16 +284,5 @@ LOGGING = {
     },
 }
 
-# Sentry
-if not DEBUG:
-    import sentry_sdk
-    from sentry_sdk.integrations.django import DjangoIntegration
-    
-    sentry_sdk.init(
-        dsn=config('SENTRY_DSN'),
-        integrations=[DjangoIntegration()],
-        traces_sample_rate=0.1,
-        send_default_pii=False,
-    )
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

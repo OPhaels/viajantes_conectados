@@ -3,6 +3,10 @@
 
 {% block titulo %}Listar Viajantes{% endblock %}
 
+{% block estilos_extras %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
 {% block conteudo %}
 <div class="viajantes-container">
     <!-- Hero Section -->
@@ -23,7 +27,7 @@
             <!-- Filtros Avançados -->
             <div class="row justify-content-center">
                 <div class="col-12 col-lg-11 col-xl-10">
-                    <div class="filtros-card fade-in" style="animation-delay:0.1s">
+                    <div class="filtros-card fade-in delay-1">
                         <form method="get" action="{% url 'destinos:buscar_viajantes' %}" id="formBusca">
                             <div class="row g-3 align-items-end">
                                 <!-- Busca Geral -->
@@ -258,155 +262,7 @@
     </div>
 </div>
 
-<style>
-    .viajantes-container {
-        min-height: 100vh;
-    }
 
-    .viajantes-hero {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 4rem 0;
-        margin-bottom: 3rem;
-    }
-
-    .hero-title {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .hero-subtitle {
-        font-size: 1.1rem;
-        opacity: 0.9;
-    }
-
-    .filtros-card {
-        background: white;
-        border-radius: 0.75rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
-    }
-
-    .filtro-label {
-        font-weight: 600;
-        color: #2c3e50;
-        margin-bottom: 0.5rem;
-        display: block;
-    }
-
-    .form-control-custom {
-        border: 2px solid #e9ecef;
-        border-radius: 0.5rem;
-        padding: 0.75rem 1rem;
-        font-size: 0.95rem;
-        transition: all 0.3s ease;
-    }
-
-    .form-control-custom:focus {
-        border-color: #4a90e2;
-        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
-    }
-
-    .btn-custom {
-        padding: 0.75rem 1.5rem;
-        font-weight: 600;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-primario {
-        background-color: #50c878;
-        border-color: #50c878;
-        color: white;
-    }
-
-    .btn-primario:hover {
-        background-color: #45b86e;
-        border-color: #45b86e;
-        color: white;
-    }
-
-    .btn-limpar {
-        background-color: #6c757d;
-        border-color: #6c757d;
-        color: white;
-    }
-
-    .btn-limpar:hover {
-        background-color: #5a6268;
-        border-color: #5a6268;
-        color: white;
-    }
-
-    .viajante-card {
-        border-radius: 0.75rem;
-        overflow: hidden;
-        transition: all 0.3s ease;
-    }
-
-    .viajante-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .viajante-header {
-        height: 200px;
-        background: #f0f0f0;
-        overflow: hidden;
-        position: relative;
-    }
-
-    .viajante-photo {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        transition: transform 0.3s ease;
-    }
-
-    .viajante-card:hover .viajante-photo {
-        transform: scale(1.05);
-    }
-
-    .photo-placeholder {
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 3rem;
-    }
-
-    .badge-status {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background-color: #50c878 !important;
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-    }
-
-    .localizacao {
-        font-size: 0.9rem;
-        color: #555;
-    }
-
-    .card-footer {
-        padding: 1rem;
-    }
-
-    @media (max-width: 768px) {
-        .hero-title {
-            font-size: 1.75rem;
-        }
-
-        .filtros-card {
-            padding: 1.5rem;
-        }
-    }
-</style>
 
 <script>
     function enviarSolicitacao(uuid) {

@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}Viajantes Conectados - Encontre Companheiros de Viagem{% endblock %}
 
@@ -70,7 +71,7 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-md-4 fade-in" style="animation-delay: 0.1s">
+                <div class="col-md-4 fade-in delay-1">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="bi bi-person-check"></i>
@@ -80,7 +81,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 fade-in" style="animation-delay: 0.2s">
+                <div class="col-md-4 fade-in delay-2">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="bi bi-pin-map"></i>
@@ -90,7 +91,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 fade-in" style="animation-delay: 0.3s">
+                <div class="col-md-4 fade-in delay-3">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="bi bi-people-fill"></i>
@@ -185,7 +186,7 @@
             </div>
 
             <div class="row g-4">
-                <div class="col-md-4 fade-in" style="animation-delay: 0.1s">
+                <div class="col-md-4 fade-in delay-1">
                     <div class="testimonial-card">
                         <div class="stars mb-3">
                             <i class="bi bi-star-fill text-warning"></i>
@@ -203,7 +204,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 fade-in" style="animation-delay: 0.2s">
+                <div class="col-md-4 fade-in delay-2">
                     <div class="testimonial-card">
                         <div class="stars mb-3">
                             <i class="bi bi-star-fill text-warning"></i>
@@ -221,7 +222,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4 fade-in" style="animation-delay: 0.3s">
+                <div class="col-md-4 fade-in delay-3">
                     <div class="testimonial-card">
                         <div class="stars mb-3">
                             <i class="bi bi-star-fill text-warning"></i>
@@ -268,256 +269,10 @@
     </section>
 </div>
 
-<style>
-    /* Hero Section */
-    .hero-section {
-        background: linear-gradient(to top, #4964dfaf 0%, #ffffff 100%);
-        margin: 0 -2rem;
-        padding: 0 2rem;
-    }
+{% endblock %}
 
-    .hero-image-container {
-        position: relative;
-        height: 500px;
-    }
-
-    .hero-illustration {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 300px;
-        height: 300px;
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        animation: float 6s ease-in-out infinite;
-    }
-
-    .floating-card {
-        position: absolute;
-        background: white;
-        padding: 1rem 1.5rem;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        animation: float 3s ease-in-out infinite;
-    }
-
-    .floating-card i {
-        font-size: 1.5rem;
-        color: var(--cor-primaria);
-    }
-
-    .floating-card span {
-        font-weight: 600;
-        color: var(--cor-texto);
-    }
-
-    .card-1 {
-        top: 10%;
-        left: 10%;
-        animation-delay: 0s;
-    }
-
-    .card-2 {
-        top: 50%;
-        right: 5%;
-        animation-delay: 1s;
-    }
-
-    .card-3 {
-        bottom: 10%;
-        left: 20%;
-        animation-delay: 2s;
-    }
-
-    /* Features Section */
-    .features-section {
-        background: white;
-    }
-
-    .feature-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: var(--sombra-suave);
-        text-align: center;
-        transition: var(--transicao-padrao);
-        height: 100%;
-    }
-
-    .feature-card:hover {
-        transform: translateY(-10px);
-        box-shadow: var(--sombra-media);
-    }
-
-    .feature-icon {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, var(--cor-primaria), #357abd);
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto 1.5rem;
-        font-size: 2rem;
-        color: white;
-    }
-
-    .feature-card h3 {
-        font-size: 1.5rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
-        color: var(--cor-texto);
-    }
-
-    .feature-card p {
-        color: var(--cor-texto-secundario);
-        margin: 0;
-    }
-
-    /* Benefits Section */
-    .benefits-section {
-        background: var(--cor-fundo);
-    }
-
-    .benefit-item {
-        display: flex;
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .benefit-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, var(--cor-secundaria), #3da55e);
-        border-radius: 15px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.5rem;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .benefit-item h4 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: var(--cor-texto);
-    }
-
-    .benefit-item p {
-        color: var(--cor-texto-secundario);
-        margin: 0;
-    }
-
-    /* Stats Container */
-    .stats-container {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 1.5rem;
-    }
-
-    .stat-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: var(--sombra-suave);
-        text-align: center;
-        transition: var(--transicao-padrao);
-    }
-
-    .stat-card:hover {
-        transform: scale(1.05);
-        box-shadow: var(--sombra-media);
-    }
-
-    .stat-number {
-        font-size: 2.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, var(--cor-primaria), var(--cor-secundaria));
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-
-    .stat-label {
-        color: var(--cor-texto-secundario);
-        font-weight: 500;
-        margin-top: 0.5rem;
-    }
-
-    /* Testimonials Section */
-    .testimonials-section {
-        background: white;
-    }
-
-    .testimonial-card {
-        background: white;
-        padding: 2rem;
-        border-radius: 20px;
-        box-shadow: var(--sombra-suave);
-        height: 100%;
-        transition: var(--transicao-padrao);
-    }
-
-    .testimonial-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--sombra-media);
-    }
-
-    .testimonial-card p {
-        font-style: italic;
-        color: var(--cor-texto);
-        margin-bottom: 1.5rem;
-    }
-
-    .testimonial-author strong {
-        color: var(--cor-texto);
-    }
-
-    /* CTA Section */
-    .cta-section {
-        background: linear-gradient(to bottom, #4965df 0%, #ffffff 100%);
-        margin: 0 -2rem;
-        padding: 0 2rem 5rem 2rem;
-    }
-
-    .cta-content {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .hero-section {
-            padding: 0 1rem;
-        }
-
-        .display-3 {
-            font-size: 2rem;
-        }
-
-        .display-5 {
-            font-size: 1.75rem;
-        }
-
-        .stats-container {
-            grid-template-columns: 1fr;
-        }
-
-        .benefit-item {
-            flex-direction: column;
-            text-align: center;
-        }
-    }
-</style>
+{% block estilos_extras %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
 {% endblock %}
 
 {% block scripts_extras %}

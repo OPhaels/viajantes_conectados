@@ -1,6 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block titulo %}Login - Viajantes Conectados{% endblock %}
+
+{% block estilos_extras %}
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
 
 {% block conteudo %}
 <div class="auth-container">
@@ -17,7 +22,7 @@
                     <!-- Formulário de Login -->
                     <form method="post" action="{% url 'usuarios:login' %}" class="needs-validation" novalidate>
                         {% csrf_token %}
-                        
+
                         <!-- Campo Email -->
                         <div class="form-group mb-4">
                             <label for="id_username" class="form-label">
@@ -27,15 +32,8 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-person"></i>
                                 </span>
-                                <input 
-                                    type="email" 
-                                    name="username" 
-                                    id="id_username"
-                                    class="form-control form-control-lg" 
-                                    placeholder="seu@email.com"
-                                    required
-                                    autofocus
-                                >
+                                <input type="email" name="username" id="id_username"
+                                    class="form-control form-control-lg" placeholder="seu@email.com" required autofocus>
                                 <div class="invalid-feedback">
                                     Por favor, insira um email válido.
                                 </div>
@@ -51,20 +49,10 @@
                                 <span class="input-group-text">
                                     <i class="bi bi-key"></i>
                                 </span>
-                                <input 
-                                    type="password" 
-                                    name="password" 
-                                    id="id_password"
-                                    class="form-control form-control-lg" 
-                                    placeholder="Digite sua senha"
-                                    required
-                                >
-                                <button 
-                                    class="btn btn-outline-secondary" 
-                                    type="button" 
-                                    id="togglePassword"
-                                    title="Mostrar/Ocultar senha"
-                                >
+                                <input type="password" name="password" id="id_password"
+                                    class="form-control form-control-lg" placeholder="Digite sua senha" required>
+                                <button class="btn btn-outline-secondary" type="button" id="togglePassword"
+                                    title="Mostrar/Ocultar senha">
                                     <i class="bi bi-eye" id="eyeIcon"></i>
                                 </button>
                                 <div class="invalid-feedback">
@@ -76,12 +64,7 @@
                         <!-- Lembrar-me e Esqueci Senha -->
                         <div class="form-group mb-4 d-flex justify-content-between align-items-center">
                             <div class="form-check">
-                                <input 
-                                    class="form-check-input" 
-                                    type="checkbox" 
-                                    name="lembrar_me" 
-                                    id="lembrar_me"
-                                >
+                                <input class="form-check-input" type="checkbox" name="lembrar_me" id="lembrar_me">
                                 <label class="form-check-label" for="lembrar_me">
                                     Lembrar-me
                                 </label>
@@ -105,7 +88,7 @@
                         <!-- Link para Cadastro -->
                         <div class="text-center">
                             <p class="mb-0">
-                                Ainda não tem conta? 
+                                Ainda não tem conta?
                                 <a href="{% url 'usuarios:cadastro' %}" class="auth-link fw-bold">
                                     Criar Conta Gratuita
                                 </a>
@@ -115,7 +98,7 @@
                 </div>
 
                 <!-- Informações Adicionais -->
-                <div class="auth-footer text-center mt-4 fade-in" style="animation-delay: 0.2s">
+                <div class="auth-footer text-center mt-4 fade-in delay-2">
                     <p class="text-white-50 mb-2">
                         <i class="bi bi-shield-check me-2"></i>
                         Seus dados estão seguros conosco
@@ -126,286 +109,12 @@
     </div>
 </div>
 
-<style>
-    /* Container de Autenticação */
-    .auth-container {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        padding: 2rem 0;
-    }
-
-    /* Card de Autenticação */
-    .auth-card {
-        background: white;
-        border-radius: 24px;
-        padding: 3rem;
-        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .auth-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: var(--cor-primaria);
-    }
-
-    /* Header do Card */
-    .auth-header {
-        margin-bottom: 2rem;
-    }
-
-    .auth-icon {
-        width: 80px;
-        height: 80px;
-        background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-escura));
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin: 0 auto;
-        animation: pulse 2s ease-in-out infinite;
-    }
-
-    .auth-icon i {
-        font-size: 2.5rem;
-        color: white;
-    }
-
-    .auth-title {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--cor-texto);
-        margin-bottom: 0.5rem;
-    }
-
-    .auth-subtitle {
-        font-size: 1.1rem;
-        color: var(--cor-texto-secundario);
-        margin: 0;
-    }
-
-    /* Formulário */
-    .form-label {
-        font-weight: 600;
-        color: var(--cor-texto);
-        margin-bottom: 0.5rem;
-        font-size: 0.95rem;
-    }
-
-    .form-control-lg {
-        padding: 0.75rem 1rem;
-        font-size: 1rem;
-        border: 2px solid #e9ecef;
-        border-radius: 12px;
-        transition: var(--transicao-padrao);
-    }
-
-    .form-control-lg:focus {
-        border-color: var(--cor-primaria);
-        box-shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.15);
-        transform: translateY(-2px);
-    }
-
-    .input-group-text {
-        background: #f8f9fa;
-        border: 2px solid #e9ecef;
-        border-right: none;
-        border-radius: 12px 0 0 12px;
-        color: var(--cor-texto-secundario);
-    }
-
-    .input-group .form-control {
-        border-left: none;
-        border-radius: 0 12px 12px 0;
-    }
-
-    .input-group:focus-within .input-group-text {
-        border-color: var(--cor-primaria);
-        color: var(--cor-primaria);
-    }
-
-    #togglePassword {
-        border: 2px solid #e9ecef;
-        border-left: none;
-        border-radius: 0 12px 12px 0;
-        background: #f8f9fa;
-        color: var(--cor-texto-secundario);
-        transition: var(--transicao-padrao);
-    }
-
-    #togglePassword:hover {
-        background: #e9ecef;
-        color: var(--cor-primaria);
-    }
-
-    /* Checkbox customizado */
-    .form-check-input {
-        width: 1.25rem;
-        height: 1.25rem;
-        border: 2px solid #dee2e6;
-        cursor: pointer;
-    }
-
-    .form-check-input:checked {
-        background-color: var(--cor-primaria);
-        border-color: var(--cor-primaria);
-    }
-
-    .form-check-label {
-        cursor: pointer;
-        user-select: none;
-        color: var(--cor-texto-secundario);
-    }
-
-    /* Links */
-    .auth-link {
-        color: var(--cor-primaria);
-        text-decoration: none;
-        font-weight: 500;
-        transition: var(--transicao-padrao);
-    }
-
-    .auth-link:hover {
-        color: var(--cor-primaria-escura);
-        text-decoration: underline;
-    }
-
-    /* Divisor */
-    .auth-divider {
-        position: relative;
-        text-align: center;
-        margin: 2rem 0;
-    }
-
-    .auth-divider::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: #e9ecef;
-    }
-
-    .auth-divider span {
-        position: relative;
-        background: white;
-        padding: 0 1rem;
-        color: var(--cor-texto-secundario);
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
-
-    /* Botões */
-    .btn-custom {
-        padding: 0.875rem 2rem;
-        border-radius: 12px;
-        font-weight: 600;
-        font-size: 1.05rem;
-        letter-spacing: 0.5px;
-        transition: var(--transicao-padrao);
-        border: none;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn-custom::before {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 0;
-        height: 0;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50%, -50%);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .btn-custom:hover::before {
-        width: 400px;
-        height: 400px;
-    }
-
-    .btn-primario {
-        background: linear-gradient(135deg, var(--cor-primaria), var(--cor-primaria-escura));
-        color: rgb(81, 124, 216);
-    }
-
-    .btn-primario:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 25px rgba(74, 144, 226, 0.4);
-        color: rgb(32, 80, 183);
-    }
-
-    /* Footer */
-    .auth-footer p {
-        font-size: 0.95rem;
-    }
-
-    /* Animações */
-    .fade-in {
-        animation: fadeIn 0.6s ease-out forwards;
-    }
-
-    @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Responsivo */
-    @media (max-width: 768px) {
-        .auth-card {
-            padding: 2rem 1.5rem;
-            border-radius: 20px;
-        }
-
-        .auth-title {
-            font-size: 1.75rem;
-        }
-
-        .auth-subtitle {
-            font-size: 1rem;
-        }
-
-        .auth-icon {
-            width: 70px;
-            height: 70px;
-        }
-
-        .auth-icon i {
-            font-size: 2rem;
-        }
-    }
-
-    @media (max-width: 576px) {
-        .auth-card {
-            padding: 1.5rem 1rem;
-        }
-
-        .auth-container {
-            padding: 1rem 0;
-        }
-    }
-</style>
-
 <script>
     // Toggle mostrar/ocultar senha
-    document.getElementById('togglePassword')?.addEventListener('click', function() {
+    document.getElementById('togglePassword')?.addEventListener('click', function () {
         const passwordInput = document.getElementById('id_password');
         const eyeIcon = document.getElementById('eyeIcon');
-        
+
         if (passwordInput.type === 'password') {
             passwordInput.type = 'text';
             eyeIcon.classList.remove('bi-eye');
@@ -418,12 +127,12 @@
     });
 
     // Validação do formulário
-    (function() {
+    (function () {
         'use strict';
         const forms = document.querySelectorAll('.needs-validation');
-        
-        Array.from(forms).forEach(function(form) {
-            form.addEventListener('submit', function(event) {
+
+        Array.from(forms).forEach(function (form) {
+            form.addEventListener('submit', function (event) {
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();

@@ -86,7 +86,10 @@ if not DEBUG and SENTRY_DSN:
         traces_sample_rate=0.1,
         send_default_pii=False,
     )
+    
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
 
 #DATABASES = {
 #    'default': {

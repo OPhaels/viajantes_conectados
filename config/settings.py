@@ -10,10 +10,13 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', cast=Csv())
 
+SENTRY_DSN = config('SENTRY_DSN', default=None)
 
-dsn=config('SENTRY_DSN', default=None),
-
-
+if SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+    )
+    
 # Aplicações
 INSTALLED_APPS = [
     'daphne',  

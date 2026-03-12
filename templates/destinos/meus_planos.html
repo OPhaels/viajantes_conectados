@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block titulo %}Meus Planos de Viagem{% endblock %}
+
+{% block conteudo %}
+<div class="meus-planos-container">
+    <!-- Hero Section -->
+    <section class="planos-hero">
+        <div class="container">
+            <div class="row">
+                <div class="col-12 text-center mb-4 fade-in">
+                    <h1 class="hero-title">
+                        <i class="bi bi-map me-3"></i>
+                        Meus Planos de Viagem
+                    </h1>
+                    <p class="hero-subtitle">
+                        Visualize, edite e acompanhe seus planos de viagem
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Conteúdo Principal -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <!-- Filtros e Ações -->
+            <div class="row justify-content-between align-items-center mb-4">
+                <div class="col-12 col-md-6">
+                    <div class="input-group input-group-lg">
+                        <span class="input-group-text bg-white border-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control border-0" placeholder="Buscar planos..."
+                            id="buscaPlanos">
+                    </div>
+                </div>
+                <div class="col-12 col-md-6 text-md-end mt-3 mt-md-0">
+                    <a href="{% url 'destinos:criar_plano' %}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-plus-circle me-2"></i>Novo Plano
+                    </a>
+                </div>
+            </div>
+
+            {% if meus_planos %}
+            <!-- Grid de Planos -->
+            <div class="row g-4" id="gridPlanos">
+                {% for plano in meus_planos %}
+                <div class="col-12 col-md-6 col-lg-4 plano-card-wrapper"
+                    data-pais="{{ plano.pais_destino.nome|lower }}">
+                    <div class="card plano-card h-100 shadow-sm border-0">
+                        <!-- Imagem do País -->
+                        <div class="plano-image-container">
+                            {% if plano.pais_destino.imagem %}
+                            <img src="{{ plano.pais_destino.imagem.url }}" alt="{{ plano.pais_destino.nome }}"
+                                class="card-img-top">
+                            {% else %}
+                            <div class="bg-gradient-placeholder">
+                                <i class="bi bi-globe"></i>
+                            </div>
+                            {% endif %}
+
+                            <!-- Badge de Status -->
+                            <div class="badge-container">
+                                {% if plano.viagem_concluida %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle me-1"></i>Concluída
+                                </span>
+                                {% elif plano.ativo %}
+                                <span class="badge bg-primary">
+                                    <i class="bi bi-calendar-event me-1"></i>Ativa
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="bi bi-pause-circle me-1"></i>Inativa
+                                </span>
+                                {% endif %}
+
+                                <!-- Privacidade -->
+                                <span class="badge badge-privacidade">
+                                    {% if plano.nivel_privacidade == 'publico' %}
+                                    <i class="bi bi-globe2 me-1"></i>Público
+                                    {% elif plano.nivel_privacidade == 'amigos' %}
+                                    <i class="bi bi-people me-1"></i>Amigos
+                                    {% else %}
+                                    <i class="bi bi-lock me-1"></i>Privado
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Conteúdo do Card -->
+                        <div class="card-body">
+                            <!-- País e Cidade -->
+                            <h5 class="card-title mb-2">
+                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                                {{ plano.pais_destino.nome }}
+                            </h5>
+
+                            {% if plano.cidade_destino %}
+                            <p class="card-subtitle text-muted mb-3">
+                                <i class="bi bi-pin-map me-1"></i>{{ plano.cidade_destino }}
+                            </p>
+                            {% endif %}
+
+                            <!-- Datas -->
+                            <div class="plano-info mb-3">
+                                <i class="bi bi-calendar-range text-primary me-2"></i>
+                                <span>
+                                    {{ plano.data_inicio|date:"d/m/Y" }}
+                                    {% if plano.data_fim %}
+                                    até {{ plano.data_fim|date:"d/m/Y" }}
+                                    {% else %}
+                                    (data flexível)
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            {% if plano.duracao_dias %}
+                            <div class="plano-info mb-3">
+                                <i class="bi bi-hourglass-split text-warning me-2"></i>
+                                <span>{{ plano.duracao_dias }} dias de viagem</span>
+                            </div>
+                            {% endif %}
+
+                            <!-- Motivo -->
+                            <div class="plano-info mb-3">
+                                <i class="bi bi-heart text-danger me-2"></i>
+                                <span>{{ plano.get_motivo_viagem_display }}</span>
+                            </div>
+
+                            <!-- Descrição (truncada) -->
+                            {% if plano.descricao %}
+                            <p class="card-text text-muted small mb-3">
+                                {{ plano.descricao|truncatewords:15 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <!-- Footer do Card -->
+                        <div class="card-footer bg-white border-top-0">
+                            <div class="d-flex gap-2 flex-wrap">
+                                <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
+                                    class="btn btn-sm btn-info flex-grow-1">
+                                    <i class="bi bi-eye me-1"></i>Ver Detalhes
+                                </a>
+                                <a href="{% url 'destinos:editar_plano' plano.uuid %}" class="btn btn-sm btn-warning">
+                                    <i class="bi bi-pencil me-1"></i>Editar
+                                </a>
+                                <button type="button" class="btn btn-sm btn-danger"
+                                    onclick="deletarPlano('{{ plano.uuid }}')">
+                                    <i class="bi bi-trash me-1"></i>Deletar
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginação (se necessário) -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Paginação" class="mt-5">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page=1">Primeira</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+                    </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% else %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                    </li>
+                    {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Próxima</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+            {% else %}
+            <!-- Estado Vazio -->
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                </div>
+                <h3 class="mb-2">Nenhum plano de viagem ainda</h3>
+                <p class="text-muted mb-4">
+                    Comece a planejar sua próxima aventura criando um novo plano
+                </p>
+                <a href="{% url 'destinos:criar_plano' %}" class="btn btn-primary btn-lg">
+                    <i class="bi bi-plus-circle me-2"></i>Criar Primeiro Plano
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="modalDeletar" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja deletar este plano de viagem?</p>
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Esta ação não pode ser desfeita.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <form method="post" action="" id="formDeletar" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger" id="confirmarDeletar">
+                        <i class="bi bi-trash me-1"></i>Deletar Definitivamente
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .meus-planos-container {
+        min-height: 100vh;
+    }
+
+    .planos-hero {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 4rem 0;
+        margin-bottom: 3rem;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .hero-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+    }
+
+    .plano-card {
+        transition: all 0.3s ease;
+        border-radius: 0.75rem;
+        overflow: hidden;
+    }
+
+    .plano-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    .plano-image-container {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+        background: #f0f0f0;
+    }
+
+    .plano-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .plano-card:hover .plano-image-container img {
+        transform: scale(1.05);
+    }
+
+    .bg-gradient-placeholder {
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 3rem;
+    }
+
+    .badge-container {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+    }
+
+    .badge-privacidade {
+        background-color: rgba(0, 0, 0, 0.6) !important;
+        margin-left: auto;
+    }
+
+    .plano-info {
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+
+    .card-footer {
+        padding: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 1.75rem;
+        }
+
+        .plano-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<script>
+    // Busca em tempo real
+    document.getElementById('buscaPlanos')?.addEventListener('keyup', function (e) {
+        const termo = e.target.value.toLowerCase();
+        const cards = document.querySelectorAll('.plano-card-wrapper');
+
+        cards.forEach(card => {
+            const pais = card.dataset.pais;
+            card.style.display = pais.includes(termo) ? '' : 'none';
+        });
+    });
+
+    // Deletar plano
+    function deletarPlano(uuid) {
+        const modal = new bootstrap.Modal(document.getElementById('modalDeletar'));
+        const form = document.getElementById('formDeletar');
+        form.action = `{% url 'destinos:deletar_plano' 'uuid-placeholder' %}`.replace('uuid-placeholder', uuid);
+        modal.show();
+    }
+</script>
+{% endblock %}

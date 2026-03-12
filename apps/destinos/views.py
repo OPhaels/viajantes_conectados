@@ -125,7 +125,7 @@ def view_criar_plano_viagem(request):
                         'formulario': form,
                         'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
                     }
-                    return render(request, 'destinos/detalhes_plano.html', context)
+                    return render(request, 'destinos/criar_plano.html', context)
         
         except Exception as e:
             logger.error(f"Erro ao criar plano de viagem: {e}", exc_info=True)
@@ -153,9 +153,11 @@ def view_criar_plano_viagem(request):
     
     return render(request, 'destinos/criar_plano.html', context)
 
+
 @login_required
 @require_http_methods(["GET"])
 def view_buscar_viajantes(request):
+    """View para buscar viajantes que estão planejando viagens (excluindo o próprio usuário)."""
     formulario = FormularioBuscaViajantes(request.GET)
 
     queryset_destinos = (
@@ -246,14 +248,97 @@ def view_buscar_viajantes(request):
 
 @login_required
 @require_http_methods(["GET"])
+def view_listar_viajantes(request):
+    """View para listar viajantes (usuários que têm perfil público), excluindo o próprio usuário."""
+    
+    # Queryset base: usuários ativos, com perfil público, exceto o próprio
+    queryset_viajantes = (
+        Usuario.objects
+        .filter(ativo=True, perfil_publico=True)
+        .exclude(uuid=request.user.uuid)
+    )
+    
+    # Filtros de busca
+    busca = request.GET.get('q', '').strip()
+    if busca:
+        queryset_viajantes = queryset_viajantes.filter(
+            Q(nome_completo__icontains=busca) |
+            Q(pais_residencia__icontains=busca) |
+            Q(cidade_residencia__icontains=busca)
+        )
+    
+    pais = request.GET.get('pais', '').strip()
+    if pais:
+        queryset_viajantes = queryset_viajantes.filter(
+            pais_residencia__icontains=pais
+        )
+    
+    cidade = request.GET.get('cidade', '').strip()
+    if cidade:
+        queryset_viajantes = queryset_viajantes.filter(
+            cidade_residencia__icontains=cidade
+        )
+    
+    # Ordenação
+    queryset_viajantes = queryset_viajantes.order_by('-data_criacao')
+    
+    # Paginação
+    paginador = Paginator(queryset_viajantes, 12)
+    viajantes_paginados = paginador.get_page(request.GET.get('page', 1))
+    
+    # Amizades
+    amigos_ids = set()
+    if request.user.is_authenticated:
+        amizades = Amizade.objects.filter(
+            Q(usuario1=request.user) | Q(usuario2=request.user),
+            ativa=True
+        )
+        for a in amizades:
+            amigos_ids.add(a.usuario2.id if a.usuario1 == request.user else a.usuario1.id)
+    
+    contexto = {
+        'viajantes': viajantes_paginados,
+        'page_obj': viajantes_paginados,
+        'amigos_ids': amigos_ids,
+        'total_viajantes': paginador.count,
+        'titulo': _('Listar Viajantes'),
+    }
+    
+    return render(request, 'destinos/buscar_viajantes.html', contexto)
+
+
+@login_required
+@require_http_methods(["GET"])
+def view_meus_planos(request):
+    """View para listar os planos de viagem do usuário autenticado."""
+    
+    planos = PlanoViagem.objects.filter(
+        usuario=request.user
+    ).select_related('pais_destino').order_by('-data_inicio')
+    
+    # Paginação
+    paginador = Paginator(planos, 12)
+    planos_paginados = paginador.get_page(request.GET.get('page', 1))
+    
+    contexto = {
+        'meus_planos': planos_paginados,
+        'page_obj': planos_paginados,
+        'titulo': _('Meus Planos de Viagem'),
+    }
+    
+    return render(request, 'destinos/meus_planos.html', contexto)
+
+
+@login_required
+@require_http_methods(["GET"])
 def view_detalhes_plano(request, uuid):
     """View para visualizar detalhes de um plano de viagem."""
     plano = get_object_or_404(PlanoViagem, uuid=uuid)
-    print(plano)
+    
     # Verificar permissão de visualização
     if not plano.pode_ser_visto_por(request.user):
         messages.error(request, _('Você não tem permissão para visualizar este plano.'))
-        return redirect('destinos:buscar')
+        return redirect('destinos:buscar_viajantes')
     
     # Verificar se são amigos
     sao_amigos = Amizade.sao_amigos(request.user, plano.usuario)
@@ -278,74 +363,56 @@ def view_detalhes_plano(request, uuid):
 
 
 @login_required
+@require_http_methods(["POST"])
+def view_deletar_plano(request, uuid):
+    """View para deletar um plano de viagem (apenas o próprio)."""
+    
+    plano = get_object_or_404(PlanoViagem, uuid=uuid)
+    
+    # Verificar se é o proprietário
+    if plano.usuario != request.user:
+        messages.error(request, _('Você não pode deletar este plano.'))
+        return redirect('destinos:meus_planos')
+    
+    try:
+        plano_nome = f"{plano.pais_destino.nome} ({plano.data_inicio.strftime('%d/%m/%Y')})"
+        plano.delete()
+        messages.success(request, f'Plano de viagem "{plano_nome}" deletado com sucesso!')
+        logger.info(f'Plano deletado por {request.user.email}: {plano_nome}')
+    except Exception as e:
+        logger.error(f"Erro ao deletar plano: {e}")
+        messages.error(request, _('Erro ao deletar o plano. Tente novamente.'))
+    
+    return redirect('destinos:meus_planos')
+
+
+@login_required
 @require_http_methods(["GET"])
 def api_paises_autocomplete(request):
     """
-    API para autocomplete de países.
+    ⚠️ API DESCONTINUADA - Use /api/paises/ com filtro 'search' em vez disso.
+    
+    Migração: GET /api/paises/?search=termo
     """
-    termo = request.GET.get('q', '').strip()
-    
-    if len(termo) < 2:
-        return JsonResponse({'resultados': []})
-    
-    try:
-        paises = Pais.objects.filter(
-            Q(nome__icontains=termo) | Q(nome_completo__icontains=termo),
-            ativo=True
-        ).values('id', 'nome', 'codigo_iso', 'latitude', 'longitude')[:10]
-        
-        return JsonResponse({
-            'resultados': list(paises)
-        })
-    
-    except Exception as erro:
-        logger.error(f'Erro na API de autocomplete: {str(erro)}')
-        return JsonResponse({'erro': 'Erro ao buscar países'}, status=500)
+    return JsonResponse({
+        'erro': 'Esta API foi descontinuada.',
+        'mensagem': 'Use o novo endpoint: GET /destinos/api/paises/?search=<termo>',
+        'novo_endpoint': '/destinos/api/paises/?search=',
+        'codigo_migracao': 'Use DjangoFilterBackend com SearchFilter'
+    }, status=410)  # 410 Gone
 
 
 @login_required
 @require_http_methods(["GET"])
 def api_estatisticas_destino(request, pais_id):
     """
-    API para obter estatísticas de um destino.
-    Retorna número de viajantes, período mais popular, etc.
-    """
-    try:
-        pais = get_object_or_404(Pais, id=pais_id)
-        
-        destinos = PlanoViagem.objects.filter(
-            pais_destino=pais,
-            ativo=True,
-            viagem_concluida=False
-        )
-        
-        total_viajantes = destinos.count()
-        
-        # Período mais popular
-        from django.db.models import Count
-        periodos = destinos.extra(
-            select={'mes': 'EXTRACT(month FROM data_inicio)'}
-        ).values('mes').annotate(total=Count('id')).order_by('-total')
-        
-        mes_popular = periodos.first()['mes'] if periodos else None
-        
-        # Motivo mais comum
-        motivos = destinos.values('motivo_viagem').annotate(
-            total=Count('id')
-        ).order_by('-total')
-        
-        motivo_popular = motivos.first()['motivo_viagem'] if motivos else None
-        
-        estatisticas = {
-            'total_viajantes': total_viajantes,
-            'mes_popular': mes_popular,
-            'motivo_popular': motivo_popular,
-            'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
-            'nome_pais': pais.nome
-        }
-        
-        return JsonResponse(estatisticas)
+    ⚠️ API DESCONTINUADA - Use ViewSets de PlanoViagem para análises.
     
-    except Exception as erro:
-        logger.error(f'Erro ao obter estatísticas: {str(erro)}')
-        return JsonResponse({'erro': 'Erro ao obter estatísticas'}, status=500)
+    Migração: GET /destinos/api/planos/?pais_destino=<id>
+    """
+    return JsonResponse({
+        'erro': 'Esta API foi descontinuada.',
+        'mensagem': 'Use o novo endpoint: GET /destinos/api/planos/?pais_destino=<id>',
+        'novo_endpoint': '/destinos/api/planos/?pais_destino=',
+        'nota_segurança': 'Dados agregados agora requerem permissões apropriadas'
+    }, status=410)  # 410 Gone

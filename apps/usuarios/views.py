@@ -208,9 +208,28 @@ def view_perfil_usuario(request, uuid=None):
     else:
         usuario = request.user
     
+    # Buscar planos de viagem
+    from apps.destinos.models import PlanoViagem
+    
+    e_proprio_perfil = usuario == request.user
+    
+    if e_proprio_perfil:
+        # Mostrar todos os planos próprios
+        planos = PlanoViagem.objects.filter(
+            usuario=usuario
+        ).order_by('-data_criacao')
+    else:
+        # Mostrar apenas planos públicos de outros usuários
+        planos = PlanoViagem.objects.filter(
+            usuario=usuario,
+            nivel_privacidade='publico'
+        ).order_by('-data_criacao')
+    
     contexto = {
         'usuario_perfil': usuario,
-        'e_proprio_perfil': usuario == request.user,
+        'e_proprio_perfil': e_proprio_perfil,
+        'planos': planos,
+        'planos_count': planos.count(),
         'titulo': usuario.get_nome_exibicao()
     }
     

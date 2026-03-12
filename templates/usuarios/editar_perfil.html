@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+{% block titulo %}{{ titulo }}{% endblock %}
+
+{% block conteudo %}
+<div class="container mt-5 mb-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <!-- Header -->
+            <div class="mb-4">
+                <h1 class="mb-2">
+                    <i class="bi bi-person-circle me-2"></i>Editar Perfil
+                </h1>
+                <p class="text-muted">Atualize suas informações pessoais</p>
+            </div>
+
+            <!-- Formulário -->
+            <form method="post" enctype="multipart/form-data" class="needs-validation">
+                {% csrf_token %}
+
+                <!-- Foto de Perfil -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-image me-2"></i>Foto de Perfil
+                        </h5>
+
+                        <div class="row align-items-center">
+                            <div class="col-12 col-md-4 text-center mb-3 mb-md-0">
+                                {% if user.foto_perfil %}
+                                <img src="{{ user.foto_perfil.url }}" alt="Foto de Perfil"
+                                    class="img-fluid rounded-circle border border-3 border-primary"
+                                    style="max-width: 150px; width: 100%; object-fit: cover; aspect-ratio: 1;">
+                                {% else %}
+                                <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border border-3 border-primary"
+                                    style="width: 150px; height: 150px; margin: 0 auto;">
+                                    <i class="bi bi-person-fill" style="font-size: 3rem; color: #6c757d;"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12 col-md-8">
+                                <div class="mb-3">
+                                    <label for="{{ formulario.foto_perfil.id_for_label }}" class="form-label">
+                                        <i class="bi bi-upload me-2"></i>Alterar Foto
+                                    </label>
+                                    <input type="file" name="foto_perfil" id="{{ formulario.foto_perfil.id_for_label }}"
+                                        class="form-control form-control-custom" accept="image/*"
+                                        onchange="previewFoto(this)">
+                                    <small class="d-block mt-2 text-muted">
+                                        <i class="bi bi-info-circle me-1"></i>
+                                        Formatos: JPG, PNG, GIF (máx. 5MB)
+                                    </small>
+                                    {% if formulario.foto_perfil.errors %}
+                                    <div class="alert alert-danger small mt-2 mb-0">
+                                        {{ formulario.foto_perfil.errors.0 }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Pessoais -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-person me-2"></i>Informações Pessoais
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="{{ formulario.nome_completo.id_for_label }}" class="form-label">
+                                Nome Completo <span class="text-danger">*</span>
+                            </label>
+                            {{ formulario.nome_completo }}
+                            {% if formulario.nome_completo.errors %}
+                            <div class="alert alert-danger small mt-2 mb-0">
+                                {{ formulario.nome_completo.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="{{ formulario.data_nascimento.id_for_label }}" class="form-label">
+                                    Data de Nascimento
+                                </label>
+                                {{ formulario.data_nascimento }}
+                                {% if formulario.data_nascimento.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    {{ formulario.data_nascimento.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="{{ formulario.telefone.id_for_label }}" class="form-label">
+                                    Telefone
+                                </label>
+                                {{ formulario.telefone }}
+                                {% if formulario.telefone.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    {{ formulario.telefone.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Localização -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-geo-alt me-2"></i>Localização
+                        </h5>
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="{{ formulario.pais_residencia.id_for_label }}" class="form-label">
+                                    País de Residência
+                                </label>
+                                {{ formulario.pais_residencia }}
+                                {% if formulario.pais_residencia.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    {{ formulario.pais_residencia.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="col-12 col-md-6 mb-3">
+                                <label for="{{ formulario.cidade_residencia.id_for_label }}" class="form-label">
+                                    Cidade de Residência
+                                </label>
+                                {{ formulario.cidade_residencia }}
+                                {% if formulario.cidade_residencia.errors %}
+                                <div class="alert alert-danger small mt-2 mb-0">
+                                    {{ formulario.cidade_residencia.errors.0 }}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biografia -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-chat-quote me-2"></i>Biografia
+                        </h5>
+
+                        <div class="mb-3">
+                            <label for="{{ formulario.biografia.id_for_label }}" class="form-label">
+                                Conte um pouco sobre você
+                            </label>
+                            {{ formulario.biografia }}
+                            <small class="d-block mt-2 text-muted">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Máximo de 500 caracteres
+                            </small>
+                            {% if formulario.biografia.errors %}
+                            <div class="alert alert-danger small mt-2 mb-0">
+                                {{ formulario.biografia.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacidade -->
+                <div class="card mb-4 border-0 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title mb-3">
+                            <i class="bi bi-shield-lock me-2"></i>Privacidade
+                        </h5>
+
+                        <div class="form-check mb-3">
+                            {{ formulario.perfil_publico }}
+                            <label class="form-check-label" for="{{ formulario.perfil_publico.id_for_label }}">
+                                <i class="bi bi-globe me-2"></i>Perfil Público
+                                <small class="d-block text-muted mt-1">Permita que outros usuários vejam seu
+                                    perfil</small>
+                            </label>
+                        </div>
+
+                        <div class="form-check mb-3">
+                            {{ formulario.mostrar_email }}
+                            <label class="form-check-label" for="{{ formulario.mostrar_email.id_for_label }}">
+                                <i class="bi bi-envelope me-2"></i>Mostrar Email
+                                <small class="d-block text-muted mt-1">Permita que amigos vejam seu email</small>
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            {{ formulario.mostrar_telefone }}
+                            <label class="form-check-label" for="{{ formulario.mostrar_telefone.id_for_label }}">
+                                <i class="bi bi-telephone me-2"></i>Mostrar Telefone
+                                <small class="d-block text-muted mt-1">Permita que amigos vejam seu telefone</small>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botões de Ação -->
+                <div class="d-grid gap-2 d-md-flex justify-content-md-between mb-4">
+                    <a href="{% url 'usuarios:perfil' %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle me-2"></i>Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle me-2"></i>Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .form-control-custom {
+        border: 2px solid #e9ecef;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .form-control-custom:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 0.2rem rgba(74, 144, 226, 0.25);
+    }
+
+    .form-check-input {
+        width: 1.25em;
+        height: 1.25em;
+        margin-top: 0.3em;
+        cursor: pointer;
+    }
+
+    .form-check-input:checked {
+        background-color: #50c878;
+        border-color: #50c878;
+    }
+
+    .card {
+        transition: all 0.3s ease;
+    }
+
+    .card:hover {
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12) !important;
+    }
+</style>
+
+<script>
+    function previewFoto(input) {
+        if (input.files && input.files[0]) {
+            // Validar tamanho
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            if (input.files[0].size > maxSize) {
+                alert('O arquivo é muito grande. Tamanho máximo: 5MB');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const preview = document.querySelector('.img-preview');
+                if (preview) {
+                    preview.src = e.target.result;
+                }
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
+{% endblock %}

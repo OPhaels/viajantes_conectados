@@ -9,8 +9,16 @@
     <meta name="description" content="Conecte-se com viajantes que compartilham o mesmo destino">
     <meta name="keywords" content="viagens, destinos, viajantes, conexões">
     <meta name="author" content="Viajantes Conectados">
+    <meta name="theme-color" content="#1a5f9e">
 
     <title>{% block titulo %}Viajantes Conectados{% endblock %}</title>
+
+    <!-- Google Fonts - Inter e Fira Code -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
 
     <!-- Bootstrap 5.3 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -21,7 +29,8 @@
     <!-- Mapbox GL -->
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
 
-    <!-- Estilos Customizados -->
+    <!-- Design System CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}" <!-- Estilos Customizados -->
     <style>
         :root {
             --cor-primaria: #4a90e2;

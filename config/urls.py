@@ -4,6 +4,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.shortcuts import render
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
 def view_home(request):
@@ -32,6 +33,10 @@ urlpatterns = [
     
     # Página inicial
     path('', view_home, name='home'),
+    
+    # Autenticação JWT
+    path('api-token-auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api-token-auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     
     # Apps
     path('usuarios/', include('apps.usuarios.urls')),

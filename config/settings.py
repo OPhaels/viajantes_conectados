@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     
     # Apps do Projeto
+    'apps.core',          # App centralizado para utils, permissions, exceptions
     'apps.usuarios',
     'apps.destinos',
     'apps.conexoes',
@@ -173,7 +174,17 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': '100/hour',
         'user': '1000/hour',
+        'login': '5/min',
+        'registro': '10/hour',
+        'email_verificacao': '3/hour',
+        'solicitacao_amizade': '10/hour',
+        'criacao_planos': '30/day',
+        'mensagens': '100/hour',
+        'busca': '100/hour',
+        'busca_autenticado': '500/hour',
     },
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 20,
 }
 
 # JWT
@@ -183,6 +194,33 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 }
+
+# CORS - Configuração de Compartilhamento de Recursos (Cross-Origin)
+CORS_ALLOWED_ORIGINS = config(
+    'CORS_ALLOWED_ORIGINS',
+    default='http://localhost:3000,http://localhost:8000,http://localhost:5173',
+    cast=Csv()
+)
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+CORS_EXPOSE_HEADERS = [
+    'access-control-allow-credentials',
+    'access-control-allow-headers',
+    'access-control-allow-methods',
+    'access-control-allow-origin',
+    'access-control-expose-headers',
+    'access-control-max-age',
+]
 
 # Email
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')

@@ -88,20 +88,20 @@ if not DEBUG and SENTRY_DSN:
     )
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-DATABASES = {
-    'default': {
-        'ENGINE': config('DB_ENGINE'),
-        'NAME': config('DB_NAME'),
-        'USER': config('DB_USER'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST'),
-        'PORT': config('DB_PORT', cast=int),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
-        'CONN_MAX_AGE': 600,
-    }
-}
+#DATABASES = {
+#    'default': {
+#        'ENGINE': config('DB_ENGINE'), # <--- O ERRO ESTÁ AQUI
+#        'NAME': config('DB_NAME'),
+#        'USER': config('DB_USER'),
+#        'PASSWORD': config('DB_PASSWORD'),
+#        'HOST': config('DB_HOST'),
+#        'PORT': config('DB_PORT', cast=int),
+#        'OPTIONS': {
+#            'sslmode': 'require',
+#        },
+#        'CONN_MAX_AGE': 600,
+#    }
+#}
 
 # Modelo de Usuário Customizado
 AUTH_USER_MODEL = 'usuarios.Usuario'

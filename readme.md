@@ -167,7 +167,6 @@ Este projeto está sob a licença MIT. Veja [LICENSE.md](LICENSE.md) para detalh
 - 📚 **Documentação:** `/docs`
 - 🐛 **Issues:** GitHub Issues
 - 💬 **Discussões:** GitHub Discussions
-- 📧 **Email:** [seu-email@exemplo.com]
 
 ---
 

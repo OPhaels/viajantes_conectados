@@ -9,10 +9,12 @@
 
 {% block conteudo %}
 <div class="container mb-5">
+
     <a href="{% url 'chat:conversas' %}" class="chat-back-btn">
         <i class="bi bi-chevron-left"></i> Voltar
     </a>
 
+    <!-- Cabeçalho da conversa -->
     <div class="chat-header">
         <div class="chat-header-info">
             <div class="chat-avatar">
@@ -24,8 +26,9 @@
             </div>
             <div>
                 <h3>{{ outro_participante.get_nome_exibicao }}</h3>
-                <p class="chat-header-status">
-                    <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i> Online
+                <p class="chat-header-status" id="statusOnline">
+                    <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                    <span id="statusTexto">Online</span>
                 </p>
             </div>
         </div>
@@ -36,57 +39,97 @@
         </div>
     </div>
 
+    <!-- Indicador de "está digitando" -->
+    <div id="digitandoIndicador" class="digitando-indicador d-none">
+        <span>{{ outro_participante.get_nome_exibicao }} está digitando</span>
+        <span class="digitando-pontos"><span>.</span><span>.</span><span>.</span></span>
+    </div>
+
+    <!-- Alerta de erros -->
+    <div id="alertaErro" class="alert alert-danger d-none" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span id="alertaErroTexto"></span>
+    </div>
+
+    <!-- Área de mensagens -->
     <div class="mensagens-container" id="mensagens-container">
         {% if conversa.mensagens.all %}
         {% for mensagem in conversa.mensagens.all %}
-        <div
-            class="mensagem {% if mensagem.remetente == request.user %}mensagem-enviada{% else %}mensagem-recebida{% endif %}">
-            <div>
-                <div class="mensagem-conteudo">
-                    {{ mensagem.conteudo }}
+        <div class="mensagem {% if mensagem.remetente == request.user %}mensagem-enviada{% else %}mensagem-recebida{% endif %}"
+            data-id="{{ mensagem.id }}">
+            <div class="mensagem-balao">
+                <div class="mensagem-conteudo">{{ mensagem.conteudo }}</div>
+
+                <!-- Ações da mensagem -->
+                <div class="mensagem-acoes">
+                    <button class="btn-acao" title="Copiar" onclick="copiarMensagem(this)">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                    {% if mensagem.remetente == request.user %}
+                    <button class="btn-acao btn-apagar" title="Apagar"
+                        onclick="apagarMensagem({{ mensagem.id }}, this)">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    {% endif %}
                 </div>
+
                 <p class="mensagem-timestamp">
-                    {% now "SHORT_DATETIME_FORMAT" as today %}
-                    {% if mensagem.data_envio|date:"Y-m-d" == today|date:"Y-m-d" %}
+                    {% if mensagem.data_envio|date:"Y-m-d" == hoje %}
                     {{ mensagem.data_envio|time:"H:i" }}
                     {% else %}
                     {{ mensagem.data_envio|date:"d/m/Y H:i" }}
+                    {% endif %}
+                    {% if mensagem.remetente == request.user %}
+                    <i class="bi bi-check2{% if mensagem.lida %}-all text-primary{% endif %} ms-1"></i>
                     {% endif %}
                 </p>
             </div>
         </div>
         {% endfor %}
         {% else %}
-        <div class="empty-messages">
+        <div class="empty-messages" id="emptyMessages">
             <i class="bi bi-chat-left"></i>
             <p>Nenhuma mensagem ainda. Envie a primeira mensagem para começar!</p>
         </div>
         {% endif %}
     </div>
 
-    <form method="post" action="{% url 'chat:enviar_mensagem' uuid_conversa=conversa.uuid %}" class="mb-3">
+    <!-- Formulário de envio -->
+    <form id="formMensagem" method="post" action="{% url 'chat:enviar_mensagem' uuid_conversa=conversa.uuid %}">
         {% csrf_token %}
         <div class="chat-form">
-            <textarea name="conteudo" rows="2" placeholder="Digite sua mensagem..." required
-                class="form-control"></textarea>
-            <button type="submit" class="btn btn-enviar">
+            <textarea id="inputMensagem" name="conteudo" rows="2" placeholder="Digite sua mensagem..." required
+                maxlength="2000" class="form-control" autocomplete="off"></textarea>
+            <button type="submit" class="btn btn-enviar" id="btnEnviar">
                 <i class="bi bi-send"></i> Enviar
             </button>
         </div>
+        <div class="d-flex justify-content-end mt-1">
+            <small class="text-muted" id="contagemCaracteres">0 / 2000</small>
+        </div>
     </form>
 
-    <div class="alert alert-info">
-        <i class="bi bi-info-circle"></i>
-        <small>As mensagens são criptografadas e visíveis apenas para você e para {{
-            outro_participante.get_nome_exibicao }}.</small>
+    <div class="alert alert-info mt-3">
+        <i class="bi bi-shield-lock"></i>
+        <small>
+            Mensagens visíveis apenas para você e {{ outro_participante.get_nome_exibicao }}.
+        </small>
+    </div>
+
+</div>
+
+<!-- Toast de confirmação de cópia -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
+    <div id="toastCopiado" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive"
+        aria-atomic="true">
+        <div class="d-flex">
+            <div class="toast-body">
+                <i class="bi bi-check2-circle me-2"></i> Mensagem copiada!
+            </div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
     </div>
 </div>
 
-<script>
-    // Auto-scroll para a última mensagem
-    const container = document.getElementById('mensagens-container');
-    if (container) {
-        container.scrollTop = container.scrollHeight;
-    }
-</script>
+<script src="{% static 'js/chat.js' %}"></script>
 {% endblock %}

@@ -39,10 +39,7 @@
                 </div>
 
                 <div class="card-body-custom">
-                    <div class="amigo-info-row">
-                        <i class="bi bi-envelope"></i>
-                        <span><strong>{{ item.amigo.email }}</strong></span>
-                    </div>
+                    <!-- Email removido por questões de privacidade -->
 
                     {% if item.amigo.telefone %}
                     <div class="amigo-info-row">
@@ -82,7 +79,8 @@
                             class="btn-action btn-chat">
                             <i class="bi bi-chat-dots"></i> Conversar
                         </a>
-                        <a href="{% url 'usuarios:perfil' uuid=item.amigo.uuid %}" class="btn-action btn-perfil">
+                        <a href="{% url 'usuarios:perfil_publico' uuid=item.amigo.uuid %}"
+                            class="btn-action btn-perfil">
                             <i class="bi bi-person"></i> Perfil
                         </a>
                         <form method="post" action="{% url 'conexoes:desfazer_amizade' uuid_amigo=item.amigo.uuid %}">
@@ -146,6 +144,73 @@
         <a href="{% url 'destinos:buscar_viajantes' %}" class="btn btn-primary">
             <i class="bi bi-search"></i> Buscar Viajantes
         </a>
+    </div>
+    {% endif %}
+    {% if todos_usuarios %}
+    <div class="mt-5">
+        <h2 class="section-title">
+            <i class="bi bi-people-fill"></i> Todos os usuários
+            <span class="badge bg-primary ms-2">{{ todos_usuarios|length }}</span>
+        </h2>
+        <div class="row g-4">
+            {% for item in todos_usuarios %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card card-amigo">
+                    <div class="card-header-gradient">
+                        <div class="user-avatar-large">
+                            {% if item.usuario.foto_perfil %}
+                            <img src="{{ item.usuario.foto_perfil.url }}" alt="{{ item.usuario.get_nome_exibicao }}">
+                            {% else %}
+                            {{ item.usuario.get_nome_exibicao|first|upper }}
+                            {% endif %}
+                        </div>
+                        <h5>{{ item.usuario.get_nome_exibicao }}</h5>
+                    </div>
+
+                    <div class="card-body-custom">
+                        {% if item.usuario.pais_residencia or item.usuario.cidade_residencia %}
+                        <div class="amigo-info-row">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>{{ item.usuario.cidade_residencia }}
+                                {% if item.usuario.cidade_residencia and item.usuario.pais_residencia %},
+                                {% endif %}{{ item.usuario.pais_residencia }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-actions">
+                        <a href="{% url 'usuarios:perfil_publico' uuid=item.usuario.uuid %}"
+                            class="btn-action btn-perfil">
+                            <i class="bi bi-person"></i> Perfil
+                        </a>
+
+                        {% if item.status == 'amigo' %}
+                        <a href="{% url 'chat:iniciar_conversa' uuid_usuario=item.usuario.uuid %}"
+                            class="btn-action btn-chat">
+                            <i class="bi bi-chat-dots"></i> Conversar
+                        </a>
+                        <form method="post" action="{% url 'conexoes:desfazer_amizade' uuid_amigo=item.usuario.uuid %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-desfazer" title="Remover amigo"
+                                onclick="return confirm('Tem certeza que deseja remover {{ item.usuario.get_nome_exibicao }} da sua lista de amigos?')">
+                                <i class="bi bi-x"></i> Remover
+                            </button>
+                        </form>
+                        {% elif item.status == 'pendente' %}
+                        <div class="badge bg-warning text-dark">Solicitação pendente</div>
+                        {% else %}
+                        <form method="post" action="{% url 'conexoes:enviar_solicitacao' item.usuario.uuid %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-adicionar">
+                                <i class="bi bi-person-plus"></i> Adicionar
+                            </button>
+                        </form>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </div>
     {% endif %}
 </div>

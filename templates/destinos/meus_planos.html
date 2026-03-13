@@ -268,7 +268,7 @@
     function deletarPlano(uuid) {
         const modal = new bootstrap.Modal(document.getElementById('modalDeletar'));
         const form = document.getElementById('formDeletar');
-        form.action = `{% url 'destinos:deletar_plano' 'uuid-placeholder' %}`.replace('uuid-placeholder', uuid);
+        form.action = `{% url 'destinos:deletar_plano' '00000000-0000-0000-0000-000000000000' %}`.replace('00000000-0000-0000-0000-000000000000', uuid);
         modal.show();
     }
 </script>

@@ -132,10 +132,29 @@
                             </a>
                             {% else %}
                             <!-- Botões para outro usuário -->
+                            {% if sao_amigos %}
+                            <!-- Já são amigos -->
+                            <div class="alert alert-success py-2 mb-2">
+                                <i class="bi bi-check-circle-fill me-2"></i>
+                                <small>Vocês são amigos!</small>
+                            </div>
+                            <a href="{% url 'chat:iniciar_conversa' uuid_usuario=usuario_perfil.uuid %}"
+                                class="btn btn-success btn-sm w-100 mb-2">
+                                <i class="bi bi-chat-dots me-2"></i>Conversar
+                            </a>
+                            {% elif solicitacao_pendente %}
+                            <!-- Solicitação pendente -->
+                            <div class="alert alert-warning py-2 mb-2">
+                                <i class="bi bi-clock me-2"></i>
+                                <small>Solicitação pendente</small>
+                            </div>
+                            {% else %}
+                            <!-- Não são amigos, pode enviar solicitação -->
                             <button class="btn btn-primary btn-sm w-100 mb-2"
                                 onclick="enviarSolicitacao('{{ usuario_perfil.uuid }}')">
                                 <i class="bi bi-person-plus me-2"></i>Adicionar Amigo
                             </button>
+                            {% endif %}
                             <a href="{% url 'destinos:buscar_viajantes' %}"
                                 class="btn btn-outline-primary btn-sm w-100">
                                 <i class="bi bi-people me-2"></i>Ver Mais Viajantes

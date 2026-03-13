@@ -6,6 +6,8 @@
    HOME PAGE STYLES
    ======================================== */
 
+
+
 .hero-section {
     background: linear-gradient(to top, #4964dfaf 0%, #ffffff 100%);
     margin: 0 -2rem;
@@ -1422,4 +1424,611 @@
     .plano-mini-header {
         height: 120px;
     }
+}
+
+/* Criar_plano */
+
+/* ================================================================
+   pages.css — Viajantes Conectados
+   Estilos para criar/editar plano de viagem
+   ================================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+/* ── Variáveis ─────────────────────────────────────────────── */
+:root {
+    --primary: #1a3a5c;
+    --primary-light: #2a5298;
+    --accent: #5c4ae8;
+    --accent-light: #fce8d8;
+    --success: #2d9e6b;
+    --surface: #ffffff;
+    --surface-alt: #f7f5f2;
+    --border: #e2ddd8;
+    --text-main: #1a1a1a;
+    --text-muted: #7a7570;
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, .06);
+    --shadow-md: 0 4px 20px rgba(0, 0, 0, .09);
+    --shadow-lg: 0 12px 40px rgba(0, 0, 0, .13);
+    --radius: 14px;
+    --radius-sm: 8px;
+    --transition: .2s cubic-bezier(.4, 0, .2, 1);
+}
+
+/* ── Wrapper geral ─────────────────────────────────────────── */
+.container.mt-4 {
+    max-width: 1100px;
+    padding-bottom: 3rem;
+}
+
+/* ── Seção do formulário ────────────────────────────────────── */
+.secao-form {
+    background: var(--surface);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 2.5rem 2.75rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Faixa decorativa no topo */
+.secao-form::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 60%, var(--accent-light) 100%);
+}
+
+/* ── Título do formulário ───────────────────────────────────── */
+.form-titulo {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+}
+
+.form-titulo i {
+    color: var(--accent);
+    font-size: 1.5rem;
+}
+
+/* ── Linha de busca do mapa ─────────────────────────────────── */
+.input-map {
+    display: flex;
+    gap: .5rem;
+    margin-bottom: .75rem;
+}
+
+.input-map .form-control {
+    flex: 1;
+    border-radius: var(--radius-sm) !important;
+    border: 1.5px solid var(--border);
+    font-size: .9rem;
+    padding: .55rem .85rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.input-map .form-control:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(42, 82, 152, .12);
+    outline: none;
+}
+
+.input-map .btn {
+    border-radius: var(--radius-sm) !important;
+    padding: .55rem .9rem;
+    font-size: .85rem;
+    font-weight: 600;
+    letter-spacing: .02em;
+    white-space: nowrap;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.input-map .btn-primary {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.input-map .btn-primary:hover {
+    background: var(--primary-light);
+    border-color: var(--primary-light);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(26, 58, 92, .25);
+}
+
+.input-map .btn-outline-danger {
+    border-color: #e5b4b4;
+    color: #b94a4a;
+}
+
+.input-map .btn-outline-danger:hover {
+    background: #fff0f0;
+    border-color: #c0392b;
+    color: #c0392b;
+    transform: translateY(-1px);
+}
+
+/* ── Mapa Mapbox ────────────────────────────────────────────── */
+#mapa {
+    width: 100%;
+    height: 340px;
+    border-radius: var(--radius);
+    border: 1.5px solid var(--border);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    margin-bottom: .65rem;
+    transition: box-shadow var(--transition);
+}
+
+#mapa:hover {
+    box-shadow: var(--shadow-lg);
+}
+
+/* ── Texto de ajuda abaixo do mapa ──────────────────────────── */
+.small-muted,
+small.small-muted {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .78rem;
+    color: var(--text-muted);
+    margin-top: .4rem;
+}
+
+.small-muted i {
+    font-size: .8rem;
+    color: var(--primary-light);
+}
+
+/* ── Coluna de campos ────────────────────────────────────────── */
+.col-lg-6 .alert-info {
+    background: linear-gradient(135deg, #eef4ff 0%, #e8f0fe 100%);
+    border: 1px solid #c3d4f7;
+    border-radius: var(--radius-sm);
+    font-size: .85rem;
+    color: var(--primary);
+}
+
+.col-lg-6 hr {
+    border-color: var(--border);
+    opacity: 1;
+}
+
+/* ── Labels ─────────────────────────────────────────────────── */
+.form-label {
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: .35rem;
+    display: flex;
+    align-items: center;
+    gap: .45rem;
+}
+
+/* ── Badge "Auto" ───────────────────────────────────────────── */
+.badge-auto {
+    font-size: .65rem;
+    font-weight: 600;
+    padding: .2em .5em;
+    border-radius: 4px;
+    letter-spacing: .03em;
+    vertical-align: middle;
+}
+
+/* ── Campos do formulário ────────────────────────────────────── */
+.form-control,
+.form-select {
+    border-radius: var(--radius-sm) !important;
+    border: 1.5px solid var(--border);
+    font-size: .9rem;
+    padding: .6rem .85rem;
+    background: var(--surface);
+    color: var(--text-main);
+    transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(42, 82, 152, .12);
+    outline: none;
+    background: #fafcff;
+}
+
+.form-control.is-valid {
+    border-color: var(--success);
+    background-image: none;
+    box-shadow: 0 0 0 3px rgba(45, 158, 107, .1);
+}
+
+.form-control.is-invalid {
+    border-color: #e74c3c;
+    box-shadow: 0 0 0 3px rgba(231, 76, 60, .1);
+}
+
+/* Campo somente leitura (país auto) */
+.campo-readonly {
+    background: var(--surface-alt) !important;
+    color: var(--text-muted);
+    cursor: default;
+    font-style: italic;
+}
+
+.campo-readonly.is-valid {
+    background: #f0faf5 !important;
+    color: var(--success);
+    font-style: normal;
+    font-weight: 500;
+}
+
+/* Textarea */
+textarea.form-control {
+    resize: vertical;
+    min-height: 90px;
+}
+
+/* Checkbox / Switch */
+.form-check-input:checked {
+    background-color: var(--primary);
+    border-color: var(--primary);
+}
+
+.form-check-label {
+    font-size: .875rem;
+    color: var(--text-main);
+}
+
+/* ── Texto de ajuda dos campos ──────────────────────────────── */
+.form-text,
+.text-muted.small,
+small.text-muted {
+    font-size: .75rem;
+    color: var(--text-muted);
+    margin-top: .3rem;
+}
+
+/* ── Mensagens de erro ──────────────────────────────────────── */
+.text-danger.small {
+    font-size: .78rem;
+    margin-top: .25rem;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+/* ── Botão de submit ─────────────────────────────────────────── */
+.btn-primary.p-3 {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+    border: none;
+    border-radius: var(--radius-sm) !important;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: .03em;
+    padding: .85rem 1.5rem !important;
+    box-shadow: 0 4px 15px rgba(26, 58, 92, .3);
+    transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary.p-3::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, .1) 100%);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.btn-primary.p-3:hover {
+    background: linear-gradient(135deg, var(--primary-light) 0%, #3a6bc9 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(26, 58, 92, .35);
+}
+
+.btn-primary.p-3:hover::after {
+    opacity: 1;
+}
+
+.btn-primary.p-3:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(26, 58, 92, .25);
+}
+
+/* ── Animação de entrada ────────────────────────────────────── */
+@keyframes fadeSlideUp {
+    from {
+        opacity: 0;
+        transform: translateY(18px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.secao-form {
+    animation: fadeSlideUp .45s ease both;
+}
+
+.col-lg-6:nth-child(2) {
+    animation: fadeSlideUp .55s .08s ease both;
+}
+
+/* ── Responsivo ─────────────────────────────────────────────── */
+@media (max-width: 991px) {
+    .secao-form {
+        padding: 1.75rem 1.5rem;
+    }
+
+    #mapa {
+        height: 260px;
+    }
+
+    .form-titulo {
+        font-size: 1.4rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .secao-form {
+        padding: 1.25rem 1rem;
+        border-radius: var(--radius-sm);
+    }
+
+    .input-map {
+        flex-wrap: wrap;
+    }
+
+    .input-map .form-control {
+        width: 100%;
+    }
+
+    #mapa {
+        height: 220px;
+    }
+}
+
+/* ================================================================
+   Estilos para meus_planos.html
+   ================================================================ */
+
+/* Hero */
+.planos-hero {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 60%, #3a6bc9 100%);
+    padding: 3.5rem 0 3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.planos-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 40px;
+    background: var(--surface-alt);
+    clip-path: ellipse(55% 100% at 50% 100%);
+}
+
+.hero-title {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 2.25rem;
+    font-weight: 700;
+    color: #fff;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, .2);
+}
+
+.hero-subtitle {
+    color: rgba(255, 255, 255, .8);
+    font-size: 1rem;
+    margin-top: .5rem;
+}
+
+/* Cards de plano */
+.plano-card {
+    border-radius: var(--radius) !important;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.plano-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg) !important;
+}
+
+.plano-image-container {
+    position: relative;
+    height: 160px;
+    overflow: hidden;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: linear-gradient(135deg, #1a3a5c, #2a5298);
+}
+
+.plano-image-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform .4s ease;
+}
+
+.plano-card:hover .plano-image-container img {
+    transform: scale(1.05);
+}
+
+.bg-gradient-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+}
+
+.bg-gradient-placeholder i {
+    font-size: 3rem;
+    color: rgba(255, 255, 255, .3);
+}
+
+.badge-container {
+    position: absolute;
+    top: .75rem;
+    left: .75rem;
+    display: flex;
+    flex-direction: column;
+    gap: .35rem;
+}
+
+.badge-container .badge {
+    font-size: .7rem;
+    font-weight: 600;
+    padding: .3em .65em;
+    border-radius: 6px;
+    backdrop-filter: blur(4px);
+    width: fit-content;
+}
+
+.badge-privacidade {
+    background: rgba(0, 0, 0, .45) !important;
+    color: #fff !important;
+}
+
+.card-body {
+    padding: 1.15rem 1.25rem .75rem;
+}
+
+.card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.05rem;
+    color: var(--primary);
+}
+
+.card-subtitle {
+    font-size: .82rem;
+}
+
+.plano-info {
+    display: flex;
+    align-items: center;
+    font-size: .83rem;
+    color: var(--text-main);
+    gap: .1rem;
+}
+
+.plano-info i {
+    flex-shrink: 0;
+    font-size: .85rem;
+}
+
+.card-footer {
+    padding: .9rem 1.25rem 1.1rem;
+}
+
+.card-footer .btn-sm {
+    font-size: .78rem;
+    font-weight: 600;
+    border-radius: var(--radius-sm) !important;
+    padding: .35rem .7rem;
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.card-footer .btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, .15);
+}
+
+/* Busca */
+#buscaPlanos {
+    border-radius: var(--radius-sm) !important;
+    border: 1.5px solid var(--border);
+    font-size: .9rem;
+    padding: .65rem .9rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+#buscaPlanos:focus {
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(42, 82, 152, .12);
+    outline: none;
+}
+
+.input-group-text {
+    border-radius: var(--radius-sm) 0 0 var(--radius-sm) !important;
+}
+
+/* Estado vazio */
+.text-center.py-5 i.bi-inbox {
+    color: #c8c0b8 !important;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, .08));
+}
+
+/* Paginação */
+.pagination .page-link {
+    border-radius: var(--radius-sm) !important;
+    margin: 0 .2rem;
+    color: var(--primary);
+    border-color: var(--border);
+    font-size: .85rem;
+    font-weight: 500;
+    transition: background var(--transition), color var(--transition);
+}
+
+.pagination .page-item.active .page-link {
+    background: var(--primary);
+    border-color: var(--primary);
+}
+
+.pagination .page-link:hover {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent-light);
+}
+
+/* Animação fade-in para os cards */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.plano-card-wrapper {
+    animation: fadeIn .4s ease both;
+}
+
+.plano-card-wrapper:nth-child(1) {
+    animation-delay: .05s;
+}
+
+.plano-card-wrapper:nth-child(2) {
+    animation-delay: .10s;
+}
+
+.plano-card-wrapper:nth-child(3) {
+    animation-delay: .15s;
+}
+
+.plano-card-wrapper:nth-child(4) {
+    animation-delay: .20s;
+}
+
+.plano-card-wrapper:nth-child(5) {
+    animation-delay: .25s;
+}
+
+.plano-card-wrapper:nth-child(6) {
+    animation-delay: .30s;
 }

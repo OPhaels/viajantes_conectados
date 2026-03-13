@@ -186,6 +186,43 @@ def obter_dados_publicos_usuario(usuario):
     }
 
 
+from django.core.exceptions import ValidationError
+import re
+
+
+def validar_senha_forte(password):
+    """
+    Valida se a senha atende aos critérios de segurança.
+    
+    Critérios:
+    - Mínimo 8 caracteres
+    - Pelo menos 1 letra maiúscula
+    - Pelo menos 1 letra minúscula
+    - Pelo menos 1 número
+    - Pelo menos 1 caractere especial (!@#$%^&*)
+    
+    Args:
+        password: Senha a validar
+        
+    Raises:
+        ValidationError: Se a senha não atender aos critérios
+    """
+    if len(password) < 8:
+        raise ValidationError('A senha deve ter pelo menos 8 caracteres.')
+    
+    if not re.search(r'[A-Z]', password):
+        raise ValidationError('A senha deve conter pelo menos uma letra maiúscula.')
+    
+    if not re.search(r'[a-z]', password):
+        raise ValidationError('A senha deve conter pelo menos uma letra minúscula.')
+    
+    if not re.search(r'\d', password):
+        raise ValidationError('A senha deve conter pelo menos um número.')
+    
+    if not re.search(r'[!@#$%^&*]', password):
+        raise ValidationError('A senha deve conter pelo menos um caractere especial (!@#$%^&*).')
+
+
 @transaction.atomic
 def desativar_usuario(usuario, motivo=''):
     """

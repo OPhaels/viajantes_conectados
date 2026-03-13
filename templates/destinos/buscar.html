@@ -26,8 +26,9 @@
                     <div class="filtros-card fade-in delay-1">
                         <form method="get" action="{% url 'destinos:buscar' %}" id="formBusca">
                             <div class="row g-3 align-items-end">
+
                                 <!-- País -->
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-sm-6 col-md-4">
                                     <label class="filtro-label">
                                         <i class="bi bi-geo-alt-fill me-2"></i>País de Destino
                                     </label>
@@ -36,7 +37,7 @@
                                 </div>
 
                                 <!-- Cidade -->
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-sm-6 col-md-4">
                                     <label class="filtro-label">
                                         <i class="bi bi-pin-map me-2"></i>Cidade
                                     </label>
@@ -45,7 +46,7 @@
                                 </div>
 
                                 <!-- Data -->
-                                <div class="col-12 col-md-4">
+                                <div class="col-12 col-sm-6 col-md-4">
                                     <label class="filtro-label">
                                         <i class="bi bi-calendar-check me-2"></i>Data de Início
                                     </label>
@@ -64,6 +65,7 @@
                                         </a>
                                     </div>
                                 </div>
+
                             </div>
                         </form>
                     </div>
@@ -75,6 +77,7 @@
     <!-- Resultados -->
     <section class="py-5 bg-light">
         <div class="container">
+
             <!-- Header dos Resultados -->
             <div class="resultados-header mb-4">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
@@ -103,9 +106,11 @@
 
             <!-- Grid de Viajantes -->
             <div class="row g-4" id="viagensGrid">
+
                 {% for plano in destinos %}
-                <div class="col-12 col-md-6 col-lg-4 viagem-item">
+                <div class="col-12 col-md-6 col-xl-4 viagem-item">
                     <div class="card viajante-card h-100" data-pais="{{ plano.pais_destino.id|default:'' }}">
+
                         <!-- Imagem do Destino -->
                         <div class="card-img-wrapper position-relative">
                             {% if plano.pais_destino %}
@@ -117,22 +122,20 @@
                             {% endif %}
                             <div class="img-overlay"></div>
 
-                            <!-- Badge do País -->
+                            <!-- Badge da Bandeira -->
                             <span class="country-badge">
-                                <span class="country-flag">
-                                    {% if plano.pais_destino.codigo_iso %}
-                                    <img src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower }}.png"
-                                        alt="Bandeira de {{ plano.pais_destino.nome }}"
-                                        class="rounded-pill border border-white"
-                                        style="object-fit: cover; height: 50px; width: 50px;"
-                                        onerror="this.style.display='none'">
-                                    {% else %}
-                                    <div class="bg-white rounded d-flex align-items-center justify-content-center"
-                                        style="width: 60px; height: 40px;">
-                                        <i class="bi bi-flag text-primary fs-4"></i>
-                                    </div>
-                                    {% endif %}
-                                </span>
+                                {% if plano.pais_destino.codigo_iso %}
+                                <img src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower }}.png"
+                                    alt="Bandeira de {{ plano.pais_destino.nome }}"
+                                    class="rounded-pill border border-white"
+                                    style="object-fit: cover; height: 50px; width: 50px;"
+                                    onerror="this.style.display='none'">
+                                {% else %}
+                                <div class="bg-white rounded d-flex align-items-center justify-content-center"
+                                    style="width: 60px; height: 40px;">
+                                    <i class="bi bi-flag text-primary fs-4"></i>
+                                </div>
+                                {% endif %}
                             </span>
 
                             <!-- Nome do Destino -->
@@ -149,55 +152,52 @@
                                 {% endif %}
                             </div>
                         </div>
+                        <!-- /card-img-wrapper -->
 
                         <!-- Conteúdo do Card -->
-                        <div class="card-body d-flex flex-column">
-                            <!-- Informações do Viajante -->
-                            <div class="mb-3">
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="avatar-circle me-2">
-                                        {{ plano.usuario.get_nome_exibicao|first|upper }}
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0">{{ plano.usuario.get_nome_exibicao|title }}</h6>
-                                        <small class="text-muted">
-                                            <i class="bi bi-geo-alt"></i>
-                                            {% if plano.usuario.cidade %}
-                                            {{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais
-                                            }}{% endif %}
-                                            {% elif plano.usuario.pais %}
-                                            {{ plano.usuario.pais }}
-                                            {% else %}
-                                            Brasil
-                                            {% endif %}
-                                        </small>
-                                    </div>
+                        <div class="card-body d-flex flex-column gap-3">
+
+                            <!-- Viajante -->
+                            <div class="d-flex align-items-center">
+                                <div class="avatar-circle me-2">
+                                    {{ plano.usuario.get_nome_exibicao|first|upper }}
+                                </div>
+                                <div>
+                                    <h6 class="mb-0">{{ plano.usuario.get_nome_exibicao|title }}</h6>
+                                    <small class="text-muted">
+                                        <i class="bi bi-geo-alt"></i>
+                                        {% if plano.usuario.cidade %}
+                                        {{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais
+                                        }}{% endif %}
+                                        {% elif plano.usuario.pais %}
+                                        {{ plano.usuario.pais }}
+                                        {% else %}
+                                        Brasil
+                                        {% endif %}
+                                    </small>
                                 </div>
                             </div>
 
                             <!-- Informações da Viagem -->
-                            <div class="viagem-info mb-3">
+                            <div class="viagem-info">
                                 <div class="info-item">
                                     <i class="bi bi-calendar-event text-primary"></i>
                                     <div>
                                         <small class="text-muted d-block">Período</small>
                                         <span class="fw-medium">
                                             {{ plano.data_inicio|date:"d/m/Y" }}
-                                            {% if plano.data_fim %}
-                                            - {{ plano.data_fim|date:"d/m/Y" }}
-                                            {% endif %}
+                                            {% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}
                                         </span>
                                     </div>
                                 </div>
-
                                 <div class="info-item">
                                     <i class="bi bi-hourglass-split text-primary"></i>
                                     <div>
                                         <small class="text-muted d-block">Duração</small>
                                         <span class="fw-medium">
                                             {% if plano.duracao_dias %}
-                                            {{ plano.duracao_dias }}
-                                            {% if plano.duracao_dias == 1 %}dia{% else %}dias{% endif %}
+                                            {{ plano.duracao_dias }} {% if plano.duracao_dias == 1 %}dia{% else %}dias
+                                            {% endif %}
                                             {% else %}
                                             <span class="text-warning">Indefinida</span>
                                             {% endif %}
@@ -208,51 +208,64 @@
 
                             <!-- Descrição -->
                             {% if plano.descricao %}
-                            <p class="card-text text-muted small mb-3">
+                            <p class="card-text text-muted small mb-0">
                                 {{ plano.descricao|truncatewords:20 }}
                             </p>
                             {% endif %}
 
                             <!-- Ações -->
-                            <div class="mt-auto">
-                                <div class="d-grid gap-2">
-                                    <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
-                                        class="btn btn-primary btn-sm btn-ver-detalhes p-2">
-                                        <i class="bi bi-eye me-1"></i> Ver Detalhes
-                                    </a>
+                            <div class="mt-auto d-grid gap-2">
 
-                                    {% if plano.usuario.id not in amigos_ids %}
-                                    <button class="btn btn-outline-primary btn-sm btn-conectar p-2">
-                                        <i class="bi bi-person-plus me-1"></i> Conectar
+                                <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
+                                    class="btn btn-primary btn-sm btn-ver-detalhes p-2">
+                                    <i class="bi bi-eye me-1"></i> Ver Detalhes
+                                </a>
+
+                                {% if plano.usuario.uuid in amigos_uuids %}
+                                <button class="btn btn-success btn-sm w-100" disabled>
+                                    <i class="bi bi-check-all"></i> Já Conectados
+                                </button>
+                                {% elif plano.usuario == request.user %}
+                                <button class="btn btn-secondary btn-sm w-100" disabled>
+                                    <i class="bi bi-person"></i> Você
+                                </button>
+                                {% else %}
+                                <form action="{% url 'conexoes:enviar_solicitacao' plano.usuario.uuid %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                        <i class="bi bi-person-plus"></i> Conectar
                                     </button>
-                                    {% else %}
-                                    <button class="btn btn-success btn-sm" disabled>
-                                        <i class="bi bi-check-circle me-1"></i> Já Conectado
-                                    </button>
+                                </form>
+                                {% endif %}
+
+                                <!-- Status Badge -->
+                                {% if plano.data_inicio %}
+                                {% with dias=plano.data_inicio|timeuntil %}
+                                <div class="status-badge text-center">
+                                    {% if "day" in dias or "hour" in dias %}
+                                    <span class="badge bg-danger w-100">Viagem em breve</span>
+                                    {% elif "week" in dias %}
+                                    <span class="badge bg-warning w-100">Próxima viagem</span>
                                     {% endif %}
                                 </div>
-                            </div>
-                        </div>
+                                {% endwith %}
+                                {% endif %}
 
-                        <!-- Status Badge -->
-                        <div class="status-badge">
-                            {% if plano.data_inicio %}
-                            {% with dias=plano.data_inicio|timeuntil %}
-                            {% if "day" in dias or "hour" in dias %}
-                            <span class="badge bg-danger">Viagem em breve</span>
-                            {% elif "week" in dias %}
-                            <span class="badge bg-warning">Próxima viagem</span>
-                            {% endif %}
-                            {% endwith %}
-                            {% endif %}
+                            </div>
+                            <!-- /ações -->
+
                         </div>
+                        <!-- /card-body -->
+
                     </div>
+                    <!-- /viajante-card -->
                 </div>
+                <!-- /col viagem-item -->
 
                 {% empty %}
                 <div class="col-12">
-                    <div class="empty-state">
-                        <i class="bi bi-search display-1 text-muted mb-3"></i>
+                    <div class="empty-state text-center py-5">
+                        <i class="bi bi-search display-1 text-muted mb-3 d-block"></i>
                         <h4>Nenhum viajante encontrado</h4>
                         <p class="text-muted mb-4">
                             Tente ajustar os filtros de busca ou seja o primeiro a criar um plano para este destino!
@@ -263,12 +276,15 @@
                     </div>
                 </div>
                 {% endfor %}
+
             </div>
+            <!-- /viagensGrid -->
 
             <!-- Paginação -->
             {% if destinos.has_other_pages %}
-            <nav class="mt-5">
+            <nav class="mt-5" aria-label="Paginação dos resultados">
                 <ul class="pagination justify-content-center">
+
                     {% if destinos.has_previous %}
                     <li class="page-item">
                         <a class="page-link"
@@ -298,15 +314,99 @@
                             </a>
                         </li>
                         {% endif %}
+
                 </ul>
             </nav>
             {% endif %}
+            <!-- /paginação -->
+
         </div>
+        <!-- /container -->
     </section>
 
 </div>
+<!-- /buscar-container -->
 {% endblock %}
 
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+{% endblock %}
+
+{% block scripts_extras %}
+<script>
+    // ── Toggle Grid / List ──────────────────────────────────────────────────
+    const btnGrid = document.getElementById('viewGrid');
+    const btnList = document.getElementById('viewList');
+    const grid = document.getElementById('viagensGrid');
+
+    btnGrid.addEventListener('click', () => {
+        // Restaura layout em grade (3 colunas)
+        grid.querySelectorAll('.viagem-item').forEach(item => {
+            item.className = 'col-12 col-md-6 col-xl-4 viagem-item';
+        });
+
+        grid.querySelectorAll('.viajante-card').forEach(card => {
+            card.classList.remove('viajante-card--list');
+        });
+
+        btnGrid.classList.add('active');
+        btnList.classList.remove('active');
+    });
+
+    btnList.addEventListener('click', () => {
+        // Muda para layout em lista (coluna única)
+        grid.querySelectorAll('.viagem-item').forEach(item => {
+            item.className = 'col-12 viagem-item';
+        });
+
+        grid.querySelectorAll('.viajante-card').forEach(card => {
+            card.classList.add('viajante-card--list');
+        });
+
+        btnList.classList.add('active');
+        btnGrid.classList.remove('active');
+    });
+
+    // ── Limpar Filtros ──────────────────────────────────────────────────────
+    // Garante que o link "Limpar Filtros" recarrega sem parâmetros
+    document.querySelector('.btn-limpar')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        window.location.href = e.currentTarget.href;
+    });
+</script>
+
+<style>
+    /* Layout de lista para os cards */
+    #viagensGrid .viajante-card--list {
+        flex-direction: row;
+    }
+
+    #viagensGrid .viajante-card--list .card-img-wrapper {
+        width: 220px;
+        min-width: 220px;
+        flex-shrink: 0;
+    }
+
+    #viagensGrid .viajante-card--list .card-img-wrapper img {
+        height: 100%;
+        object-fit: cover;
+    }
+
+    #viagensGrid .viajante-card--list .card-body {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    @media (max-width: 576px) {
+        #viagensGrid .viajante-card--list {
+            flex-direction: column;
+        }
+
+        #viagensGrid .viajante-card--list .card-img-wrapper {
+            width: 100%;
+        }
+    }
+</style>
 {% endblock %}

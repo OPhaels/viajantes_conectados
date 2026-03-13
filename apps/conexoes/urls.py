@@ -11,10 +11,9 @@ urlpatterns = [
         name='solicitacoes'
     ),
     path(
-        'enviar-solicitacao/<uuid:uuid_usuario>/',
-        views.view_enviar_solicitacao_amizade,
-        name='enviar_solicitacao'
-    ),
+        'enviar-solicitacao/<uuid:uuid_destinatario>/',
+          views.enviar_solicitacao, 
+          name='enviar_solicitacao'),
     path(
         'responder-solicitacao/<uuid:uuid_solicitacao>/<str:acao>/',
         views.view_responder_solicitacao,

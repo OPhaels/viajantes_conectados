@@ -8,6 +8,7 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_protect
 from django.http import JsonResponse
 from django.db import transaction
+from django.db.models import Q
 from django.core.mail import send_mail
 from django.conf import settings
 import logging
@@ -213,6 +214,20 @@ def view_perfil_usuario(request, uuid=None):
     
     e_proprio_perfil = usuario == request.user
     
+    # Verificar se são amigos (para mostrar/esconder botões)
+    from apps.conexoes.models import Amizade
+    sao_amigos = Amizade.sao_amigos(request.user, usuario) if not e_proprio_perfil else False
+    
+    # Verificar se há solicitação pendente
+    from apps.conexoes.models import SolicitacaoAmizade
+    solicitacao_pendente = False
+    if not e_proprio_perfil and not sao_amigos:
+        solicitacao_pendente = SolicitacaoAmizade.objects.filter(
+            Q(remetente=request.user, destinatario=usuario) |
+            Q(remetente=usuario, destinatario=request.user),
+            status='pendente'
+        ).exists()
+    
     if e_proprio_perfil:
         # Mostrar todos os planos próprios
         planos = PlanoViagem.objects.filter(
@@ -228,6 +243,8 @@ def view_perfil_usuario(request, uuid=None):
     contexto = {
         'usuario_perfil': usuario,
         'e_proprio_perfil': e_proprio_perfil,
+        'sao_amigos': sao_amigos,
+        'solicitacao_pendente': solicitacao_pendente,
         'planos': planos,
         'planos_count': planos.count(),
         'titulo': usuario.get_nome_exibicao()

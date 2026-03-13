@@ -3,6 +3,10 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from apps.usuarios.models import Usuario
 import uuid
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 
 class SolicitacaoAmizade(models.Model):
@@ -78,6 +82,34 @@ class SolicitacaoAmizade(models.Model):
         """Cancela a solicitação (apenas pelo remetente)."""
         self.status = 'cancelada'
         self.save()
+
+
+@login_required
+@require_POST
+def enviar_solicitacao(request, user_id):
+    destinatario = get_object_or_404(Usuario, id=user_id)
+    remetente = request.user
+
+    if destinatario == remetente:
+        return JsonResponse({'error': 'Operação inválida.'}, status=400)
+
+    if Amizade.sao_amigos(remetente, destinatario):
+        return JsonResponse({'message': 'Vocês já estão conectados.', 'status': 'amigos'}, status=200)
+
+    ja_existe = SolicitacaoAmizade.objects.filter(
+        remetente=remetente, destinatario=destinatario, status='pendente'
+    ).exists()
+
+    if ja_existe:
+        return JsonResponse({'message': 'Solicitação já enviada.'}, status=200)
+
+    SolicitacaoAmizade.objects.create(
+        remetente=remetente,
+        destinatario=destinatario,
+        status='pendente'
+    )
+
+    return JsonResponse({'message': 'Solicitação enviada!'}, status=201)
 
 
 class Amizade(models.Model):

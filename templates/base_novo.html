@@ -30,7 +30,10 @@
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
 
     <!-- CSS está em static/css/ -->
-    {% block estilos_extras %}{% endblock %}
+    {% block estilos_extras %}
+    <link rel="stylesheet" href="{% static 'css/chat.css' %}">
+    <link rel="stylesheet" href="{% static 'css/conexoes.css' %}">
+    {% endblock %}
 </head>
 
 <body>

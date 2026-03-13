@@ -155,6 +155,88 @@ def view_criar_plano_viagem(request):
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
+def view_editar_plano(request, uuid):
+    """View para editar um plano de viagem existente."""
+    plano = get_object_or_404(PlanoViagem, uuid=uuid)
+
+    if plano.usuario != request.user:
+        messages.error(request, _('Você não pode editar este plano.'))
+        return redirect('destinos:meus_planos')
+
+    if request.method == 'POST':
+        pais_nome = request.POST.get('pais_nome', '').strip()
+        pais_codigo_iso = request.POST.get('pais_codigo_iso', '').strip()
+        cidade = request.POST.get('cidade_destino', '').strip()
+        regiao = request.POST.get('regiao_destino', '').strip()
+        latitude = request.POST.get('latitude', '').strip()
+        longitude = request.POST.get('longitude', '').strip()
+
+        pais = plano.pais_destino
+
+        if pais_nome:
+            if pais_codigo_iso:
+                pais = Pais.objects.filter(codigo_iso__iexact=pais_codigo_iso).first() or pais
+
+            if not pais or pais.nome.lower() != pais_nome.lower():
+                pais = Pais.objects.filter(nome__iexact=pais_nome).first() or pais
+
+            if not pais:
+                logger.info(f"Criando novo país para edição: {pais_nome} ({pais_codigo_iso})")
+                lat = float(latitude) if latitude else 0.0
+                lng = float(longitude) if longitude else 0.0
+                pais = Pais.objects.create(
+                    codigo_iso=pais_codigo_iso or 'XX',
+                    nome=pais_nome,
+                    nome_completo=pais_nome,
+                    continente='Não especificado',
+                    latitude=lat,
+                    longitude=lng,
+                    ativo=True
+                )
+
+        dados_post = request.POST.copy()
+        dados_post['pais_destino'] = pais.id
+        dados_post['cidade_destino'] = cidade
+        dados_post['regiao_destino'] = regiao
+
+        form = FormularioPlanoViagem(dados_post, instance=plano)
+
+        if form.is_valid():
+            plano = form.save(commit=False)
+            plano.pais_destino = pais
+            plano.save()
+
+            if latitude and longitude:
+                EnderecoPlano.objects.update_or_create(
+                    plano=plano,
+                    defaults={
+                        'cidade': cidade,
+                        'estado': regiao,
+                        'pais_texto': pais_nome or plano.pais_destino.nome,
+                        'latitude': float(latitude),
+                        'longitude': float(longitude),
+                    }
+                )
+
+            messages.success(request, _('Plano de viagem atualizado com sucesso!'))
+            return redirect('destinos:detalhes_plano', uuid=plano.uuid)
+        else:
+            messages.error(request, _('Corrija os erros no formulário.'))
+            logger.error(f"Erros no formulário de edição: {form.errors}")
+    else:
+        form = FormularioPlanoViagem(instance=plano)
+
+    context = {
+        'titulo': _('Editar Plano de Viagem'),
+        'formulario': form,
+        'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
+    }
+
+    return render(request, 'destinos/criar_plano.html', context)
+
+
+@login_required
 @require_http_methods(["GET"])
 def view_buscar_viajantes(request):
     """View para buscar viajantes que estão planejando viagens (excluindo o próprio usuário)."""
@@ -218,13 +300,16 @@ def view_buscar_viajantes(request):
 
     # Amizades
     amigos_ids = set()
+    amigos_uuids = set()
     if request.user.is_authenticated:
         amizades = Amizade.objects.filter(
             Q(usuario1=request.user) | Q(usuario2=request.user),
             ativa=True
         )
         for a in amizades:
-            amigos_ids.add(a.usuario2.id if a.usuario1 == request.user else a.usuario1.id)
+            amigo = a.usuario2 if a.usuario1 == request.user else a.usuario1
+            amigos_ids.add(amigo.id)
+            amigos_uuids.add(amigo.uuid)
 
     # Meus destinos
     meus_destinos = (
@@ -238,6 +323,7 @@ def view_buscar_viajantes(request):
         'destinos': destinos_paginados,
         'meus_destinos': meus_destinos,
         'amigos_ids': amigos_ids,
+        'amigos_uuids': amigos_uuids,
         'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
         'total_resultados': len(destinos_filtrados),
         'title': _('Buscar Viagens'), 

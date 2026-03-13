@@ -4,74 +4,241 @@
 {% block titulo %}{{ titulo }}{% endblock %}
 
 {% block estilos_extras %}
-<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+<link rel="stylesheet" href="{% static 'css/conexoes.css' %}">
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
 {% endblock %}
 
 {% block conteudo %}
-<div class="hero-conversas">
-    <div class="container">
-        <h1><i class="bi bi-chat-dots"></i> {{ titulo }}</h1>
-        <p>Gerencie suas conversas e fique conectado com seus amigos</p>
-    </div>
-</div>
 
-<div class="container mb-5">
-    {% if conversas_com_dados %}
-    <div class="row g-3">
-        {% for item in conversas_com_dados %}
-        <div class="col-12 col-lg-6">
-            <div class="card card-conversa">
-                <a href="{% url 'chat:conversa' uuid_conversa=item.conversa.uuid %}">
-                    <div class="conversa-header">
-                        <div class="conversa-info">
-                            <div class="user-avatar">
-                                {% if item.outro_participante.foto_perfil %}
-                                <img src="{{ item.outro_participante.foto_perfil.url }}"
-                                    alt="{{ item.outro_participante.get_nome_exibicao }}">
-                                {% else %}
-                                {{ item.outro_participante.get_nome_exibicao|first|upper }}
-                                {% endif %}
-                            </div>
-                            <div class="conversa-details">
-                                <h5>{{ item.outro_participante.get_nome_exibicao }}</h5>
-                                <p class="conversa-time">
-                                    <i class="bi bi-clock"></i>
-                                    {% if item.conversa.data_ultima_mensagem %}
-                                    {% now "SHORT_DATETIME_FORMAT" as today %}
-                                    {% if item.conversa.data_ultima_mensagem|date:"Y-m-d" == today|date:"Y-m-d" %}
-                                    {{ item.conversa.data_ultima_mensagem|time:"H:i" }}
-                                    {% else %}
-                                    {{ item.conversa.data_ultima_mensagem|date:"d/m/Y" }}
-                                    {% endif %}
-                                    {% else %}
-                                    Iniciada
-                                    {% endif %}
-                                </p>
-                            </div>
-                        </div>
-                        {% if item.mensagens_nao_lidas > 0 %}
-                        <div class="badge-unread">{{ item.mensagens_nao_lidas }}</div>
-                        {% endif %}
-                    </div>
-                    {% if item.conversa.ultima_mensagem %}
-                    <div class="conversa-preview">
-                        <p>{{ item.conversa.ultima_mensagem|truncatewords:10 }}</p>
-                    </div>
-                    {% endif %}
-                </a>
+<!-- Hero -->
+<div class="meus-planos-container">
+    <!-- Hero Section -->
+    <section class="planos-hero">
+        <div class="container">
+            <div class="row text-center">
+                <div class="col-12  mb-4 fade-in">
+                    <h1 class="hero-title">
+                        <i class="bi bi-map me-3"></i>
+                        {{ titulo }}
+                    </h1>
+                </div>
+                <p>Gerencie suas conversas e fique conectado com seus amigos</p>
             </div>
         </div>
-        {% endfor %}
+    </section>
+
+    <div class="container mb-5">
+
+        {% if conversas_com_dados %}
+
+        <!-- Barra de busca -->
+        <div class="mb-4">
+            <div class="input-group">
+                <span class="input-group-text bg-white border-end-0">
+                    <i class="bi bi-search text-muted"></i>
+                </span>
+                <input type="text" id="buscaConversa" class="form-control border-start-0 ps-0"
+                    placeholder="Buscar conversa..." autocomplete="off">
+            </div>
+        </div>
+
+        <!-- Lista de conversas -->
+        <div class="row g-3" id="listaConversas">
+            {% for item in conversas_com_dados %}
+            <div class="col-12 col-lg-6 conversa-item"
+                data-nome="{{ item.outro_participante.get_nome_exibicao|lower }}">
+                <div class="card card-conversa {% if item.mensagens_nao_lidas > 0 %}card-conversa--nao-lida{% endif %}"
+                    data-uuid="{{ item.conversa.uuid }}">
+                    <a href="{% url 'chat:conversa' uuid_conversa=item.conversa.uuid %}"
+                        class="text-decoration-none text-reset">
+                        <div class="conversa-header">
+                            <div class="conversa-info">
+
+                                <!-- Avatar -->
+                                <div class="user-avatar">
+                                    {% if item.outro_participante.foto_perfil %}
+                                    <img src="{{ item.outro_participante.foto_perfil.url }}"
+                                        alt="{{ item.outro_participante.get_nome_exibicao }}">
+                                    {% else %}
+                                    {{ item.outro_participante.get_nome_exibicao|first|upper }}
+                                    {% endif %}
+                                </div>
+
+                                <!-- Info da conversa -->
+                                <div class="conversa-details">
+                                    <h5 class="mb-0">{{ item.outro_participante.get_nome_exibicao }}</h5>
+                                    <p class="conversa-time mb-0">
+                                        <i class="bi bi-clock"></i>
+                                        {% if item.conversa.data_ultima_mensagem %}
+                                        {% if item.conversa.data_ultima_mensagem|date:"Y-m-d" == hoje %}
+                                        {{ item.conversa.data_ultima_mensagem|time:"H:i" }}
+                                        {% else %}
+                                        {{ item.conversa.data_ultima_mensagem|date:"d/m/Y" }}
+                                        {% endif %}
+                                        {% else %}
+                                        Iniciada agora
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Badge de não lidas -->
+                            <div class="badge-unread {% if item.mensagens_nao_lidas == 0 %}d-none{% endif %}"
+                                id="badge-{{ item.conversa.uuid }}">
+                                {{ item.mensagens_nao_lidas }}
+                            </div>
+                        </div>
+
+                        <!-- Preview da última mensagem -->
+                        {% if item.conversa.ultima_mensagem %}
+                        <div class="conversa-preview">
+                            <p class="mb-0 {% if item.mensagens_nao_lidas > 0 %}fw-semibold{% endif %}">
+                                {{ item.conversa.ultima_mensagem|truncatewords:12 }}
+                            </p>
+                        </div>
+                        {% else %}
+                        <div class="conversa-preview">
+                            <p class="mb-0 text-muted fst-italic">Nenhuma mensagem ainda</p>
+                        </div>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Sem resultados na busca -->
+        <div id="semResultados" class="empty-state d-none">
+            <i class="bi bi-search"></i>
+            <h3>Nenhuma conversa encontrada</h3>
+            <p>Tente buscar por outro nome.</p>
+        </div>
+
+        {% else %}
+
+        <!-- Estado vazio -->
+        <div class="empty-state">
+            <i class="bi bi-chat-dots"></i>
+            <h3>Nenhuma conversa ainda</h3>
+            <p>Comece uma conversa com um de seus amigos para se conectar</p>
+        </div>
+
+        {% endif %}
+
+        <!-- ── Seção de Amigos ────────────────────────────────────────────────── -->
+        {% if amigos_sem_conversa %}
+        <h2 class="section-title mt-5">
+            <i class="bi bi-people"></i> Meus Amigos
+            <span class="badge bg-primary ms-2">{{ amigos_sem_conversa|length }}</span>
+        </h2>
+
+        <div class="row g-3">
+            {% for item in amigos_sem_conversa %}
+            <div class="col-12 col-md-6 col-lg-4">
+                <div class="card card-amigo">
+                    <div class="card-header-gradient">
+                        <div class="user-avatar-large">
+                            {% if item.amigo.foto_perfil %}
+                            <img src="{{ item.amigo.foto_perfil.url }}" alt="{{ item.amigo.get_nome_exibicao }}">
+                            {% else %}
+                            {{ item.amigo.get_nome_exibicao|first|upper }}
+                            {% endif %}
+                        </div>
+                        <h5>{{ item.amigo.get_nome_exibicao }}</h5>
+                        <p class="user-status">
+                            <i class="bi bi-circle-fill" style="font-size: 0.5rem;"></i>
+                            Amigos desde {{ item.amizade.data_criacao|date:"d/m/Y" }}
+                        </p>
+                    </div>
+
+                    <div class="card-body-custom">
+                        {% if item.amigo.pais_residencia or item.amigo.cidade_residencia %}
+                        <div class="amigo-info-row">
+                            <i class="bi bi-geo-alt"></i>
+                            <span>{{ item.amigo.cidade_residencia }}
+                                {% if item.amigo.cidade_residencia and item.amigo.pais_residencia %},
+                                {% endif %}{{ item.amigo.pais_residencia }}</span>
+                        </div>
+                        {% endif %}
+
+                        {% if item.amigo.biografia %}
+                        <p class="amigo-bio">{{ item.amigo.biografia|truncatewords:15 }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div class="card-actions">
+                        <a href="{% url 'chat:iniciar_conversa' uuid_usuario=item.amigo.uuid %}"
+                            class="btn-action btn-chat">
+                            <i class="bi bi-chat-dots"></i> Iniciar Conversa
+                        </a>
+                        <a href="{% url 'usuarios:perfil_publico' uuid=item.amigo.uuid %}"
+                            class="btn-action btn-perfil">
+                            <i class="bi bi-person"></i> Ver Perfil
+                        </a>
+                        <form method="post" action="{% url 'conexoes:desfazer_amizade' uuid_amigo=item.amigo.uuid %}"
+                            class="btn-action m-0 px-0">
+                            {% csrf_token %}
+                            <button type="submit" class="btn-action btn-remover" title="Remover amizade"
+                                onclick="return confirm('Tem certeza que deseja remover {{ item.amigo.get_nome_exibicao }} da sua lista de amigos?')">
+                                <i class="bi bi-x-circle"></i> Remover
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
     </div>
-    {% else %}
-    <div class="empty-state">
-        <i class="bi bi-chat-dots"></i>
-        <h3>Nenhuma conversa ainda</h3>
-        <p>Comece uma conversa com um de seus amigos para se conectar</p>
-        <a href="{% url 'conexoes:amigos' %}" class="btn btn-primary">
-            <i class="bi bi-people"></i> Ver Meus Amigos
-        </a>
-    </div>
-    {% endif %}
-</div>
-{% endblock %}
+
+    <script>
+        const inputBusca = document.getElementById('buscaConversa');
+        const itens = document.querySelectorAll('.conversa-item');
+        const semResultados = document.getElementById('semResultados');
+
+        inputBusca?.addEventListener('input', () => {
+            const termo = inputBusca.value.toLowerCase().trim();
+            let encontrou = false;
+
+            itens.forEach(item => {
+                const nome = item.dataset.nome || '';
+                const visivel = nome.includes(termo);
+                item.classList.toggle('d-none', !visivel);
+                if (visivel) encontrou = true;
+            });
+
+            semResultados.classList.toggle('d-none', encontrou || !termo);
+        });
+
+        // ── Polling: atualiza badges de não lidas a cada 6s ────────────────────
+        async function atualizarNaoLidas() {
+            try {
+                const resp = await fetch('/chat/nao-lidas/', {
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                });
+                if (!resp.ok) return;
+
+                const data = await resp.json(); // { "<uuid>": <count>, ... }
+
+                document.querySelectorAll('.card-conversa[data-uuid]').forEach(card => {
+                    const uuid = card.dataset.uuid;
+                    const badge = document.getElementById(`badge-${uuid}`);
+                    const count = data[uuid] ?? 0;
+
+                    if (badge) {
+                        badge.textContent = count;
+                        badge.classList.toggle('d-none', count === 0);
+                    }
+                    card.classList.toggle('card-conversa--nao-lida', count > 0);
+                });
+
+            } catch (_) {
+                // falha silenciosa para não poluir a UI
+            }
+        }
+
+        setInterval(atualizarNaoLidas, 6000);
+    </script>
+
+    {% endblock %}

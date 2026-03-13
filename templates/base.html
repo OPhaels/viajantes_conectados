@@ -114,34 +114,36 @@
                 </ul>
             </div>
         </div>
+
     </nav>
 
-    <!-- Mensagens -->
+
+    <!-- Mensagens (sobrepostas ao conteúdo) -->
     {% if messages %}
-    <div class="container mt-3">
-        {% for mensagem in messages %}
-        <div class="alert alert-{{ mensagem.tags }} alert-custom alert-dismissible fade show d-flex align-items-center gap-3"
-            role="alert">
+    <div id="site-alerts" class="alerts-fixed-container">
+        <div class="container">
+            {% for mensagem in messages %}
+            <div class="alert alert-{{ mensagem.tags }} alert-custom alert-dismissible fade show d-flex align-items-center gap-3"
+                role="alert">
 
-            <i class="
-                    bi
-                    {% if mensagem.tags == 'success' %} bi-check-circle-fill
-                    {% elif mensagem.tags == 'error' or mensagem.tags == 'danger' %} bi-exclamation-octagon-fill
-                    {% elif mensagem.tags == 'warning' %} bi-exclamation-triangle-fill
-                    {% else %} bi-info-circle-fill
-                    {% endif %}
-                    icon-alert
-                "></i>
+                <i class="
+                        bi
+                        {% if mensagem.tags == 'success' %} bi-check-circle-fill
+                        {% elif mensagem.tags == 'error' or mensagem.tags == 'danger' %} bi-exclamation-octagon-fill
+                        {% elif mensagem.tags == 'warning' %} bi-exclamation-triangle-fill
+                        {% else %} bi-info-circle-fill
+                        {% endif %}
+                        icon-alert
+                    "></i>
 
-            <span>{{ mensagem }}</span>
+                <span>{{ mensagem }}</span>
 
-            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
         </div>
-        {% endfor %}
     </div>
     {% endif %}
-
-
 
     <!-- Conteúdo Principal -->
     <main class="container">

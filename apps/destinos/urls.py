@@ -19,6 +19,7 @@ urlpatterns = [
     path('buscar/', views.view_buscar_viajantes, name='buscar'),
     
     # Detalhes e Ações
+    path('<uuid:uuid>/editar/', views.view_editar_plano, name='editar_plano'),
     path('<uuid:uuid>/', views.view_detalhes_plano, name='detalhes_plano'),
     path('<uuid:uuid>/deletar/', views.view_deletar_plano, name='deletar_plano'),
     

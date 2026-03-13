@@ -7,7 +7,7 @@
 ## 🚀 Início Rápido
 
 ### Pré-requisitos
-- Python 3.12+
+- Python 3.11
 - Django 5.0+
 - PostgreSQL (sugerido para produção)
 

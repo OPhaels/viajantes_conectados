@@ -181,10 +181,6 @@ Criado arquivo `API_DOCUMENTATION.md` com:
 
 ---
 
-### 5. **Templates Redesenhados** 🎭
-
-#### Novo Base Template (`templates/base_novo.html`)
-
 **Melhorias:**
 - ✅ Estrutura HTML semântica e limpa
 - ✅ Navegação profissional com dropdown
@@ -275,8 +271,7 @@ viajantes_conectados/
 │   └── viewsets.py                # ViewSets otimizados
 ├── static/css/
 │   └── style.css                  # 🎨 Novo design system
-├── templates/
-│   ├── base_novo.html             # 🎭 Template base redesenhado
+├── templates/          
 │   └── [outros templates...]
 ├── config/
 │   └── settings.py                # ✅ Atualizado com core app

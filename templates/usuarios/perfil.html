@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block titulo %}{{ usuario_perfil.nome_completo }}{% endblock %}
+{% block titulo %}{{ usuario_perfil.nome_completo }} — Perfil{% endblock %}
 
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
@@ -9,365 +9,390 @@
 
 {% block conteudo %}
 <div class="perfil-container">
-    <!-- Hero Background -->
-    <div class="perfil-hero">
-        <div class="hero-overlay"></div>
-    </div>
 
-    <!-- Conteúdo Principal -->
-    <div class="container mt-5 mb-5">
-        <div class="row">
-            <!-- Sidebar - Foto e Info Principal -->
-            <div class="col-12 col-md-4 mb-4">
-                <!-- Card de Perfil -->
-                <div class="card perfil-card shadow-lg border-0">
-                    <!-- Foto de Perfil -->
-                    <div class="perfil-photo-container">
-                        {% if usuario_perfil.foto_perfil %}
-                        <img src="{{ usuario_perfil.foto_perfil.url }}" alt="{{ usuario_perfil.nome_completo }}"
-                            class="perfil-photo">
-                        {% else %}
-                        <div class="perfil-photo placeholder-photo">
-                            <i class="bi bi-person-fill"></i>
-                        </div>
-                        {% endif %}
-                    </div>
+  <!-- ══════════ HERO BANNER ══════════ -->
+  <div class="perfil-hero">
+    <div class="hero-overlay"></div>
+  </div>
 
-                    <!-- Informações Básicas -->
-                    <div class="card-body text-center">
-                        <h2 class="mb-2">{{ usuario_perfil.nome_completo }}</h2>
+  <!-- ══════════ CONTEÚDO ══════════ -->
+  <div class="container pb-5">
+    <div class="row g-4 align-items-start">
 
-                        <!-- Status -->
-                        <div class="mb-3">
-                            {% if usuario_perfil.ativo %}
-                            <span class="badge bg-success">
-                                <i class="bi bi-circle-fill me-1"></i>Ativo
-                            </span>
-                            {% else %}
-                            <span class="badge bg-secondary">
-                                <i class="bi bi-circle-fill me-1"></i>Inativo
-                            </span>
-                            {% endif %}
-                        </div>
+      <!-- ────────────────────────────────────
+           SIDEBAR
+      ──────────────────────────────────── -->
+      <div class="col-12 col-md-4 col-lg-3">
 
-                        <!-- Localização -->
-                        <div class="localizacao-perfil mb-3">
-                            <p class="mb-2">
-                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
-                                <strong>Localização</strong>
-                            </p>
-                            {% if usuario_perfil.cidade_residencia %}
-                            <p class="text-muted mb-0">
-                                {{ usuario_perfil.cidade_residencia }},
-                                {{ usuario_perfil.pais_residencia|default:"Não informado" }}
-                            </p>
-                            {% else %}
-                            <p class="text-muted mb-0">
-                                {{ usuario_perfil.pais_residencia|default:"Não informado" }}
-                            </p>
-                            {% endif %}
-                        </div>
+        <!-- Card principal de perfil -->
+        <div class="card perfil-card shadow-sm border-0">
 
-                        <!-- Data de Nascimento -->
-                        {% if usuario_perfil.data_nascimento %}
-                        <div class="info-item mb-3">
-                            <p class="mb-2">
-                                <i class="bi bi-calendar-event text-info me-2"></i>
-                                <strong>Data de Nascimento</strong>
-                            </p>
-                            <p class="text-muted mb-0">
-                                {{ usuario_perfil.data_nascimento|date:"d/m/Y" }}
-                            </p>
-                        </div>
-                        {% endif %}
+          <!-- Foto -->
+          <div class="perfil-photo-container">
+            {% if usuario_perfil.foto_perfil %}
+              <img src="{{ usuario_perfil.foto_perfil.url }}"
+                   alt="{{ usuario_perfil.nome_completo }}"
+                   class="perfil-photo">
+            {% else %}
+              <div class="perfil-photo placeholder-photo">
+                <i class="bi bi-person-fill"></i>
+              </div>
+            {% endif %}
+          </div>
 
-                        <!-- Telefone (se visível) -->
-                        {% if usuario_perfil.telefone %}
-                        {% if e_proprio_perfil or usuario_perfil.mostrar_telefone %}
-                        <div class="info-item mb-3">
-                            <p class="mb-2">
-                                <i class="bi bi-telephone text-warning me-2"></i>
-                                <strong>Telefone</strong>
-                            </p>
-                            <p class="text-muted mb-0">
-                                {{ usuario_perfil.telefone }}
-                            </p>
-                        </div>
-                        {% endif %}
-                        {% endif %}
+          <!-- Info -->
+          <div class="card-body text-center px-3 py-4">
 
-                        <!-- Email (se visível) -->
-                        {% if e_proprio_perfil or usuario_perfil.mostrar_email %}
-                        <div class="info-item mb-3">
-                            <p class="mb-2">
-                                <i class="bi bi-envelope text-primary me-2"></i>
-                                <strong>Email</strong>
-                            </p>
-                            <p class="text-muted mb-0">
-                                {{ usuario_perfil.email }}
-                            </p>
-                        </div>
-                        {% endif %}
+            <h2 class="mb-2">{{ usuario_perfil.nome_completo }}</h2>
 
-                        <!-- Membro desde -->
-                        <div class="info-item mb-3">
-                            <p class="mb-2">
-                                <i class="bi bi-calendar-check text-success me-2"></i>
-                                <strong>Membro desde</strong>
-                            </p>
-                            <p class="text-muted mb-0">
-                                {{ usuario_perfil.data_criacao|date:"d/m/Y" }}
-                            </p>
-                        </div>
-
-                        <!-- Botões de Ação -->
-                        <div class="btn-group-perfil">
-                            {% if e_proprio_perfil %}
-                            <!-- Botões próprios -->
-                            <a href="{% url 'usuarios:editar_perfil' %}" class="btn btn-primary btn-sm w-100 mb-2">
-                                <i class="bi bi-pencil me-2"></i>Editar Perfil
-                            </a>
-                            <a href="{% url 'destinos:meus_planos' %}" class="btn btn-outline-primary btn-sm w-100">
-                                <i class="bi bi-map me-2"></i>Meus Planos
-                            </a>
-                            {% else %}
-                            <!-- Botões para outro usuário -->
-                            {% if sao_amigos %}
-                            <!-- Já são amigos -->
-                            <div class="alert alert-success py-2 mb-2">
-                                <i class="bi bi-check-circle-fill me-2"></i>
-                                <small>Vocês são amigos!</small>
-                            </div>
-                            <a href="{% url 'chat:iniciar_conversa' uuid_usuario=usuario_perfil.uuid %}"
-                                class="btn btn-success btn-sm w-100 mb-2">
-                                <i class="bi bi-chat-dots me-2"></i>Conversar
-                            </a>
-                            {% elif solicitacao_pendente %}
-                            <!-- Solicitação pendente -->
-                            <div class="alert alert-warning py-2 mb-2">
-                                <i class="bi bi-clock me-2"></i>
-                                <small>Solicitação pendente</small>
-                            </div>
-                            {% else %}
-                            <!-- Não são amigos, pode enviar solicitação -->
-                            <button class="btn btn-primary btn-sm w-100 mb-2"
-                                onclick="enviarSolicitacao('{{ usuario_perfil.uuid }}')">
-                                <i class="bi bi-person-plus me-2"></i>Adicionar Amigo
-                            </button>
-                            {% endif %}
-                            <a href="{% url 'destinos:buscar_viajantes' %}"
-                                class="btn btn-outline-primary btn-sm w-100">
-                                <i class="bi bi-people me-2"></i>Ver Mais Viajantes
-                            </a>
-                            {% endif %}
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Card de Estatísticas -->
-                <div class="card mt-4 shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">
-                            <i class="bi bi-bar-chart me-2"></i>Estatísticas
-                        </h5>
-                        <div class="stat-item mb-3">
-                            <span class="stat-label">Planos de Viagem</span>
-                            <span class="stat-value">{{ planos_count|default:0 }}</span>
-                        </div>
-                        <div class="stat-item mb-3">
-                            <span class="stat-label">Amigos</span>
-                            <span class="stat-value">{{ amigos_count|default:0 }}</span>
-                        </div>
-                    </div>
-                </div>
+            <!-- Status -->
+            <div class="mb-3">
+              {% if usuario_perfil.ativo %}
+                <span class="badge bg-success rounded-pill px-3 py-2">
+                  <i class="bi bi-circle-fill me-1" style="font-size:.5rem;vertical-align:middle;"></i>Ativo
+                </span>
+              {% else %}
+                <span class="badge bg-secondary rounded-pill px-3 py-2">
+                  <i class="bi bi-circle-fill me-1" style="font-size:.5rem;vertical-align:middle;"></i>Inativo
+                </span>
+              {% endif %}
             </div>
 
-            <!-- Main Content -->
-            <div class="col-12 col-md-8">
-                <!-- Biografia -->
-                {% if usuario_perfil.biografia %}
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">
-                            <i class="bi bi-chat-quote me-2"></i>Sobre
-                        </h5>
-                        <p class="card-text">{{ usuario_perfil.biografia }}</p>
-                    </div>
+            <!-- Localização -->
+            <div class="info-item mb-2 text-start">
+              <i class="bi bi-geo-alt-fill" style="color:var(--danger,#c0392b);"></i>
+              <div>
+                <small class="d-block" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.5;">Localização</small>
+                <span style="font-size:.88rem;font-weight:600;">
+                  {% if usuario_perfil.cidade_residencia %}
+                    {{ usuario_perfil.cidade_residencia }},
+                  {% endif %}
+                  {{ usuario_perfil.pais_residencia|default:"Não informado" }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Data de nascimento -->
+            {% if usuario_perfil.data_nascimento %}
+            <div class="info-item mb-2 text-start">
+              <i class="bi bi-cake2" style="color:var(--primary,#1a3a5c);"></i>
+              <div>
+                <small class="d-block" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.5;">Nascimento</small>
+                <span style="font-size:.88rem;font-weight:600;">{{ usuario_perfil.data_nascimento|date:"d/m/Y" }}</span>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Telefone (condicional) -->
+            {% if usuario_perfil.telefone %}
+              {% if e_proprio_perfil or usuario_perfil.mostrar_telefone %}
+              <div class="info-item mb-2 text-start">
+                <i class="bi bi-telephone" style="color:#d4a847;"></i>
+                <div>
+                  <small class="d-block" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.5;">Telefone</small>
+                  <span style="font-size:.88rem;font-weight:600;">{{ usuario_perfil.telefone }}</span>
                 </div>
+              </div>
+              {% endif %}
+            {% endif %}
+
+            <!-- Email (condicional) -->
+            {% if e_proprio_perfil or usuario_perfil.mostrar_email %}
+            <div class="info-item mb-2 text-start">
+              <i class="bi bi-envelope" style="color:var(--primary,#1a3a5c);"></i>
+              <div>
+                <small class="d-block" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.5;">Email</small>
+                <span style="font-size:.88rem;font-weight:600;">{{ usuario_perfil.email }}</span>
+              </div>
+            </div>
+            {% endif %}
+
+            <!-- Membro desde -->
+            <div class="info-item mb-4 text-start">
+              <i class="bi bi-calendar-check" style="color:#2d9e6b;"></i>
+              <div>
+                <small class="d-block" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;opacity:.5;">Membro desde</small>
+                <span style="font-size:.88rem;font-weight:600;">{{ usuario_perfil.data_criacao|date:"d/m/Y" }}</span>
+              </div>
+            </div>
+
+            <!-- ── BOTÕES DE AÇÃO ── -->
+            <div class="d-grid gap-2">
+              {% if e_proprio_perfil %}
+                <a href="{% url 'usuarios:editar_perfil' %}" class="btn btn-custom btn-primario btn-sm">
+                  <i class="bi bi-pencil-fill me-1"></i>Editar Perfil
+                </a>
+                <a href="{% url 'destinos:meus_planos' %}" class="btn btn-custom btn-secundario btn-sm">
+                  <i class="bi bi-map-fill me-1"></i>Meus Planos
+                </a>
+
+              {% else %}
+                {% if sao_amigos %}
+                  <div class="d-flex align-items-center justify-content-center gap-2 mb-1
+                              py-2 px-3 rounded-3"
+                       style="background:rgba(45,158,107,.1);border:1px solid rgba(45,158,107,.25);font-size:.82rem;font-weight:600;color:#2d9e6b;">
+                    <i class="bi bi-check-circle-fill"></i> Vocês são amigos!
+                  </div>
+                  <a href="{% url 'chat:iniciar_conversa' uuid_usuario=usuario_perfil.uuid %}"
+                     class="btn btn-custom btn-primario btn-sm">
+                    <i class="bi bi-chat-dots-fill me-1"></i>Conversar
+                  </a>
+
+                {% elif solicitacao_pendente %}
+                  <div class="d-flex align-items-center justify-content-center gap-2
+                              py-2 px-3 rounded-3"
+                       style="background:rgba(212,168,71,.1);border:1px solid rgba(212,168,71,.25);font-size:.82rem;font-weight:600;color:#b8891f;">
+                    <i class="bi bi-clock-fill"></i> Solicitação pendente
+                  </div>
+
+                {% else %}
+                  <button class="btn btn-custom btn-primario btn-sm"
+                          onclick="enviarSolicitacao('{{ usuario_perfil.uuid }}')">
+                    <i class="bi bi-person-plus-fill me-1"></i>Adicionar Amigo
+                  </button>
                 {% endif %}
 
-                <!-- Planos de Viagem (se visível) -->
-                <div class="card shadow-sm border-0 mb-4">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h5 class="mb-0">
-                                <i class="bi bi-map me-2"></i>Planos de Viagem
-                            </h5>
-                            {% if e_proprio_perfil %}
-                            <a href="{% url 'destinos:criar_plano' %}" class="btn btn-sm btn-primary">
-                                <i class="bi bi-plus-circle me-1"></i>Novo
-                            </a>
-                            {% endif %}
-                        </div>
+                <a href="{% url 'destinos:buscar_viajantes' %}"
+                   class="btn btn-ghost-navy btn-sm">
+                  <i class="bi bi-people me-1"></i>Ver Mais Viajantes
+                </a>
+              {% endif %}
+            </div>
 
-                        {% if planos %}
-                        <div class="row g-3">
-                            {% for plano in planos %}
-                            <div class="col-12 col-md-6">
-                                <div class="plano-mini-card">
-                                    <!-- Header -->
-                                    <div class="plano-mini-header">
-                                        {% if plano.pais_destino.imagem %}
-                                        <img src="{{ plano.pais_destino.imagem.url }}"
-                                            alt="{{ plano.pais_destino.nome }}">
-                                        {% else %}
-                                        <div class="plano-mini-placeholder">
-                                            <i class="bi bi-globe"></i>
-                                        </div>
-                                        {% endif %}
-                                    </div>
+          </div><!-- /card-body -->
+        </div><!-- /perfil-card -->
 
-                                    <!-- Body -->
-                                    <div class="plano-mini-body">
-                                        <h6 class="mb-2">{{ plano.pais_destino.nome }}</h6>
-                                        <p class="mb-1 small text-muted">
-                                            <i class="bi bi-calendar me-1"></i>
-                                            {{ plano.data_inicio|date:"d/m/Y" }}
-                                            {% if plano.data_fim %}
-                                            - {{ plano.data_fim|date:"d/m/Y" }}
-                                            {% endif %}
-                                        </p>
-                                        <p class="mb-2 small text-muted">
-                                            <i class="bi bi-heart me-1"></i>
-                                            {{ plano.get_motivo_viagem_display }}
-                                        </p>
-                                        {% if plano.viagem_concluida %}
-                                        <span class="badge bg-success">Concluída</span>
-                                        {% elif plano.ativo %}
-                                        <span class="badge bg-primary">Ativa</span>
-                                        {% else %}
-                                        <span class="badge bg-secondary">Inativa</span>
-                                        {% endif %}
-                                    </div>
+        <!-- Card de Estatísticas -->
+        <div class="card shadow-sm border-0 mt-3" style="border-radius:14px;overflow:hidden;">
+          <div class="card-body p-0">
+            <div class="card-header-custom px-3 py-3">
+              <span style="font-size:.78rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8;">
+                <i class="bi bi-bar-chart-fill me-2"></i>Estatísticas
+              </span>
+            </div>
+            <div class="p-3">
+              <div class="stat-item">
+                <span class="stat-label">
+                  <i class="bi bi-map me-1" style="color:#d4a847;"></i>Planos de Viagem
+                </span>
+                <span class="stat-value">{{ planos_count|default:0 }}</span>
+              </div>
+              <div class="stat-item" style="border-bottom:none;padding-bottom:0;margin-bottom:0;">
+                <span class="stat-label">
+                  <i class="bi bi-people me-1" style="color:#d4a847;"></i>Amigos
+                </span>
+                <span class="stat-value">{{ amigos_count|default:0 }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                                    <!-- Link para detalhes -->
-                                    <a href="{% url 'destinos:detalhes_plano' plano.uuid %}" class="plano-mini-link">
-                                        Ver Detalhes
-                                    </a>
-                                </div>
-                            </div>
-                            {% endfor %}
+      </div><!-- /sidebar -->
+
+      <!-- ────────────────────────────────────
+           MAIN CONTENT
+      ──────────────────────────────────── -->
+      <div class="col-12 col-md-8 col-lg-9">
+
+        <!-- Biografia -->
+        {% if usuario_perfil.biografia %}
+        <div class="card shadow-sm border-0 mb-4" style="border-radius:14px;overflow:hidden;">
+          <div class="card-body p-4">
+            <h5 class="mb-3" style="font-weight:800;color:#1a3a5c;letter-spacing:-.01em;">
+              <i class="bi bi-chat-quote-fill me-2" style="color:#d4a847;"></i>Sobre
+            </h5>
+            <p class="mb-0" style="line-height:1.75;color:#4b5563;">
+              {{ usuario_perfil.biografia }}
+            </p>
+          </div>
+        </div>
+        {% endif %}
+
+        <!-- Planos de Viagem -->
+        <div class="card shadow-sm border-0 mb-4" style="border-radius:14px;overflow:hidden;">
+          <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+              <h5 class="mb-0" style="font-weight:800;color:#1a3a5c;letter-spacing:-.01em;">
+                <i class="bi bi-map-fill me-2" style="color:#d4a847;"></i>Planos de Viagem
+              </h5>
+              {% if e_proprio_perfil %}
+                <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-secundario btn-sm">
+                  <i class="bi bi-plus-circle-fill me-1"></i>Novo Plano
+                </a>
+              {% endif %}
+            </div>
+
+            {% if planos %}
+              <div class="row g-3">
+                {% for plano in planos %}
+                <div class="col-12 col-sm-6">
+                  <div class="plano-mini-card">
+
+                    <div class="plano-mini-header">
+                      <img src="https://flagcdn.com/w160/{{ plano.pais_destino.codigo_iso|lower }}.png"
+                            alt="Bandeira de {{ plano.pais_destino.nome }}"
+                            class="plano-mini-flag"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+
+                        <div class="plano-mini-placeholder" style="display:none;">
+                            <i class="bi bi-globe2"></i>
                         </div>
-                        {% else %}
-                        <div class="alert alert-info mb-0">
-                            <i class="bi bi-info-circle me-2"></i>
-                            {% if e_proprio_perfil %}
-                            Você não tem planos de viagem. <a href="{% url 'destinos:criar_plano' %}">Crie um agora!</a>
-                            {% else %}
-                            Este usuário não tem planos de viagem publicados.
-                            {% endif %}
-                        </div>
-                        {% endif %}
                     </div>
-                </div>
 
-                <!-- Privacidade do Perfil -->
+                    <div class="plano-mini-body">
+                      <h6 class="mb-2">{{ plano.pais_destino.nome }}</h6>
+                      <p class="mb-1 small text-muted">
+                        <i class="bi bi-calendar3 me-1" style="color:#d4a847;"></i>
+                        {{ plano.data_inicio|date:"d/m/Y" }}
+                        {% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}
+                      </p>
+                      <p class="mb-2 small text-muted">
+                        <i class="bi bi-heart me-1" style="color:#d4a847;"></i>
+                        {{ plano.get_motivo_viagem_display }}
+                      </p>
+                      {% if plano.viagem_concluida %}
+                        <span class="badge bg-success rounded-pill">Concluída</span>
+                      {% elif plano.ativo %}
+                        <span class="badge rounded-pill"
+                              style="background:#1a3a5c;">Ativa</span>
+                      {% else %}
+                        <span class="badge bg-secondary rounded-pill">Inativa</span>
+                      {% endif %}
+                    </div>
+
+                    <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
+                       class="plano-mini-link">
+                      Ver Detalhes <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+
+            {% else %}
+              <div class="text-center py-4" style="color:#9ca3af;">
+                <i class="bi bi-map" style="font-size:2.5rem;display:block;margin-bottom:.75rem;opacity:.35;"></i>
                 {% if e_proprio_perfil %}
-                <div class="card shadow-sm border-0">
-                    <div class="card-body">
-                        <h5 class="card-title mb-3">
-                            <i class="bi bi-shield-lock me-2"></i>Configurações de Privacidade
-                        </h5>
-                        <div class="privacy-settings">
-                            <div class="privacy-item mb-2">
-                                <i class="bi bi-globe text-primary me-2"></i>
-                                <strong>Perfil:</strong>
-                                <span class="badge bg-primary">
-                                    {% if usuario_perfil.perfil_publico %}
-                                    Público
-                                    {% else %}
-                                    Privado
-                                    {% endif %}
-                                </span>
-                            </div>
-                            <div class="privacy-item mb-2">
-                                <i class="bi bi-envelope text-info me-2"></i>
-                                <strong>Email:</strong>
-                                <span
-                                    class="badge {% if usuario_perfil.mostrar_email %}bg-info{% else %}bg-secondary{% endif %}">
-                                    {% if usuario_perfil.mostrar_email %}
-                                    Visível para Amigos
-                                    {% else %}
-                                    Privado
-                                    {% endif %}
-                                </span>
-                            </div>
-                            <div class="privacy-item">
-                                <i class="bi bi-telephone text-warning me-2"></i>
-                                <strong>Telefone:</strong>
-                                <span
-                                    class="badge {% if usuario_perfil.mostrar_telefone %}bg-warning{% else %}bg-secondary{% endif %}">
-                                    {% if usuario_perfil.mostrar_telefone %}
-                                    Visível para Amigos
-                                    {% else %}
-                                    Privado
-                                    {% endif %}
-                                </span>
-                            </div>
-                        </div>
-                        <a href="{% url 'usuarios:editar_perfil' %}" class="btn btn-outline-primary btn-sm mt-3">
-                            <i class="bi bi-pencil me-1"></i>Gerenciar Privacidade
-                        </a>
-                    </div>
-                </div>
+                  <p class="mb-3" style="font-size:.9rem;">Você ainda não tem planos de viagem.</p>
+                  <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-primario btn-sm">
+                    <i class="bi bi-plus-circle-fill me-1"></i>Criar Primeiro Plano
+                  </a>
+                {% else %}
+                  <p class="mb-0" style="font-size:.9rem;">Este viajante não tem planos publicados.</p>
                 {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+              </div>
+            {% endif %}
 
-<!-- Modal de Solicitação de Amizade -->
-<div class="modal fade" id="modalSolicitacao" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">
-                    <i class="bi bi-person-plus me-2"></i>Enviar Solicitação de Amizade
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <form method="post" action="{% url 'conexoes:enviar_solicitacao' usuario_perfil.uuid %}"
-                id="formSolicitacao">
-                {% csrf_token %}
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="mensagem" class="form-label">
-                            Mensagem Opcional
-                        </label>
-                        <textarea name="mensagem" id="mensagem" class="form-control" rows="3"
-                            placeholder="Conte um pouco sobre você..."></textarea>
-                        <small class="text-muted">Máximo de 500 caracteres</small>
-                    </div>
-                    <input type="hidden" name="destinatario_uuid" id="destinatario_uuid">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-send me-1"></i>Enviar Solicitação
-                    </button>
-                </div>
-            </form>
+          </div>
         </div>
-    </div>
-</div>
 
+        <!-- Privacidade (apenas dono) -->
+        {% if e_proprio_perfil %}
+        <div class="card shadow-sm border-0" style="border-radius:14px;overflow:hidden;">
+          <div class="card-body p-4">
+            <h5 class="mb-4" style="font-weight:800;color:#1a3a5c;letter-spacing:-.01em;">
+              <i class="bi bi-shield-lock-fill me-2" style="color:#d4a847;"></i>Privacidade
+            </h5>
+
+            <div class="privacy-settings">
+              <div class="privacy-item mb-3">
+                <i class="bi bi-globe2" style="color:#1a3a5c;font-size:1.1rem;"></i>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <strong style="font-size:.88rem;">Perfil</strong>
+                  <span class="badge rounded-pill px-3"
+                        style="background:{% if usuario_perfil.perfil_publico %}#1a3a5c{% else %}#6b7280{% endif %};">
+                    {% if usuario_perfil.perfil_publico %}Público{% else %}Privado{% endif %}
+                  </span>
+                </div>
+              </div>
+
+              <div class="privacy-item mb-3">
+                <i class="bi bi-envelope" style="color:#1a3a5c;font-size:1.1rem;"></i>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <strong style="font-size:.88rem;">Email</strong>
+                  <span class="badge rounded-pill px-3"
+                        style="background:{% if usuario_perfil.mostrar_email %}#2a5298{% else %}#6b7280{% endif %};">
+                    {% if usuario_perfil.mostrar_email %}Visível para Amigos{% else %}Privado{% endif %}
+                  </span>
+                </div>
+              </div>
+
+              <div class="privacy-item">
+                <i class="bi bi-telephone" style="color:#d4a847;font-size:1.1rem;"></i>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <strong style="font-size:.88rem;">Telefone</strong>
+                  <span class="badge rounded-pill px-3"
+                        style="background:{% if usuario_perfil.mostrar_telefone %}#d4a847;color:#000{% else %}#6b7280{% endif %};">
+                    {% if usuario_perfil.mostrar_telefone %}Visível para Amigos{% else %}Privado{% endif %}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-4 pt-3" style="border-top:1px solid #e2ddd8;">
+              <a href="{% url 'usuarios:editar_perfil' %}" class="btn btn-custom btn-primario btn-sm">
+                <i class="bi bi-pencil-fill me-1"></i>Gerenciar Privacidade
+              </a>
+            </div>
+
+          </div>
+        </div>
+        {% endif %}
+
+      </div><!-- /main -->
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div><!-- /perfil-container -->
+
+
+<!-- ══════════ MODAL AMIZADE ══════════ -->
+<div class="modal fade" id="modalSolicitacao" tabindex="-1" aria-labelledby="modalSolicitacaoLabel">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;border:none;overflow:hidden;">
+
+      <div class="modal-header" style="background:linear-gradient(135deg,#1a3a5c,#2a5298);border:none;">
+        <h5 class="modal-title text-white fw-bold" id="modalSolicitacaoLabel">
+          <i class="bi bi-person-plus-fill me-2"></i>Enviar Solicitação de Amizade
+        </h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+
+      <form method="post"
+            action="{% url 'conexoes:enviar_solicitacao' usuario_perfil.uuid %}"
+            id="formSolicitacao">
+        {% csrf_token %}
+        <div class="modal-body p-4">
+          <label for="mensagem" class="form-label">
+            <i class="bi bi-chat-text me-1" style="color:#d4a847;"></i>
+            Mensagem Opcional
+          </label>
+          <textarea name="mensagem" id="mensagem" class="form-control" rows="3"
+                    placeholder="Conte um pouco sobre você e por que quer se conectar..."></textarea>
+          <small class="text-muted mt-1 d-block">Máximo de 500 caracteres</small>
+          <input type="hidden" name="destinatario_uuid" id="destinatario_uuid">
+        </div>
+        <div class="modal-footer" style="border-top:1px solid #e2ddd8;">
+          <button type="button" class="btn btn-ghost-navy btn-sm" data-bs-dismiss="modal">
+            Cancelar
+          </button>
+          <button type="submit" class="btn btn-custom btn-primario btn-sm">
+            <i class="bi bi-send-fill me-1"></i>Enviar Solicitação
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+{% block scripts_extras %}
 <script>
-    function enviarSolicitacao(uuid) {
-        document.getElementById('destinatario_uuid').value = uuid;
-        const modal = new bootstrap.Modal(document.getElementById('modalSolicitacao'));
-        modal.show();
-    }
+function enviarSolicitacao(uuid) {
+  document.getElementById('destinatario_uuid').value = uuid;
+  new bootstrap.Modal(document.getElementById('modalSolicitacao')).show();
+}
 </script>
 {% endblock %}

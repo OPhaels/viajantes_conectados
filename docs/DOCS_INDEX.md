@@ -87,7 +87,7 @@ viajantes_conectados/
 │   └── style.css                    ← 🎨 Design System profissional
 │
 ├── templates/
-│   └── base_novo.html               ← Template base redesenhado
+│   
 │
 └── config/
     └── settings.py                  ← Atualizado com segurança

@@ -27,7 +27,7 @@
     </section>
 
     <!-- Conteúdo Principal -->
-    <section class="py-5 bg-light">
+    <section class="py-5">
         <div class="container">
             <!-- Filtros e Ações -->
             <div class="row justify-content-between align-items-center mb-4">
@@ -41,7 +41,7 @@
                     </div>
                 </div>
                 <div class="col-12 col-md-6 text-md-end mt-3 mt-md-0">
-                    <a href="{% url 'destinos:criar_plano' %}" class="btn btn-primary btn-lg">
+                    <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-primario btn-sm flex-grow-1">
                         <i class="bi bi-plus-circle me-2"></i>Novo Plano
                     </a>
                 </div>
@@ -56,14 +56,14 @@
                     <div class="card plano-card h-100 shadow-sm border-0">
                         <!-- Imagem do País -->
                         <div class="plano-image-container">
-                            {% if plano.pais_destino.imagem %}
-                            <img src="{{ plano.pais_destino.imagem.url }}" alt="{{ plano.pais_destino.nome }}"
-                                class="card-img-top">
-                            {% else %}
-                            <div class="bg-gradient-placeholder">
-                                <i class="bi bi-globe"></i>
+                            <img src="https://flagcdn.com/w160/{{ plano.pais_destino.codigo_iso|lower }}.png"
+                                alt="Bandeira de {{ plano.pais_destino.nome }}"
+                                style="width:100%;height:100%;object-fit:cover;"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+
+                            <div class="plano-mini-placeholder" style="display:none;">
+                            <i class="bi bi-globe2"></i>
                             </div>
-                            {% endif %}
 
                             <!-- Badge de Status -->
                             <div class="badge-container">
@@ -143,21 +143,30 @@
                         </div>
 
                         <!-- Footer do Card -->
-                        <div class="card-footer bg-white border-top-0">
+                        <div class="card-footer bg-white border-top-0 px-3 pb-3 pt-0">
                             <div class="d-flex gap-2 flex-wrap">
+
                                 <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
-                                    class="btn btn-sm btn-info flex-grow-1">
-                                    <i class="bi bi-eye me-1"></i>Ver Detalhes
+                                class="btn btn-custom btn-primario btn-sm flex-grow-1">
+                                <i class="bi bi-eye me-1"></i>Ver Detalhes
                                 </a>
-                                <a href="{% url 'destinos:editar_plano' plano.uuid %}" class="btn btn-sm btn-warning">
-                                    <i class="bi bi-pencil me-1"></i>Editar
+
+                                <a href="{% url 'destinos:editar_plano' plano.uuid %}"
+                                class="btn btn-custom btn-secundario btn-sm">
+                                <i class="bi bi-pencil-fill me-1"></i>Editar
                                 </a>
-                                <button type="button" class="btn btn-sm btn-danger"
-                                    onclick="deletarPlano('{{ plano.uuid }}')">
-                                    <i class="bi bi-trash me-1"></i>Deletar
+
+                                <button type="button"
+                                        class="btn btn-sm btn-ghost-navy"
+                                        style="border-color:rgba(192,57,43,.3);color:#c0392b;"
+                                        onmouseenter="this.style.background='rgba(192,57,43,.08)'"
+                                        onmouseleave="this.style.background=''"
+                                        onclick="deletarPlano('{{ plano.uuid }}')">
+                                <i class="bi bi-trash3-fill me-1"></i>Deletar
                                 </button>
+
                             </div>
-                        </div>
+                            </div>
                     </div>
                 </div>
                 {% endfor %}

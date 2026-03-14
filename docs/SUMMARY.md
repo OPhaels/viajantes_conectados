@@ -77,7 +77,6 @@ Realizamos uma **revisão profunda e completa** do projeto Viajantes Conectados,
 
 **Arquivos:**
 - `static/css/style.css` - Design system (1000+ linhas)
-- `templates/base_novo.html` - Template redesenhado
 
 ---
 
@@ -88,9 +87,6 @@ Realizamos uma **revisão profunda e completa** do projeto Viajantes Conectados,
 ✅ Integração com design system
 ✅ Responsivo e acessível
 ✅ Scripts otimizados
-```
-
-**Arquivo:** `templates/base_novo.html`
 
 ---
 
@@ -135,7 +131,6 @@ Realizamos uma **revisão profunda e completa** do projeto Viajantes Conectados,
 ✅ apps/core/tests.py
 
 ✅ static/css/style.css (design system)
-✅ templates/base_novo.html
 
 ✅ API_DOCUMENTATION.md (100+ endpoints)
 ✅ IMPROVEMENTS.md (relatório completo)

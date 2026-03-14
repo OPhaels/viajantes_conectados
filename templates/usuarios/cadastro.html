@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block titulo %}Cadastro - Viajantes Conectados{% endblock %}
+{% block titulo %}Cadastro — Viajantes Conectados{% endblock %}
 
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
@@ -9,696 +9,304 @@
 
 {% block conteudo %}
 <div class="auth-container">
-    <div class="container">
-        <div class="row justify-content-center align-items-center min-vh-100 py-5">
-            <div class="col-12 col-md-10 col-lg-9 col-xl-7">
-                <div class="auth-card fade-in">
-                    <!-- Header do Card -->
-                    <div class="auth-header text-center mb-4 py-4">
-                        <h2 class="auth-title mb-2">Crie Sua Conta</h2>
-                        <p class="auth-subtitle">Comece sua jornada agora - é grátis!</p>
-                    </div>
+  <div class="container">
+    <div class="row justify-content-center align-items-center min-vh-100 py-5">
+      <div class="col-12 col-md-10 col-lg-9 col-xl-7">
 
-                    <!-- Benefícios -->
-                    <div class="benefits-pills mb-4">
-                        <span class="benefit-pill">
-                            <i class="bi bi-check-circle-fill me-2"></i>Grátis para sempre
-                        </span>
-                        <span class="benefit-pill">
-                            <i class="bi bi-shield-check me-2"></i>100% Seguro
-                        </span>
-                        <span class="benefit-pill">
-                            <i class="bi bi-lightning-charge-fill me-2"></i>Cadastro rápido
-                        </span>
-                    </div>
+        <!-- ══════════ CARD PRINCIPAL ══════════ -->
+        <div class="auth-card fade-in">
 
-                    <!-- Formulário de Cadastro -->
-                    <form method="post" action="{% url 'usuarios:cadastro' %}" class="needs-validation" novalidate>
-                        {% csrf_token %}
-
-                        <div class="row g-3">
-                            <!-- Nome Completo -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label for="id_nome_completo" class="form-label">
-                                        <i class="bi bi-person me-2"></i>Nome Completo
-                                    </label>
-                                    <input type="text" name="nome_completo" id="id_nome_completo"
-                                        class="form-control form-control-lg" placeholder="Seu nome completo" required
-                                        autofocus minlength="3">
-                                    <div class="invalid-feedback">
-                                        Por favor, insira seu nome completo (mínimo 3 caracteres).
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Email -->
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <label for="id_email" class="form-label">
-                                        <i class="bi bi-envelope me-2"></i>Email
-                                    </label>
-                                    <input type="email" name="email" id="id_email" class="form-control form-control-lg"
-                                        placeholder="seu@email.com" required>
-                                    <div class="form-text">
-                                        <i class="bi bi-info-circle me-1"></i>
-                                        Enviaremos um email de verificação
-                                    </div>
-                                    <div class="invalid-feedback">
-                                        Por favor, insira um email válido.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Senha -->
-                            <div class="col-12 col-md-6">
-                                <div class="form-group">
-                                    <label for="id_password1" class="form-label">
-                                        <i class="bi bi-lock me-2"></i>Senha
-                                    </label>
-                                    <div class="password-wrapper">
-                                        <input type="password" name="password1" id="id_password1"
-                                            class="form-control form-control-lg" placeholder="Crie uma senha forte"
-                                            required minlength="8">
-                                        <button class="password-toggle" type="button"
-                                            onclick="togglePassword('id_password1', 'eyeIcon1')">
-                                            <i class="bi bi-eye" id="eyeIcon1"></i>
-                                        </button>
-                                    </div>
-
-                                    <!-- Indicador de força da senha -->
-                                    <div class="password-strength mt-2" id="passwordStrength">
-                                        <div class="strength-bar">
-                                            <div class="strength-fill" id="strengthFill"></div>
-                                        </div>
-                                        <small id="strengthText" class="text-muted"></small>
-                                    </div>
-
-                                    <div class="invalid-feedback">
-                                        A senha deve ter no mínimo 8 caracteres.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Confirmar Senha -->
-                            <div class="col-12 col-md-6">
-                                <div class="form-group">
-                                    <label for="id_password2" class="form-label">
-                                        <i class="bi bi-lock-fill me-2"></i>Confirmar Senha
-                                    </label>
-                                    <div class="password-wrapper">
-                                        <input type="password" name="password2" id="id_password2"
-                                            class="form-control form-control-lg" placeholder="Confirme sua senha"
-                                            required minlength="8">
-                                        <button class="password-toggle" type="button"
-                                            onclick="togglePassword('id_password2', 'eyeIcon2')">
-                                            <i class="bi bi-eye" id="eyeIcon2"></i>
-                                        </button>
-                                    </div>
-                                    <div class="invalid-feedback">
-                                        As senhas devem ser iguais.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Requisitos da Senha -->
-                            <div class="col-12">
-                                <div class="password-requirements">
-                                    <p class="mb-2 fw-semibold">
-                                        <i class="bi bi-shield-check me-2"></i>
-                                        Sua senha deve conter:
-                                    </p>
-                                    <ul class="requirements-list">
-                                        <li id="req-length">
-                                            <i class="bi bi-circle"></i>
-                                            Mínimo de 8 caracteres
-                                        </li>
-                                        <li id="req-uppercase">
-                                            <i class="bi bi-circle"></i>
-                                            Uma letra maiúscula
-                                        </li>
-                                        <li id="req-lowercase">
-                                            <i class="bi bi-circle"></i>
-                                            Uma letra minúscula
-                                        </li>
-                                        <li id="req-number">
-                                            <i class="bi bi-circle"></i>
-                                            Um número
-                                        </li>
-                                        <li id="req-special">
-                                            <i class="bi bi-circle"></i>
-                                            Um caractere especial (!@#$%^&*)
-                                        </li>
-                                    </ul>
-                                </div>
-                            </div>
-
-                            <!-- Termos e Condições -->
-                            <div class="col-12">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="aceita_termos"
-                                        id="aceita_termos" required>
-                                    <label class="form-check-label" for="aceita_termos">
-                                        Li e aceito os
-                                        <a href="#" class="auth-link">Termos de Uso</a>
-                                        e a
-                                        <a href="#" class="auth-link">Política de Privacidade</a>
-                                    </label>
-                                    <div class="invalid-feedback">
-                                        Você deve aceitar os termos para continuar.
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- Botão Cadastrar -->
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-custom btn-primario btn-lg w-100">
-                                    <i class="bi bi-rocket-takeoff me-2"></i>
-                                    Criar Minha Conta
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-
-                    <!-- Divisor -->
-                    <div class="auth-divider my-4">
-                        <span>OU</span>
-                    </div>
-
-                    <!-- Link para Login -->
-                    <div class="text-center">
-                        <p class="mb-0">
-                            Já tem uma conta?
-                            <a href="{% url 'usuarios:login' %}" class="auth-link fw-bold">
-                                Fazer Login
-                            </a>
-                        </p>
-                    </div>
-                </div>
-
-                <!-- Informações de Segurança -->
-                <div class="auth-footer text-center mt-4 fade-in" style="animation-delay: 0.2s">
-                    <div class="security-badges">
-                        <span class="security-badge">
-                            <i class="bi bi-shield-fill-check"></i>
-                            SSL Seguro
-                        </span>
-                        <span class="security-badge">
-                            <i class="bi bi-lock-fill"></i>
-                            Dados Criptografados
-                        </span>
-                        <span class="security-badge">
-                            <i class="bi bi-check2-circle"></i>
-                            LGPD Compatível
-                        </span>
-                    </div>
-                </div>
+          <!-- Header -->
+          <div class="auth-header text-center">
+            <div class="auth-icon mb-3">
+              <i class="bi bi-person-plus-fill"></i>
             </div>
+            <h2 class="auth-title">Crie Sua Conta</h2>
+            <p class="auth-subtitle">Comece sua jornada agora — é grátis!</p>
+          </div>
+
+          <!-- Benefit pills -->
+          <div class="benefits-pills my-4">
+            <span class="benefit-pill">
+              <i class="bi bi-check-circle-fill"></i>Grátis para sempre
+            </span>
+            <span class="benefit-pill">
+              <i class="bi bi-shield-check"></i>100% Seguro
+            </span>
+            <span class="benefit-pill">
+              <i class="bi bi-lightning-charge-fill"></i>Cadastro rápido
+            </span>
+          </div>
+
+          <!-- Formulário -->
+          <form method="post" action="{% url 'usuarios:cadastro' %}" class="needs-validation" novalidate>
+            {% csrf_token %}
+
+            <div class="row g-3">
+
+              <!-- Nome Completo -->
+              <div class="col-12">
+                <label for="id_nome_completo" class="form-label">
+                  <i class="bi bi-person"></i> Nome Completo
+                </label>
+                <input
+                  type="text"
+                  name="nome_completo"
+                  id="id_nome_completo"
+                  class="form-control form-control-lg"
+                  placeholder="Seu nome completo"
+                  required autofocus minlength="3"
+                >
+                <div class="invalid-feedback">
+                  Por favor, insira seu nome completo (mínimo 3 caracteres).
+                </div>
+              </div>
+
+              <!-- Email -->
+              <div class="col-12">
+                <label for="id_email" class="form-label">
+                  <i class="bi bi-envelope"></i> Email
+                </label>
+                <input
+                  type="email"
+                  name="email"
+                  id="id_email"
+                  class="form-control form-control-lg"
+                  placeholder="seu@email.com"
+                  required
+                >
+                <div class="form-text">
+                  <i class="bi bi-info-circle"></i> Enviaremos um e-mail de verificação
+                </div>
+                <div class="invalid-feedback">Por favor, insira um e-mail válido.</div>
+              </div>
+
+              <!-- Senha -->
+              <div class="col-12 col-md-6">
+                <label for="id_password1" class="form-label">
+                  <i class="bi bi-lock"></i> Senha
+                </label>
+                <div class="password-wrapper">
+                  <input
+                    type="password"
+                    name="password1"
+                    id="id_password1"
+                    class="form-control form-control-lg"
+                    placeholder="Crie uma senha forte"
+                    required minlength="8"
+                  >
+                  <button class="password-toggle" type="button"
+                    onclick="togglePassword('id_password1','eyeIcon1')" tabindex="-1">
+                    <i class="bi bi-eye" id="eyeIcon1"></i>
+                  </button>
+                </div>
+                <!-- Barra de força -->
+                <div class="password-strength mt-2" id="passwordStrengthWrap">
+                  <div class="strength-bar">
+                    <div class="strength-fill" id="strengthFill"></div>
+                  </div>
+                  <small id="strengthText" class="text-muted"></small>
+                </div>
+                <div class="invalid-feedback">A senha deve ter no mínimo 8 caracteres.</div>
+              </div>
+
+              <!-- Confirmar Senha -->
+              <div class="col-12 col-md-6">
+                <label for="id_password2" class="form-label">
+                  <i class="bi bi-lock-fill"></i> Confirmar Senha
+                </label>
+                <div class="password-wrapper">
+                  <input
+                    type="password"
+                    name="password2"
+                    id="id_password2"
+                    class="form-control form-control-lg"
+                    placeholder="Confirme sua senha"
+                    required minlength="8"
+                  >
+                  <button class="password-toggle" type="button"
+                    onclick="togglePassword('id_password2','eyeIcon2')" tabindex="-1">
+                    <i class="bi bi-eye" id="eyeIcon2"></i>
+                  </button>
+                </div>
+                <div class="invalid-feedback">As senhas devem ser iguais.</div>
+              </div>
+
+              <!-- Requisitos -->
+              <div class="col-12">
+                <div class="password-requirements">
+                  <p class="req-heading mb-2">
+                    <i class="bi bi-shield-check"></i> Sua senha deve conter:
+                  </p>
+                  <ul class="requirements-list">
+                    <li id="req-length">
+                      <i class="bi bi-circle req-icon"></i>
+                      Mínimo de 8 caracteres
+                    </li>
+                    <li id="req-uppercase">
+                      <i class="bi bi-circle req-icon"></i>
+                      Uma letra maiúscula
+                    </li>
+                    <li id="req-lowercase">
+                      <i class="bi bi-circle req-icon"></i>
+                      Uma letra minúscula
+                    </li>
+                    <li id="req-number">
+                      <i class="bi bi-circle req-icon"></i>
+                      Um número
+                    </li>
+                    <li id="req-special">
+                      <i class="bi bi-circle req-icon"></i>
+                      Um caractere especial (!@#$%^&amp;*)
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <!-- Termos -->
+              <div class="col-12">
+                <div class="form-check auth-check">
+                  <input class="form-check-input" type="checkbox"
+                    name="aceita_termos" id="aceita_termos" required>
+                  <label class="form-check-label" for="aceita_termos">
+                    Li e aceito os
+                    <a href="#" class="auth-link">Termos de Uso</a>
+                    e a
+                    <a href="#" class="auth-link">Política de Privacidade</a>
+                  </label>
+                  <div class="invalid-feedback">
+                    Você deve aceitar os termos para continuar.
+                  </div>
+                </div>
+              </div>
+
+              <!-- Submit -->
+              <div class="col-12">
+                <button type="submit" class="btn-custom btn-primario btn-lg w-100">
+                  <i class="bi bi-rocket-takeoff"></i>
+                  Criar Minha Conta
+                </button>
+              </div>
+
+            </div><!-- /row -->
+          </form>
+
+          <!-- Divisor -->
+          <div class="auth-divider my-4"><span>OU</span></div>
+
+          <!-- Link login -->
+          <p class="text-center mb-0" style="font-size:.9rem; color:var(--text-muted);">
+            Já tem uma conta?
+            <a href="{% url 'usuarios:login' %}" class="auth-link fw-bold">Fazer Login</a>
+          </p>
+
+        </div><!-- /auth-card -->
+
+        <!-- Selos de segurança -->
+        <div class="auth-footer text-center mt-4 fade-in" style="animation-delay:.2s;">
+          <div class="security-badges">
+            <span class="security-badge">
+              <i class="bi bi-shield-fill-check"></i> SSL Seguro
+            </span>
+            <span class="security-badge">
+              <i class="bi bi-lock-fill"></i> Dados Criptografados
+            </span>
+            <span class="security-badge">
+              <i class="bi bi-check2-circle"></i> LGPD Compatível
+            </span>
+          </div>
         </div>
-    </div>
-</div>
 
+      </div><!-- /col -->
+    </div><!-- /row -->
+  </div><!-- /container -->
+</div><!-- /auth-container -->
+{% endblock %}
+
+
+{% block scripts_extras %}
 <script>
-    min - height: 100vh;
-    display: flex;
-    align - items: center;
-    padding: 2rem 0;
+(function () {
+  'use strict';
+
+  /* ── Toggle mostrar / ocultar senha ─────────────────── */
+  window.togglePassword = function (inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon  = document.getElementById(iconId);
+    if (!input || !icon) return;
+    const isHidden = input.type === 'password';
+    input.type = isHidden ? 'text' : 'password';
+    icon.classList.toggle('bi-eye',       !isHidden);
+    icon.classList.toggle('bi-eye-slash',  isHidden);
+  };
+
+  /* ── Força da senha ──────────────────────────────────── */
+  const STRENGTH_LABELS = ['', 'Senha fraca 😕', 'Senha média 👍', 'Senha forte 💪'];
+  const STRENGTH_COLORS = ['', '#c0392b',         '#d4a847',         '#2d9e6b'];
+  const STRENGTH_CLASSES = ['', 'weak',            'medium',          'strong'];
+
+  function scorePassword(pw) {
+    let s = 0;
+    if (pw.length >= 8)  s++;
+    if (pw.length >= 12) s++;
+    if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++;
+    if (/[0-9]/.test(pw)) s++;
+    if (/[!@#$%^&*()\-_=+\[\]{};':",.<>?/\\|`~]/.test(pw)) s++;
+    return Math.min(Math.ceil(s / 1.6), 3); // 0–3
+  }
+
+  function updateReq(id, valid) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.classList.toggle('completed', valid);
+    const icon = el.querySelector('.req-icon');
+    if (icon) {
+      icon.className = valid
+        ? 'bi bi-check-circle-fill req-icon'
+        : 'bi bi-circle req-icon';
     }
-
-    /* Card de Autenticação */
-    .auth - card {
-        background: white;
-        border - radius: 24px;
-        padding: 3rem;
-        box - shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        position: relative;
-        overflow: hidden;
-    }
-
-    .auth - card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 5px;
-        background: linear - gradient(90deg, var(--cor - primaria), var(--cor - secundaria));
-    }
-
-    /* Header */
-    .auth - icon {
-        width: 80px;
-        height: 80px;
-        background: linear - gradient(135deg, var(--cor - secundaria), var(--cor - secundaria - escura));
-        border - radius: 20px;
-        display: flex;
-        align - items: center;
-        justify - content: center;
-        margin: 0 auto;
-        animation: pulse 2s ease -in -out infinite;
-    }
-
-    .auth - icon i {
-        font - size: 2.5rem;
-        color: white;
-    }
-
-    .auth - title {
-        font - size: 2rem;
-        font - weight: 700;
-        color: var(--cor - texto);
-    }
-
-    .auth - subtitle {
-        font - size: 1.1rem;
-        color: var(--cor - texto - secundario);
-    }
-
-    /* Pills de Benefícios */
-    .benefits - pills {
-        display: flex;
-        flex - wrap: wrap;
-        gap: 0.75rem;
-        justify - content: center;
-    }
-
-    .benefit - pill {
-        background: linear - gradient(135deg, #f8f9fa, #e9ecef);
-        padding: 0.5rem 1rem;
-        border - radius: 50px;
-        font - size: 0.85rem;
-        font - weight: 600;
-        color: var(--cor - texto);
-        display: inline - flex;
-        align - items: center;
-        box - shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    }
-
-    .benefit - pill i {
-        color: var(--cor - secundaria);
-    }
-
-    /* Formulário */
-    .form - label {
-        font - weight: 600;
-        color: var(--cor - texto);
-        margin - bottom: 0.5rem;
-        font - size: 0.95rem;
-    }
-
-    .form - control - lg {
-        padding: 0.75rem 1rem;
-        font - size: 1rem;
-        border: 2px solid #e9ecef;
-        border - radius: 12px;
-        transition: all 0.3s ease;
-    }
-
-    .form - control - lg:focus {
-        border - color: var(--cor - primaria);
-        box - shadow: 0 0 0 0.25rem rgba(74, 144, 226, 0.15);
-        transform: translateY(-2px);
-    }
-
-    .form - text {
-        font - size: 0.85rem;
-        color: var(--cor - texto - secundario);
-        margin - top: 0.25rem;
-    }
-
-    /* Wrapper de Senha */
-    .password - wrapper {
-        position: relative;
-    }
-
-    .password - toggle {
-        position: absolute;
-        right: 1rem;
-        top: 50 %;
-        transform: translateY(-50 %);
-        background: none;
-        border: none;
-        color: var(--cor - texto - secundario);
-        cursor: pointer;
-        padding: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .password - toggle:hover {
-        color: var(--cor - primaria);
-    }
-
-    /* Indicador de Força da Senha */
-    .password - strength {
-        margin - top: 0.5rem;
-    }
-
-    .strength - bar {
-        height: 4px;
-        background: #e9ecef;
-        border - radius: 4px;
-        overflow: hidden;
-        margin - bottom: 0.5rem;
-    }
-
-    .strength - fill {
-        height: 100 %;
-        width: 0 %;
-        transition: all 0.3s ease;
-        border - radius: 4px;
-    }
-
-    .strength - fill.weak {
-        width: 33 %;
-        background: #dc3545;
-    }
-
-    .strength - fill.medium {
-        width: 66 %;
-        background: #ffc107;
-    }
-
-    .strength - fill.strong {
-        width: 100 %;
-        background: #28a745;
-    }
-
-    /* Requisitos da Senha */
-    .password - requirements {
-        background: #f8f9fa;
-        padding: 1rem;
-        border - radius: 12px;
-        border - left: 4px solid var(--cor - primaria);
-    }
-
-    .requirements - list {
-        list - style: none;
-        padding: 0;
-        margin: 0;
-    }
-
-    .requirements - list li {
-        padding: 0.25rem 0;
-        font - size: 0.9rem;
-        color: var(--cor - texto - secundario);
-        transition: all 0.3s ease;
-    }
-
-    .requirements - list li i {
-        margin - right: 0.5rem;
-        font - size: 0.75rem;
-    }
-
-    .requirements - list li.valid {
-        color: #28a745;
-        font - weight: 600;
-    }
-
-    .requirements - list li.valid i {
-        color: #28a745;
-    }
-
-    .requirements - list li.valid i::before {
-        content: '\F26A';
-        /* bi-check-circle-fill */
-    }
-
-    /* Checkbox */
-    .form - check - input {
-        width: 1.25rem;
-        height: 1.25rem;
-        border: 2px solid #dee2e6;
-        cursor: pointer;
-    }
-
-    .form - check - input:checked {
-        background - color: var(--cor - primaria);
-        border - color: var(--cor - primaria);
-    }
-
-    .form - check - label {
-        cursor: pointer;
-        user - select: none;
-        color: var(--cor - texto - secundario);
-        font - size: 0.9rem;
-    }
-
-    /* Links */
-    .auth - link {
-        color: var(--cor - primaria);
-        text - decoration: none;
-        font - weight: 500;
-        transition: all 0.3s ease;
-    }
-
-    .auth - link:hover {
-        color: var(--cor - primaria - escura);
-        text - decoration: underline;
-    }
-
-    /* Divisor */
-    .auth - divider {
-        position: relative;
-        text - align: center;
-        margin: 2rem 0;
-    }
-
-    .auth - divider::before {
-        content: '';
-        position: absolute;
-        top: 50 %;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: #e9ecef;
-    }
-
-    .auth - divider span {
-        position: relative;
-        background: white;
-        padding: 0 1rem;
-        color: var(--cor - texto - secundario);
-        font - size: 0.9rem;
-        font - weight: 500;
-    }
-
-    /* Botões */
-    .btn - custom {
-        padding: 0.875rem 2rem;
-        border - radius: 12px;
-        font - weight: 600;
-        font - size: 1.05rem;
-        letter - spacing: 0.5px;
-        transition: all 0.3s ease;
-        border: none;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .btn - custom::before {
-        content: '';
-        position: absolute;
-        top: 50 %;
-        left: 50 %;
-        width: 0;
-        height: 0;
-        border - radius: 50 %;
-        background: rgba(255, 255, 255, 0.3);
-        transform: translate(-50 %, -50 %);
-        transition: width 0.6s, height 0.6s;
-    }
-
-    .btn - custom: hover::before {
-        width: 400px;
-        height: 400px;
-    }
-
-    .btn - primario {
-        background: linear - gradient(135deg, var(--cor - primaria), var(--cor - primaria - escura));
-        color: rgb(66, 129, 211);
-    }
-
-    .btn - primario:hover {
-        transform: translateY(-3px);
-        box - shadow: 0 10px 25px rgba(74, 144, 226, 0.4);
-        color: rgb(38, 43, 202);
-    }
-
-    /* Badges de Segurança */
-    .security - badges {
-        display: flex;
-        justify - content: center;
-        gap: 1rem;
-        flex - wrap: wrap;
-    }
-
-    .security - badge {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.5rem 1rem;
-        border - radius: 50px;
-        font - size: 0.85rem;
-        color: white;
-        display: inline - flex;
-        align - items: center;
-        gap: 0.5rem;
-        backdrop - filter: blur(10px);
-    }
-
-    /* Animações */
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(20px);
-        }
-
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    @keyframes pulse {
-
-        0 %,
-            100 % {
-                transform: scale(1);
-            }
-
-        50 % {
-            transform: scale(1.05);
-        }
-    }
-
-    .fade -in {
-        animation: fadeIn 0.6s ease- out forwards;
-    }
-
-    /* Responsivo */
-    @media(max - width: 768px) {
-        .auth - card {
-            padding: 2rem 1.5rem;
-        }
-
-        .auth - title {
-            font - size: 1.75rem;
-        }
-
-        .benefits - pills {
-            flex - direction: column;
-        }
-
-        .benefit - pill {
-            justify - content: center;
-        }
-    }
-
-    @media(max - width: 576px) {
-        .auth - card {
-            padding: 1.5rem 1rem;
-        }
-
-        .security - badges {
-            flex - direction: column;
-            align - items: center;
-</div >
-
-                <script>
-    // Toggle mostrar/ocultar senha
-                    function togglePassword(inputId, iconId) {
-        const passwordInput = document.getElementById(inputId);
-                    const eyeIcon = document.getElementById(iconId);
-
-                    if (passwordInput.type === 'password') {
-                        passwordInput.type = 'text';
-                    eyeIcon.classList.remove('bi-eye');
-                    eyeIcon.classList.add('bi-eye-slash');
-        } else {
-                        passwordInput.type = 'password';
-                    eyeIcon.classList.remove('bi-eye-slash');
-                    eyeIcon.classList.add('bi-eye');
-        }
-    }
-
-                    // Validação de força da senha
-                    const passwordInput = document.getElementById('id_password1');
-                    const strengthFill = document.getElementById('strengthFill');
-                    const strengthText = document.getElementById('strengthText');
-
-                    passwordInput?.addEventListener('input', function () {
-        const password = this.value;
-                    const strength = calculatePasswordStrength(password);
-
-                    // Atualizar barra de força
-                    strengthFill.className = 'strength-fill';
-        if (strength.score >= 4) {
-                        strengthFill.classList.add('strong');
-                    strengthText.textContent = 'Senha forte 💪';
-                    strengthText.style.color = '#28a745';
-        } else if (strength.score >= 2) {
-                        strengthFill.classList.add('medium');
-                    strengthText.textContent = 'Senha média 👍';
-                    strengthText.style.color = '#ffc107';
-        } else if (password.length > 0) {
-                        strengthFill.classList.add('weak');
-                    strengthText.textContent = 'Senha fraca 😕';
-                    strengthText.style.color = '#dc3545';
-        } else {
-                        strengthText.textContent = '';
-        }
-
-        // Atualizar requisitos
-        updateRequirement('req-length', password.length >= 8);
-                    updateRequirement('req-uppercase', /[A-Z]/.test(password));
-                    updateRequirement('req-lowercase', /[a-z]/.test(password));
-                    updateRequirement('req-number', /[0-9]/.test(password));
-                    updateRequirement('req-special', /[!@#$%^&*(),.?":{ }|<>]/.test(password));
-    });
-
-                        function calculatePasswordStrength(password) {
-                            let score = 0;
-
-        if (password.length >= 8) score++;
-        if (password.length >= 12) score++;
-                        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) score++;
-                        if (/[0-9]/.test(password)) score++;
-                        if (/[!@#$%^&*(),.?":{ }|<>]/.test(password)) score++;
-
-                            return {score};
-    }
-
-                            function updateRequirement(id, isValid) {
-        const element = document.getElementById(id);
-                            if (isValid) {
-                                element.classList.add('valid');
-        } else {
-                                element.classList.remove('valid');
-        }
-    }
-
-                            // Validar se as senhas coincidem
-                            const password2Input = document.getElementById('id_password2');
-                            password2Input?.addEventListener('input', function () {
-        if (this.value !== passwordInput.value) {
-                                this.setCustomValidity('As senhas não coincidem');
-        } else {
-                                this.setCustomValidity('');
-        }
-    });
-
-                            // Validação do formulário
-                            (function () {
-                                'use strict';
-                            const forms = document.querySelectorAll('.needs-validation');
-
-                            Array.from(forms).forEach(function (form) {
-                                form.addEventListener('submit', function (event) {
-                                    if (!form.checkValidity()) {
-                                        event.preventDefault();
-                                        event.stopPropagation();
-                                    }
-                                    form.classList.add('was-validated');
-                                }, false);
-        });
-    })();
+  }
+
+  const pw1      = document.getElementById('id_password1');
+  const pw2      = document.getElementById('id_password2');
+  const fill     = document.getElementById('strengthFill');
+  const fillText = document.getElementById('strengthText');
+
+  pw1?.addEventListener('input', function () {
+    const v = this.value;
+    const score = v.length ? scorePassword(v) : 0;
+
+    // barra
+    fill.className = 'strength-fill' + (score ? ' ' + STRENGTH_CLASSES[score] : '');
+    fillText.textContent   = score ? STRENGTH_LABELS[score] : '';
+    fillText.style.color   = STRENGTH_COLORS[score] || '';
+
+    // requisitos
+    updateReq('req-length',    v.length >= 8);
+    updateReq('req-uppercase', /[A-Z]/.test(v));
+    updateReq('req-lowercase', /[a-z]/.test(v));
+    updateReq('req-number',    /[0-9]/.test(v));
+    updateReq('req-special',   /[!@#$%^&*(),.?":{}|<>]/.test(v));
+  });
+
+  /* ── Verificar senhas iguais ─────────────────────────── */
+  pw2?.addEventListener('input', function () {
+    this.setCustomValidity(
+      this.value !== pw1?.value ? 'As senhas não coincidem' : ''
+    );
+  });
+
+  /* ── Validação HTML5 no submit ───────────────────────── */
+  document.querySelectorAll('.needs-validation').forEach(form => {
+    form.addEventListener('submit', function (e) {
+      if (!form.checkValidity()) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      form.classList.add('was-validated');
+    }, false);
+  });
+
+})();
 </script>
 {% endblock %}

@@ -2,264 +2,1050 @@
 {% block titulo %}Detalhes do Plano de Viagem{% endblock %}
 
 {% block conteudo %}
-<div class="container my-5">
+
+<style>
+    /* ── Variáveis ────────────────────────────────────────── */
+    :root {
+        --plan-radius: 16px;
+        --plan-radius-sm: 10px;
+        --plan-shadow: 0 4px 24px rgba(0, 0, 0, .08);
+        --plan-shadow-hover: 0 8px 40px rgba(0, 0, 0, .14);
+        --plan-transition: .3s cubic-bezier(.4, 0, .2, 1);
+        --plan-border: 1px solid rgba(0, 0, 0, .07);
+    }
+
+    /* ── Keyframes ────────────────────────────────────────── */
+    @keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes slideInLeft {
+        from {
+            opacity: 0;
+            transform: translateX(-16px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+
+    @keyframes pulse-badge {
+
+        0%,
+        100% {
+            transform: scale(1);
+        }
+
+        50% {
+            transform: scale(1.08);
+        }
+    }
+
+    /* ── Flag banner ─────────────────────────────────────── */
+    .plan-flag-banner {
+        width: 100%;
+        height: 180px;
+        position: relative;
+        border-radius: var(--plan-radius) var(--plan-radius) 0 0;
+        overflow: hidden;
+        animation: fadeUp .4s ease both;
+    }
+
+    .plan-flag-banner__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        display: block;
+        filter: brightness(.72) saturate(1.1);
+        transition: filter .5s ease;
+    }
+
+    .plan-flag-banner:hover .plan-flag-banner__img {
+        filter: brightness(.82) saturate(1.15);
+    }
+
+    .plan-flag-banner__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom,
+                rgba(0, 0, 0, .05) 0%,
+                rgba(0, 0, 0, .45) 100%);
+    }
+
+    /* "Powered by flagcdn" tag */
+    .plan-flag-banner__credit {
+        position: absolute;
+        bottom: .5rem;
+        right: .75rem;
+        font-size: .65rem;
+        color: rgba(255, 255, 255, .45);
+        letter-spacing: .04em;
+    }
+
+    /* fallback quando não há bandeira */
+    .plan-flag-banner--fallback {
+        background: linear-gradient(135deg, var(--bs-primary) 0%, #0d4d8a 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .plan-flag-banner--fallback i {
+        font-size: 4rem;
+        color: rgba(255, 255, 255, .2);
+    }
+
+    /* ── Hero ─────────────────────────────────────────────── */
+    .plan-hero {
+        background: linear-gradient(135deg, var(--bs-primary) 0%, #1a6fbf 60%, #0d4d8a 100%);
+        border-radius: 0;
+        padding: 1.75rem 2rem 3.5rem;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp .5s .05s ease both;
+    }
+
+    .plan-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+            radial-gradient(ellipse at 80% -10%, rgba(255, 255, 255, .12) 0%, transparent 60%),
+            radial-gradient(ellipse at -10% 110%, rgba(0, 0, 0, .18) 0%, transparent 60%);
+        pointer-events: none;
+    }
+
+    .plan-hero__wave {
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 48px;
+        background: var(--bs-body-bg, #fff);
+        clip-path: ellipse(60% 100% at 50% 100%);
+    }
+
+    .plan-hero__flag {
+        width: 72px;
+        height: 48px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 3px solid rgba(255, 255, 255, .4);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .25);
+        flex-shrink: 0;
+        transition: transform var(--plan-transition);
+    }
+
+    .plan-hero__flag:hover {
+        transform: scale(1.06) rotate(-1deg);
+    }
+
+    .plan-hero__flag-placeholder {
+        width: 72px;
+        height: 48px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, .2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 3px solid rgba(255, 255, 255, .3);
+        flex-shrink: 0;
+    }
+
+    .plan-hero__title {
+        font-size: clamp(1.25rem, 4vw, 1.85rem);
+        font-weight: 700;
+        line-height: 1.2;
+        color: #fff;
+        margin: 0;
+    }
+
+    .plan-hero__subtitle {
+        color: rgba(255, 255, 255, .75);
+        font-size: .9rem;
+        margin-top: .3rem;
+    }
+
+    .plan-hero__badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .4rem;
+        background: rgba(255, 255, 255, .18);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255, 255, 255, .25);
+        color: #fff;
+        font-size: .78rem;
+        font-weight: 600;
+        padding: .35rem .85rem;
+        border-radius: 100px;
+        animation: pulse-badge 3s ease infinite;
+    }
+
+    /* ── Stats strip ─────────────────────────────────────── */
+    .plan-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1px;
+        background: var(--bs-border-color, #dee2e6);
+        border: var(--plan-border);
+        border-top: none;
+        border-bottom: none;
+        animation: fadeUp .5s .1s ease both;
+    }
+
+    .plan-stat {
+        background: var(--bs-body-bg, #fff);
+        padding: 1.25rem 1rem;
+        text-align: center;
+        transition: background var(--plan-transition);
+    }
+
+    .plan-stat:hover {
+        background: var(--bs-tertiary-bg, #f8f9fa);
+    }
+
+    .plan-stat__icon {
+        font-size: 1.4rem;
+        margin-bottom: .35rem;
+        display: block;
+    }
+
+    .plan-stat__value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        display: block;
+        line-height: 1.2;
+    }
+
+    .plan-stat__label {
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        opacity: .55;
+        display: block;
+        margin-top: .2rem;
+    }
+
+    /* ── Card principal ──────────────────────────────────── */
+    .plan-card {
+        background: var(--bs-body-bg, #fff);
+        border-radius: 0 0 var(--plan-radius) var(--plan-radius);
+        border: var(--plan-border);
+        border-top: none;
+        box-shadow: var(--plan-shadow);
+        padding: 2rem;
+        animation: fadeUp .5s .15s ease both;
+    }
+
+    @media (max-width: 575.98px) {
+        .plan-card {
+            padding: 1.25rem 1rem;
+        }
+
+        .plan-hero {
+            padding: 1.75rem 1rem 3.5rem;
+        }
+    }
+
+    /* ── Section title ───────────────────────────────────── */
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: .6rem;
+        font-size: 1rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .08em;
+        color: var(--bs-primary);
+        margin-bottom: 1.25rem;
+    }
+
+    .section-heading__line {
+        flex: 1;
+        height: 2px;
+        background: linear-gradient(90deg, var(--bs-primary) 0%, transparent 100%);
+        opacity: .2;
+        border-radius: 2px;
+    }
+
+    .section-heading__icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        background: rgba(var(--bs-primary-rgb, 13, 110, 253), .1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        flex-shrink: 0;
+    }
+
+    /* ── Date cards ──────────────────────────────────────── */
+    .date-card {
+        border: var(--plan-border);
+        border-radius: var(--plan-radius-sm);
+        padding: 1.1rem 1.25rem;
+        transition: box-shadow var(--plan-transition), transform var(--plan-transition);
+        height: 100%;
+        background: var(--bs-body-bg, #fff);
+    }
+
+    .date-card:hover {
+        box-shadow: var(--plan-shadow);
+        transform: translateY(-2px);
+    }
+
+    .date-card__label {
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        opacity: .5;
+        margin-bottom: .4rem;
+    }
+
+    .date-card__main {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.1;
+    }
+
+    .date-card__sub {
+        font-size: .8rem;
+        opacity: .55;
+        margin-top: .3rem;
+    }
+
+    .date-card__icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    /* ── Duration pill ───────────────────────────────────── */
+    .duration-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        background: linear-gradient(135deg, rgba(var(--bs-primary-rgb, 13, 110, 253), .08), rgba(var(--bs-primary-rgb, 13, 110, 253), .04));
+        border: 1px solid rgba(var(--bs-primary-rgb, 13, 110, 253), .15);
+        border-radius: 100px;
+        padding: .55rem 1.25rem;
+        font-size: .9rem;
+        font-weight: 600;
+        color: var(--bs-primary);
+    }
+
+    /* ── Destination chips ──────────────────────────────── */
+    .dest-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: .5rem;
+        border: var(--plan-border);
+        border-radius: var(--plan-radius-sm);
+        padding: .75rem 1rem;
+        background: var(--bs-tertiary-bg, #f8f9fa);
+        transition: box-shadow var(--plan-transition);
+        width: 100%;
+    }
+
+    .dest-chip:hover {
+        box-shadow: var(--plan-shadow);
+    }
+
+    .dest-chip__flag {
+        width: 36px;
+        height: 24px;
+        object-fit: cover;
+        border-radius: 4px;
+        flex-shrink: 0;
+    }
+
+    .dest-chip__label {
+        font-size: .68rem;
+        font-weight: 700;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        opacity: .45;
+        display: block;
+    }
+
+    .dest-chip__value {
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    /* ── Description box ─────────────────────────────────── */
+    .desc-box {
+        background: var(--bs-tertiary-bg, #f8f9fa);
+        border-left: 4px solid var(--bs-primary);
+        border-radius: 0 var(--plan-radius-sm) var(--plan-radius-sm) 0;
+        padding: 1.1rem 1.25rem;
+        font-size: .95rem;
+        line-height: 1.7;
+        white-space: pre-line;
+    }
+
+    /* ── Activity timeline ───────────────────────────────── */
+    .timeline {
+        position: relative;
+        padding-left: 2rem;
+    }
+
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 10px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(180deg, var(--bs-primary) 0%, rgba(var(--bs-primary-rgb, 13, 110, 253), .1) 100%);
+        border-radius: 2px;
+    }
+
+    .timeline-item {
+        position: relative;
+        padding: 1rem 1.1rem;
+        border: var(--plan-border);
+        border-radius: var(--plan-radius-sm);
+        background: var(--bs-body-bg, #fff);
+        margin-bottom: 1rem;
+        transition: box-shadow var(--plan-transition), transform var(--plan-transition);
+        animation: slideInLeft .4s ease both;
+    }
+
+    .timeline-item:nth-child(2) {
+        animation-delay: .05s;
+    }
+
+    .timeline-item:nth-child(3) {
+        animation-delay: .1s;
+    }
+
+    .timeline-item:nth-child(4) {
+        animation-delay: .15s;
+    }
+
+    .timeline-item:nth-child(5) {
+        animation-delay: .2s;
+    }
+
+    .timeline-item:hover {
+        box-shadow: var(--plan-shadow);
+        transform: translateX(3px);
+    }
+
+    .timeline-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .timeline-dot {
+        position: absolute;
+        left: -1.65rem;
+        top: 1.1rem;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--bs-primary);
+        border: 3px solid var(--bs-body-bg, #fff);
+        box-shadow: 0 0 0 2px var(--bs-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .timeline-dot i {
+        font-size: .5rem;
+        color: #fff;
+    }
+
+    .timeline-item__name {
+        font-weight: 700;
+        font-size: .95rem;
+        margin-bottom: .25rem;
+    }
+
+    .timeline-item__desc {
+        font-size: .85rem;
+        opacity: .65;
+        line-height: 1.5;
+        margin-bottom: .4rem;
+    }
+
+    .timeline-item__meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: .5rem;
+        margin-top: .35rem;
+    }
+
+    .timeline-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: .3rem;
+        font-size: .75rem;
+        font-weight: 600;
+        padding: .22rem .6rem;
+        border-radius: 6px;
+        background: rgba(var(--bs-primary-rgb, 13, 110, 253), .08);
+        color: var(--bs-primary);
+    }
+
+    .timeline-badge.time {
+        background: rgba(var(--bs-success-rgb, 25, 135, 84), .08);
+        color: var(--bs-success);
+    }
+
+    /* ── Budget card ─────────────────────────────────────── */
+    .budget-card {
+        background: linear-gradient(135deg, rgba(var(--bs-success-rgb, 25, 135, 84), .08), rgba(var(--bs-success-rgb, 25, 135, 84), .03));
+        border: 1px solid rgba(var(--bs-success-rgb, 25, 135, 84), .2);
+        border-radius: var(--plan-radius-sm);
+        padding: 1.25rem;
+    }
+
+    .budget-amount {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--bs-success);
+        letter-spacing: -.02em;
+    }
+
+    /* ── Obs box ──────────────────────────────────────────── */
+    .obs-box {
+        background: var(--bs-tertiary-bg, #f8f9fa);
+        border-radius: var(--plan-radius-sm);
+        padding: 1rem 1.1rem;
+        font-size: .9rem;
+        line-height: 1.7;
+        white-space: pre-line;
+        border: var(--plan-border);
+    }
+
+    /* ── Empty state ─────────────────────────────────────── */
+    .empty-state {
+        text-align: center;
+        padding: 2.5rem 1rem;
+        opacity: .55;
+    }
+
+    .empty-state i {
+        font-size: 2.5rem;
+        display: block;
+        margin-bottom: .75rem;
+    }
+
+    /* ── Divider ─────────────────────────────────────────── */
+    .plan-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--bs-border-color, #dee2e6) 20%, var(--bs-border-color, #dee2e6) 80%, transparent);
+        margin: 2rem 0;
+    }
+
+    /* ── Owner action buttons ────────────────────────────── */
+    .owner-actions {
+        display: flex;
+        gap: .6rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-edit {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .45rem 1.1rem;
+        border-radius: 10px;
+        font-size: .85rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, .18);
+        backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(255, 255, 255, .35);
+        color: #fff;
+        transition: background var(--plan-transition), transform var(--plan-transition);
+        text-decoration: none;
+        white-space: nowrap;
+    }
+
+    .btn-edit:hover {
+        background: rgba(255, 255, 255, .3);
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    .btn-delete {
+        display: inline-flex;
+        align-items: center;
+        gap: .45rem;
+        padding: .45rem 1.1rem;
+        border-radius: 10px;
+        font-size: .85rem;
+        font-weight: 600;
+        background: rgba(220, 53, 69, .25);
+        backdrop-filter: blur(8px);
+        border: 1.5px solid rgba(220, 53, 69, .4);
+        color: #fff;
+        transition: background var(--plan-transition), transform var(--plan-transition);
+        text-decoration: none;
+        white-space: nowrap;
+        cursor: pointer;
+    }
+
+    .btn-delete:hover {
+        background: rgba(220, 53, 69, .45);
+        color: #fff;
+        transform: translateY(-1px);
+    }
+
+    /* Modal de confirmação de exclusão */
+    .delete-modal-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 1055;
+        background: rgba(0, 0, 0, .55);
+        backdrop-filter: blur(4px);
+        align-items: center;
+        justify-content: center;
+    }
+
+    .delete-modal-backdrop.show {
+        display: flex;
+    }
+
+    .delete-modal-box {
+        background: var(--bs-body-bg, #fff);
+        border-radius: var(--plan-radius);
+        padding: 2rem;
+        max-width: 400px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, .25);
+        animation: fadeUp .25s ease both;
+        text-align: center;
+    }
+
+    .delete-modal-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 50%;
+        background: rgba(220, 53, 69, .1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+        color: var(--bs-danger);
+    }
+
+    /* ── Action bar ──────────────────────────────────────── */
+    .action-bar {
+        display: flex;
+        justify-content: flex-end;
+        gap: .75rem;
+        padding-top: 1.5rem;
+        border-top: var(--plan-border);
+        flex-wrap: wrap;
+    }
+
+    /* ── Error card ──────────────────────────────────────── */
+    .error-card {
+        border-radius: var(--plan-radius);
+        border: none;
+        box-shadow: var(--plan-shadow);
+        overflow: hidden;
+        animation: fadeUp .5s ease both;
+    }
+</style>
+
+<div class="container my-4 my-md-5" style="max-width:860px;">
     {% if plano %}
-        <div class="card shadow-sm border-0">
-            <!-- Cabeçalho com bandeira e informações principais -->
-            <div class="card-header bg-primary text-white py-4">
-                <div class="d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-3">
-                        {% if plano.pais_destino %}
-                            {% if plano.pais_destino.codigo_iso %}
-                                <img 
-                                    src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower }}.png"
-                                    alt="Bandeira de {{ plano.pais_destino.nome }}"
-                                    class="rounded border border-white"
-                                    style="width: 60px; height: 40px; object-fit: cover;"
-                                    onerror="this.style.display='none'"
-                                >
-                            {% else %}
-                                <div class="bg-white rounded d-flex align-items-center justify-content-center" style="width: 60px; height: 40px;">
-                                    <i class="bi bi-flag text-primary fs-4"></i>
-                                </div>
-                            {% endif %}
+
+    <!-- ═══════════ FLAG BANNER ═══════════ -->
+    {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
+    <div class="plan-flag-banner" id="flagBanner">
+        <img src="https://flagcdn.com/w1280/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
+            alt="Bandeira de {{ plano.pais_destino.nome }}" class="plan-flag-banner__img"
+            onerror="this.closest('#flagBanner').classList.add('plan-flag-banner--fallback'); this.remove();">
+        <div class="plan-flag-banner__overlay"></div>
+    </div>
+    {% else %}
+    <div class="plan-flag-banner plan-flag-banner--fallback">
+        <i class="bi bi-globe2"></i>
+    </div>
+    {% endif %}
+
+    <!-- ═══════════ HERO ═══════════ -->
+    <div class="plan-hero">
+        <!-- wave bottom -->
+        <div class="plan-hero__wave"></div>
+
+        <div class="d-flex align-items-start justify-content-between gap-3 flex-wrap">
+
+            <!-- Flag thumbnail + texts -->
+            <div class="d-flex align-items-start gap-3 flex-grow-1 min-w-0">
+                {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
+                <img src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
+                    alt="Bandeira de {{ plano.pais_destino.nome }}" class="plan-hero__flag"
+                    onerror="this.style.display='none'">
+                {% else %}
+                <div class="plan-hero__flag-placeholder">
+                    <i class="bi bi-globe2 text-white fs-4"></i>
+                </div>
+                {% endif %}
+
+                <div class="flex-grow-1 min-w-0">
+                    <h1 class="plan-hero__title">
+                        {{ plano.pais_destino.nome|default:"Destino não informado" }}
+                        {% if plano.cidade_destino %}
+                        <span style="font-weight:400; opacity:.75;">— {{ plano.cidade_destino }}</span>
                         {% endif %}
-                        <div>
-                            <h2 class="mb-1">Plano de Viagem - {{ plano.pais_destino.nome|default:"Destino não informado" }}</h2>
-                            <small class="text-light opacity-75">
-                                <i class="bi bi-person-circle"></i> 
-                                {{ plano.usuario.get_nome_exibicao|title|default:plano.usuario.username|default:"Usuário não identificado" }}
-                            </small>
-                        </div>
-                    </div>
+                    </h1>
+                    <p class="plan-hero__subtitle mb-2">
+                        <i class="bi bi-person-circle me-1"></i>
+                        {{ plano.usuario.get_nome_exibicao|title|default:plano.usuario.username|default:"Usuário não identificado" }}
+                    </p>
+                    {% if plano.data_inicio and plano.data_fim %}
+                    <span class="plan-hero__badge">
+                        <i class="bi bi-hourglass-split"></i>
+                        Plano de viagem ativo
+                    </span>
+                    {% endif %}
                 </div>
             </div>
 
-            <div class="card-body p-4">
-                <!-- Resumo da viagem -->
-                <div class="alert alert-info mb-4">
-                    <h5 class="alert-heading">
-                        <i class="bi bi-info-circle-fill"></i> Resumo da Viagem
-                    </h5>
-                    <p class="mb-0">
-                        Viagem para <strong>{{ plano.pais_destino.nome|default:"destino não informado" }} - 
-                                    {% if plano.cidade_destino and plano.regiao_destino %}
-                                        <span class="fs-6">{{ plano.cidade_destino }}, {{ plano.regiao_destino }}</span>
-                                    {% elif plano.cidade_destino %}
-                                        <span class="fs-6">{{ plano.cidade_destino }}</span>
-                                    {% elif plano.regiao_destino %}
-                                        <span class="fs-6">{{ plano.regiao_destino }}</span>
-                                    {% endif %}
-                        </strong>
-                        {% if plano.data_inicio %}
-                            com partida em <strong>{{ plano.data_inicio|date:"d/m/Y" }}</strong>
-                        {% endif %}
-                        {% if plano.data_fim %}
-                            e retorno previsto em <strong>{{ plano.data_fim|date:"d/m/Y" }}</strong>
-                        {% else %}
-                            <span class="text-muted">(sem previsão de retorno)</span>
-                        {% endif %}
-                    </p>
-                </div>
+            <!-- ── Botões do dono ── -->
+            {% if request.user == plano.usuario %}
+            <div class="owner-actions align-self-start mt-1">
+                <a href="{% url 'destinos:editar_plano' plano.uuid %}" class="btn-edit">
+                    <i class="bi bi-pencil-fill"></i> Editar
+                </a>
+                <button type="button" class="btn-delete"
+                    onclick="document.getElementById('deleteModal').classList.add('show')">
+                    <i class="bi bi-trash3-fill"></i> Excluir
+                </button>
+            </div>
+            {% endif %}
 
-                <!-- Período da viagem -->
-                <div class="row mb-4">
-                    <div class="col-md-6 mb-3 mb-md-0">
-                        <div class="border rounded p-3 h-100">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-calendar-event text-primary me-2 fs-4 mt-1"></i>
-                                <div class="flex-grow-1">
-                                    <strong class="d-block text-muted small mb-1">DATA DE PARTIDA</strong>
-                                    {% if plano.data_inicio %}
-                                        <span class="fs-5 fw-bold">{{ plano.data_inicio|date:"d/m/Y" }}</span>
-                                        <br>
-                                        <small class="text-muted">{{ plano.data_inicio|date:"l, d \d\e F \d\e Y" }}</small>
-                                    {% else %}
-                                        <span class="text-muted fst-italic">Não informada</span>
-                                    {% endif %}
-                                </div>
+        </div>
+    </div>
+
+    <!-- ═══════════ STATS STRIP ═══════════ -->
+    <div class="plan-stats">
+        <div class="plan-stat">
+            <span class="plan-stat__icon text-primary"><i class="bi bi-calendar-event"></i></span>
+            <span class="plan-stat__value">
+                {% if plano.data_inicio %}{{ plano.data_inicio|date:"d/m/Y" }}{% else %}—{% endif %}
+            </span>
+            <span class="plan-stat__label">Partida</span>
+        </div>
+        <div class="plan-stat">
+            <span class="plan-stat__icon text-success"><i class="bi bi-calendar-check"></i></span>
+            <span class="plan-stat__value">
+                {% if plano.data_fim %}{{ plano.data_fim|date:"d/m/Y" }}{% else %}—{% endif %}
+            </span>
+            <span class="plan-stat__label">Retorno</span>
+        </div>
+        <div class="plan-stat">
+            <span class="plan-stat__icon text-warning"><i class="bi bi-list-check"></i></span>
+            <span class="plan-stat__value">
+                {% if plano.atividades.exists %}{{ plano.atividades.count }}{% else %}0{% endif %}
+            </span>
+            <span class="plan-stat__label">Atividades</span>
+        </div>
+    </div>
+
+    <!-- ═══════════ CARD BODY ═══════════ -->
+    <div class="plan-card">
+
+        <!-- ── PERÍODO ── -->
+        <div class="mb-4">
+            <div class="section-heading">
+                <div class="section-heading__icon"><i class="bi bi-calendar-range"></i></div>
+                Período
+                <div class="section-heading__line"></div>
+            </div>
+
+            <div class="row g-3">
+                <!-- Partida -->
+                <div class="col-sm-6">
+                    <div class="date-card">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="date-card__icon bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-airplane-fill" style="transform:rotate(-45deg)"></i>
                             </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="border rounded p-3 h-100">
-                            <div class="d-flex align-items-start">
-                                <i class="bi bi-calendar-check text-success me-2 fs-4 mt-1"></i>
-                                <div class="flex-grow-1">
-                                    <strong class="d-block text-muted small mb-1">DATA DE RETORNO</strong>
-                                    {% if plano.data_fim %}
-                                        <span class="fs-5 fw-bold">{{ plano.data_fim|date:"d/m/Y" }}</span>
-                                        <br>
-                                        <small class="text-muted">{{ plano.data_fim|date:"l, d \d\e F \d\e Y" }}</small>
-                                    {% else %}
-                                        <span class="text-warning fst-italic">
-                                            <i class="bi bi-clock-history"></i> Sem previsão de retorno
-                                        </span>
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Duração da viagem -->
-                {% if plano.data_inicio and plano.data_fim %}
-                    <div class="alert alert-light border mb-4">
-                        <i class="bi bi-hourglass-split text-primary"></i>
-                        <strong>Duração estimada:</strong>
-                        {% widthratio plano.data_fim|timeuntil:plano.data_inicio 86400 1 %} dias
-                    </div>
-                {% endif %}
-
-                <hr class="my-4">
-
-                <!-- Destino -->
-                <div class="mb-4">
-                    <h5 class="text-primary mb-3">
-                        <i class="bi bi-geo-alt-fill"></i> Destino da Viagem
-                    </h5>
-                    <div class="ps-4">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <strong class="text-muted small d-block mb-1">País de Destino</strong>
-                                <div class="d-flex align-items-center gap-2">
-                                    {% if plano.pais_destino %}
-                                        {% if plano.pais_destino.codigo_iso %}
-                                            <img 
-                                                src="https://flagcdn.com/w40/{{ plano.pais_destino.codigo_iso|lower }}.png"
-                                                alt="Bandeira"
-                                                class="rounded"
-                                                style="width: 30px; height: 20px; object-fit: cover;"
-                                                onerror="this.style.display='none'"
-                                            >
-                                        {% endif %}
-                                        <span class="fs-5">{{ plano.pais_destino.nome|title }}</span>
-                                    {% else %}
-                                        <span class="text-muted fst-italic">Não informado</span>
-                                    {% endif %}
-                                </div>
-                            </div><div class="col-md-6 mb-3">
-                                <strong class="text-muted small d-block mb-1">Cidade/Estado</strong>
-                                {% if plano.cidade_destino or plano.regiao_destino %}
-                                    {% if plano.cidade_destino and plano.regiao_destino %}
-                                        <span class="fs-5">{{ plano.cidade_destino }}, {{ plano.regiao_destino }}</span>
-                                    {% elif plano.cidade_destino %}
-                                        <span class="fs-5">{{ plano.cidade_destino }}</span>
-                                    {% elif plano.regiao_destino %}
-                                        <span class="fs-5">{{ plano.regiao_destino }}</span>
-                                    {% endif %}
+                            <div>
+                                <div class="date-card__label text-muted">Data de partida</div>
+                                {% if plano.data_inicio %}
+                                <div class="date-card__main">{{ plano.data_inicio|date:"d/m/Y" }}</div>
+                                <div class="date-card__sub">{{ plano.data_inicio|date:"l, d \d\e F" }}</div>
                                 {% else %}
-                                    <span class="text-muted fst-italic">Não informada</span>
+                                <div class="date-card__main text-muted fst-italic" style="font-size:1rem;">Não informada
+                                </div>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-                <hr class="my-4">
-
-                <!-- Descrição -->
-                <div class="mb-4">
-                    <h5 class="text-primary mb-3">
-                        <i class="bi bi-card-text"></i> Descrição do Plano
-                    </h5>
-                    <div class="ps-4">
-                        {% if plano.descricao %}
-                            <p class="mb-0" style="white-space: pre-line;">{{ plano.descricao }}</p>
-                        {% else %}
-                            <p class="text-muted fst-italic mb-0">Nenhuma descrição fornecida para este plano de viagem</p>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <hr class="my-4">
-
-                <!-- Atividades -->
-                <div class="mb-4">
-                    <h5 class="text-primary mb-3">
-                        <i class="bi bi-list-check"></i> Atividades Planejadas
-                        {% if plano.atividades.exists %}
-                            <span class="badge bg-primary rounded-pill">{{ plano.atividades.count }}</span>
-                        {% endif %}
-                    </h5>
-                    <div class="ps-4">
-                        {% if plano.atividades.exists %}
-                            <div class="list-group">
-                                {% for atividade in plano.atividades.all %}
-                                    <div class="list-group-item">
-                                        <div class="d-flex align-items-start">
-                                            <i class="bi bi-check-circle-fill text-success me-2 mt-1"></i>
-                                            <div class="flex-grow-1">
-                                                <div class="d-flex justify-content-between align-items-start">
-                                                    <h6 class="mb-1">{{ atividade.nome|default:"Atividade sem nome" }}</h6>
-                                                    {% if atividade.data %}
-                                                        <span class="badge bg-secondary">{{ atividade.data|date:"d/m/Y" }}</span>
-                                                    {% endif %}
-                                                </div>
-                                                {% if atividade.descricao %}
-                                                    <p class="text-muted small mb-1">{{ atividade.descricao }}</p>
-                                                {% endif %}
-                                                {% if atividade.horario %}
-                                                    <small class="text-muted">
-                                                        <i class="bi bi-clock"></i> {{ atividade.horario }}
-                                                    </small>
-                                                {% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                {% endfor %}
+                <!-- Retorno -->
+                <div class="col-sm-6">
+                    <div class="date-card">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="date-card__icon bg-success bg-opacity-10 text-success">
+                                <i class="bi bi-airplane-fill" style="transform:rotate(45deg)"></i>
                             </div>
-                        {% else %}
-                            <div class="alert alert-light mb-0">
-                                <i class="bi bi-info-circle"></i> Nenhuma atividade planejada ainda
+                            <div>
+                                <div class="date-card__label text-muted">Data de retorno</div>
+                                {% if plano.data_fim %}
+                                <div class="date-card__main">{{ plano.data_fim|date:"d/m/Y" }}</div>
+                                <div class="date-card__sub">{{ plano.data_fim|date:"l, d \d\e F" }}</div>
+                                {% else %}
+                                <div class="date-card__main text-warning fst-italic" style="font-size:.9rem;">
+                                    <i class="bi bi-clock-history"></i> Sem previsão de retorno
+                                </div>
+                                {% endif %}
                             </div>
-                        {% endif %}
-                    </div>
-                </div>
-
-                <!-- Informações adicionais -->
-                {% if plano.observacoes or plano.orcamento %}
-                    <hr class="my-4">
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3">
-                            <i class="bi bi-journal-text"></i> Informações Adicionais
-                        </h5>
-                        <div class="ps-4">
-                            {% if plano.orcamento %}
-                                <div class="mb-3">
-                                    <strong class="text-muted small d-block mb-1">Orçamento Estimado</strong>
-                                    <span class="fs-5">R$ {{ plano.orcamento|floatformat:2 }}</span>
-                                </div>
-                            {% endif %}
-                            {% if plano.observacoes %}
-                                <div>
-                                    <strong class="text-muted small d-block mb-1">Observações</strong>
-                                    <p class="mb-0" style="white-space: pre-line;">{{ plano.observacoes }}</p>
-                                </div>
-                            {% endif %}
                         </div>
                     </div>
-                {% endif %}
+                </div>
+            </div>
 
-                <!-- Botões de ação -->
-                <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
-                    <a href="{% url 'destinos:buscar' %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Voltar
-                    </a>
+            <!-- Duração -->
+            {% if plano.data_inicio and plano.data_fim %}
+            <div class="mt-3 d-flex justify-content-center">
+                <div class="duration-pill">
+                    <i class="bi bi-hourglass-split"></i>
+                    Duração estimada:&nbsp;<strong>
+                        {% widthratio plano.data_fim|timeuntil:plano.data_inicio 86400 1 %} dias
+                    </strong>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="plan-divider"></div>
+
+        <!-- ── DESTINO ── -->
+        <div class="mb-4">
+            <div class="section-heading">
+                <div class="section-heading__icon"><i class="bi bi-geo-alt-fill"></i></div>
+                Destino
+                <div class="section-heading__line"></div>
+            </div>
+
+            <div class="row g-3">
+                <!-- País -->
+                <div class="col-sm-6">
+                    <div class="dest-chip">
+                        {% if plano.pais_destino %}
+                        {% if plano.pais_destino.codigo_iso %}
+                        <img src="https://flagcdn.com/w40/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png" alt="Bandeira"
+                            class="dest-chip__flag" onerror="this.style.display='none'">
+                        {% else %}
+                        <i class="bi bi-globe2 text-primary fs-5"></i>
+                        {% endif %}
+                        <div>
+                            <span class="dest-chip__label">País</span>
+                            <span class="dest-chip__value">{{ plano.pais_destino.nome|title }}</span>
+                        </div>
+                        {% else %}
+                        <i class="bi bi-globe2 text-muted fs-5"></i>
+                        <div>
+                            <span class="dest-chip__label">País</span>
+                            <span class="dest-chip__value text-muted fst-italic">Não informado</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- Cidade/Região -->
+                <div class="col-sm-6">
+                    <div class="dest-chip">
+                        <i class="bi bi-building text-primary fs-5"></i>
+                        <div>
+                            <span class="dest-chip__label">Cidade / Estado</span>
+                            <span class="dest-chip__value">
+                                {% if plano.cidade_destino and plano.regiao_destino %}
+                                {{ plano.cidade_destino }}, {{ plano.regiao_destino }}
+                                {% elif plano.cidade_destino %}
+                                {{ plano.cidade_destino }}
+                                {% elif plano.regiao_destino %}
+                                {{ plano.regiao_destino }}
+                                {% else %}
+                                <span class="text-muted fst-italic">Não informada</span>
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    {% else %}
-        <!-- Tratamento de erro: plano não encontrado -->
-        <div class="alert alert-warning d-flex align-items-center" role="alert">
-            <i class="bi bi-exclamation-triangle-fill me-2 fs-4"></i>
-            <div>
-                <h5 class="alert-heading mb-1">Plano não encontrado</h5>
-                <p class="mb-2">O plano de viagem solicitado não existe ou foi removido.</p>
-                <a href="{% url 'destinos:buscar' %}" class="btn btn-warning btn-sm">
-                    <i class="bi bi-house-door"></i> Voltar para a busca
-                </a>
+
+        <div class="plan-divider"></div>
+
+        <!-- ── DESCRIÇÃO ── -->
+        <div class="mb-4">
+            <div class="section-heading">
+                <div class="section-heading__icon"><i class="bi bi-card-text"></i></div>
+                Descrição do Plano
+                <div class="section-heading__line"></div>
+            </div>
+            {% if plano.descricao %}
+            <div class="desc-box">{{ plano.descricao }}</div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-file-earmark-text"></i>
+                <span class="d-block text-muted">Nenhuma descrição fornecida</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="plan-divider"></div>
+
+        <!-- ── ATIVIDADES ── -->
+        <div class="mb-4">
+            <div class="section-heading">
+                <div class="section-heading__icon"><i class="bi bi-list-check"></i></div>
+                Atividades Planejadas
+                {% if plano.atividades.exists %}
+                <span class="badge bg-primary rounded-pill ms-1">{{ plano.atividades.count }}</span>
+                {% endif %}
+                <div class="section-heading__line"></div>
+            </div>
+
+            {% if plano.atividades.exists %}
+            <div class="timeline">
+                {% for atividade in plano.atividades.all %}
+                <div class="timeline-item">
+                    <div class="timeline-dot"><i class="bi bi-check2"></i></div>
+                    <div class="timeline-item__name">{{ atividade.nome|default:"Atividade sem nome" }}</div>
+                    {% if atividade.descricao %}
+                    <div class="timeline-item__desc">{{ atividade.descricao }}</div>
+                    {% endif %}
+                    <div class="timeline-item__meta">
+                        {% if atividade.data %}
+                        <span class="timeline-badge">
+                            <i class="bi bi-calendar3"></i> {{ atividade.data|date:"d/m/Y" }}
+                        </span>
+                        {% endif %}
+                        {% if atividade.horario %}
+                        <span class="timeline-badge time">
+                            <i class="bi bi-clock"></i> {{ atividade.horario }}
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-calendar2-x"></i>
+                <span class="d-block text-muted">Nenhuma atividade planejada ainda</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- ── INFORMAÇÕES ADICIONAIS ── -->
+        {% if plano.observacoes or plano.orcamento %}
+        <div class="plan-divider"></div>
+        <div class="mb-4">
+            <div class="section-heading">
+                <div class="section-heading__icon"><i class="bi bi-journal-text"></i></div>
+                Informações Adicionais
+                <div class="section-heading__line"></div>
+            </div>
+
+            <div class="row g-3">
+                {% if plano.orcamento %}
+                <div class="col-sm-6">
+                    <div class="budget-card">
+                        <div class="text-muted small fw-semibold mb-1 text-uppercase" style="letter-spacing:.06em;">
+                            <i class="bi bi-wallet2 me-1"></i>Orçamento estimado
+                        </div>
+                        <div class="budget-amount">R$ {{ plano.orcamento|floatformat:2 }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                {% if plano.observacoes %}
+                <div class="{% if plano.orcamento %}col-sm-6{% else %}col-12{% endif %}">
+                    <div class="text-muted small fw-semibold mb-2 text-uppercase" style="letter-spacing:.06em;">
+                        <i class="bi bi-sticky me-1"></i>Observações
+                    </div>
+                    <div class="obs-box">{{ plano.observacoes }}</div>
+                </div>
+                {% endif %}
             </div>
         </div>
+        {% endif %}
+
+        <!-- ── ACTION BAR ── -->
+        <div class="action-bar">
+            <a href="{% url 'destinos:buscar' %}"
+                class="btn btn-outline-secondary d-inline-flex align-items-center gap-2">
+                <i class="bi bi-arrow-left"></i> Voltar
+            </a>
+        </div>
+
+    </div><!-- /plan-card -->
+
+    {% else %}
+    <!-- ═══════════ ERROR STATE ═══════════ -->
+    <div class="card error-card">
+        <div class="card-body p-5 text-center">
+            <div class="mb-3" style="font-size:3.5rem; opacity:.3;">
+                <i class="bi bi-map text-warning"></i>
+            </div>
+            <h4 class="fw-bold mb-2">Plano não encontrado</h4>
+            <p class="text-muted mb-4">O plano de viagem solicitado não existe ou foi removido.</p>
+            <a href="{% url 'destinos:buscar' %}" class="btn btn-warning d-inline-flex align-items-center gap-2">
+                <i class="bi bi-house-door"></i> Voltar para a busca
+            </a>
+        </div>
+    </div>
     {% endif %}
 </div>
+
+{% if plano and request.user == plano.usuario %}
+<!-- ═══════════ MODAL EXCLUSÃO ═══════════ -->
+<div class="delete-modal-backdrop" id="deleteModal" onclick="if(event.target===this) this.classList.remove('show')">
+    <div class="delete-modal-box">
+        <div class="delete-modal-icon">
+            <i class="bi bi-trash3-fill"></i>
+        </div>
+        <h5 class="fw-bold mb-2">Excluir plano de viagem?</h5>
+        <p class="text-muted mb-4" style="font-size:.9rem;">
+            Esta ação é irreversível. O plano para
+            <strong>{{ plano.pais_destino.nome|default:"este destino" }}</strong>
+            será permanentemente removido.
+        </p>
+        <div class="d-flex gap-2 justify-content-center">
+            <button type="button" class="btn btn-outline-secondary"
+                onclick="document.getElementById('deleteModal').classList.remove('show')">
+                Cancelar
+            </button>
+            <form method="post" action="{% url 'destinos:deletar_plano' plano.uuid %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-trash3-fill"></i> Sim, excluir
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

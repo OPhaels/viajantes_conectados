@@ -169,11 +169,11 @@
                     <div class="card-actions">
                         <a href="{% url 'chat:iniciar_conversa' uuid_usuario=item.amigo.uuid %}"
                             class="btn-action btn-chat">
-                            <i class="bi bi-chat-dots"></i> Iniciar Conversa
+                            <i class="bi bi-chat-dots"></i> Chat
                         </a>
                         <a href="{% url 'usuarios:perfil_publico' uuid=item.amigo.uuid %}"
                             class="btn-action btn-perfil">
-                            <i class="bi bi-person"></i> Ver Perfil
+                            <i class="bi bi-person"></i> Perfil
                         </a>
                         <form method="post" action="{% url 'conexoes:desfazer_amizade' uuid_amigo=item.amigo.uuid %}"
                             class="btn-action m-0 px-0">

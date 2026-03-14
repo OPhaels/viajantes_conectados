@@ -7,358 +7,452 @@
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
 {% endblock %}
 
+
 {% block conteudo %}
-<div class="container mt-4">
+<div class="container mt-4 mb-5">
   <div class="secao-form">
-    <h3 class="form-titulo"><i class="bi bi-geo-alt-fill"></i> {{ titulo }}</h3>
+
+    <!-- Cabeçalho -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+      <h3 class="form-titulo mb-0">
+        <i class="bi bi-{% if formulario.instance.pk %}pencil-fill{% else %}map-fill{% endif %}"></i>
+        {{ titulo }}
+      </h3>
+      {% if formulario.instance.pk %}
+        <span class="badge rounded-pill px-3 py-2"
+              style="background:var(--accent-bg);color:var(--primary);border:1px solid var(--accent-border);font-size:.75rem;font-weight:700;">
+          <i class="bi bi-pencil me-1"></i>Modo edição
+        </span>
+      {% endif %}
+    </div>
 
     <form method="post" class="needs-validation" novalidate id="form-plano">
       {% csrf_token %}
 
-      <!-- Campos hidden para dados de localização -->
-      <input type="hidden" name="latitude" id="id_latitude">
-      <input type="hidden" name="longitude" id="id_longitude">
-      <input type="hidden" name="pais_nome" id="id_pais_nome">
-      <input type="hidden" name="pais_codigo_iso" id="id_pais_codigo_iso">
+      <!-- Hiddens de localização -->
+      {% with end=formulario.instance.endereco_plano %}
+      <input type="hidden" name="latitude"         id="id_latitude"        value="{{ end.latitude|default:'' }}">
+      <input type="hidden" name="longitude"        id="id_longitude"       value="{{ end.longitude|default:'' }}">
+      {% endwith %}
+      <input type="hidden" name="pais_nome"        id="id_pais_nome"       value="{{ formulario.instance.pais_destino.nome|default:'' }}">
+      <input type="hidden" name="pais_codigo_iso"  id="id_pais_codigo_iso" value="{{ formulario.instance.pais_destino.codigo_iso|default:'' }}">
 
-      <div class="row g-4">
-        <div class="col-lg-6">
-          <label class="form-label fw-bold">Localização</label>
-          <div class="input-map">
-            <input id="consulta_local" type="text" class="form-control" placeholder="CEP ou endereço (ex: 01311-000)">
-            <button id="btn_buscar" type="button" class="btn btn-primary">
-              <i class="bi bi-search"></i> Buscar
-            </button>
-            <button id="btn_limpar" type="button" class="btn btn-outline-danger" title="Limpar">
-              <i class="bi bi-x-circle"></i>
-            </button>
-          </div>
-          <div id="mapa" role="region" aria-label="Mapa para seleção de local"></div>
-          <small class="small-muted">
-            <i class="bi bi-info-circle"></i> Clique no mapa ou busque por CEP/endereço. Os campos serão preenchidos
-            automaticamente.
-          </small>
+      <!-- ══════════════════════════════════════
+           SEÇÃO 1 — MAPA (full width)
+      ══════════════════════════════════════ -->
+      <div class="mb-4">
+        <label class="form-label fw-bold mb-2">
+          <i class="bi bi-map me-1" style="color:var(--accent);"></i>Localização no Mapa
+        </label>
+
+        <div class="input-map mb-2">
+          <input id="consulta_local" type="text" class="form-control"
+                 placeholder="CEP ou endereço (ex: 01311-000)"
+                 value="{% if formulario.instance.pk and formulario.instance.cidade_destino %}{{ formulario.instance.cidade_destino }}{% if formulario.instance.pais_destino %}, {{ formulario.instance.pais_destino.nome }}{% endif %}{% endif %}">
+          <button id="btn_buscar" type="button" class="btn btn-primary">
+            <i class="bi bi-search"></i> Buscar
+          </button>
+          <button id="btn_limpar" type="button" class="btn btn-outline-danger" title="Limpar">
+            <i class="bi bi-x-circle"></i>
+          </button>
         </div>
 
-        <div class="col-lg-6">
-          <div class="alert alert-info alert-dismissible fade show" role="alert">
-            <i class="bi bi-lightbulb"></i> <strong>Dica:</strong> Clique no mapa e deixe que preenchemos tudo
-            automaticamente!
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-          </div>
+        <div id="mapa" role="region" aria-label="Mapa para seleção de local"
+             style="border-radius:var(--radius);border:1.5px solid var(--border);height:340px;width:100%;"></div>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">
-              Cidade de destino
-              <span class="badge bg-secondary badge-auto">Auto</span>
-            </label>
-            {{ formulario.cidade_destino }}
-            <small class="text-muted">Preenchido automaticamente ao clicar no mapa</small>
-          </div>
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mt-2">
+          <small class="small-muted">
+            <i class="bi bi-info-circle"></i>
+            Clique no mapa ou busque por CEP / endereço. Cidade, estado e país serão preenchidos automaticamente.
+          </small>
 
-          <div class="mb-3">
-            <label class="form-label fw-bold">
-              Região/Estado de destino
-              <span class="badge bg-secondary badge-auto">Auto</span>
-            </label>
-            {{ formulario.regiao_destino }}
-            <small class="text-muted">Preenchido automaticamente ao clicar no mapa</small>
-          </div>
-
-          <div class="mb-3">
-            <label class="form-label fw-bold">
-              País de destino
-              <span class="badge bg-success badge-auto">Auto</span>
-            </label>
-            <input type="text" id="id_pais_destino_display" class="form-control campo-readonly" readonly
-              placeholder="Será preenchido ao clicar no mapa">
-            <small class="text-muted">O país será criado/selecionado automaticamente</small>
-          </div>
-
-          <hr class="my-4">
-
-          {% for field in formulario %}
-          {% if field.name not in "pais_destino,cidade_destino,regiao_destino" %}
-          <div class="mb-3">
-            {{ field.label_tag }} {{ field }}
-            {% if field.help_text %}
-            <div class="form-text">{{ field.help_text }}</div>
-            {% endif %}
-            {% for err in field.errors %}
-            <div class="text-danger small">{{ err }}</div>
-            {% endfor %}
-          </div>
-          {% endif %}
-          {% endfor %}
-
-          <div class="d-grid mt-3">
-            <button class="btn btn-primary p-3" type="submit">
-              <i class="bi bi-save"></i> Salvar Plano de Viagem
-            </button>
+          <!-- Resumo da localização -->
+          <div id="loc-summary"
+               class="d-flex align-items-center gap-2 px-3 py-2 rounded-3"
+               style="background:var(--accent-bg);border:1px solid var(--accent-border);
+                      {% if not formulario.instance.pk or not formulario.instance.pais_destino %}display:none!important;{% endif %}">
+            <i class="bi bi-geo-alt-fill" style="color:var(--accent);"></i>
+            <span id="loc-summary-text" style="font-size:.85rem;font-weight:600;color:var(--primary);">
+              {% if formulario.instance.pk and formulario.instance.pais_destino %}
+                {% if formulario.instance.cidade_destino %}{{ formulario.instance.cidade_destino }}, {% endif %}
+                {% if formulario.instance.regiao_destino %}{{ formulario.instance.regiao_destino }}, {% endif %}
+                {{ formulario.instance.pais_destino.nome }}
+              {% endif %}
+            </span>
           </div>
         </div>
       </div>
+
+      <!-- ══════════════════════════════════════
+           SEÇÃO 2 — CAMPOS (3 colunas)
+      ══════════════════════════════════════ -->
+      <hr class="mb-4">
+
+      {% if formulario.instance.pk %}
+      <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-info-circle me-1"></i>
+        Os dados do seu plano estão carregados. Altere apenas o que desejar.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% else %}
+      <div class="alert alert-info alert-dismissible fade show mb-4" role="alert">
+        <i class="bi bi-lightbulb me-1"></i>
+        <strong>Dica:</strong> Clique no mapa para preencher automaticamente cidade, estado e país.
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+      {% endif %}
+
+      <div class="row g-3">
+
+        <!-- País (readonly) -->
+        <div class="col-12 col-md-4">
+          <label class="form-label fw-bold">
+            País de destino
+            <span class="badge bg-success badge-auto ms-1">Auto</span>
+          </label>
+          <input type="text" id="id_pais_destino_display" class="form-control campo-readonly" readonly
+                 placeholder="Detectado pelo mapa"
+                 value="{{ formulario.instance.pais_destino.nome|default:'' }}">
+        </div>
+
+        <!-- Cidade (auto + editável) -->
+        <div class="col-12 col-md-4">
+          <label class="form-label fw-bold" for="{{ formulario.cidade_destino.id_for_label }}">
+            Cidade de destino
+            <span class="badge bg-secondary badge-auto ms-1">Auto</span>
+          </label>
+          {{ formulario.cidade_destino }}
+          {% for err in formulario.cidade_destino.errors %}
+            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Região/Estado (auto + editável) -->
+        <div class="col-12 col-md-4">
+          <label class="form-label fw-bold" for="{{ formulario.regiao_destino.id_for_label }}">
+            Região / Estado
+            <span class="badge bg-secondary badge-auto ms-1">Auto</span>
+          </label>
+          {{ formulario.regiao_destino }}
+          {% for err in formulario.regiao_destino.errors %}
+            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- ── Datas renderizadas manualmente para garantir value correto ── -->
+        <div class="col-12 col-md-4">
+          <label class="form-label fw-bold" for="id_data_inicio">
+            Data de início <span style="color:var(--danger);">*</span>
+          </label>
+          <input
+            type="date"
+            name="data_inicio"
+            id="id_data_inicio"
+            class="form-control{% if formulario.data_inicio.errors %} is-invalid{% endif %}"
+            value="{{ formulario.instance.data_inicio|date:'Y-m-d'|default:'' }}"
+            {% if formulario.data_inicio.field.required %}required{% endif %}
+          >
+          {% for err in formulario.data_inicio.errors %}
+            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <div class="col-12 col-md-4">
+          <label class="form-label fw-bold" for="id_data_fim">Data de término</label>
+          <input
+            type="date"
+            name="data_fim"
+            id="id_data_fim"
+            class="form-control{% if formulario.data_fim.errors %} is-invalid{% endif %}"
+            value="{{ formulario.instance.data_fim|date:'Y-m-d'|default:'' }}"
+          >
+          <div class="form-text">Deixe em branco se não tiver data de retorno.</div>
+          {% for err in formulario.data_fim.errors %}
+            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+          {% endfor %}
+        </div>
+
+        <!-- Datas flexíveis (checkbox) -->
+        <div class="col-12 col-md-4 d-flex align-items-center pt-md-4">
+          <div class="form-check mt-md-2">
+            <input type="checkbox"
+                   name="datas_flexiveis"
+                   id="id_datas_flexiveis"
+                   class="form-check-input"
+                   {% if formulario.instance.datas_flexiveis %}checked{% endif %}>
+            <label class="form-check-label" for="id_datas_flexiveis">
+              Datas flexíveis
+            </label>
+            <div class="form-text">As datas podem ser ajustadas</div>
+          </div>
+        </div>
+
+        <!-- Demais campos do formulário (exceto os já renderizados) -->
+        {% for field in formulario %}
+          {% if field.name not in "pais_destino,cidade_destino,regiao_destino,data_inicio,data_fim,datas_flexiveis" %}
+          <div class="col-12 {% if field.field.widget.attrs.rows %}{% else %}col-md-6{% endif %}">
+            <label class="form-label fw-bold" for="{{ field.id_for_label }}">
+              {{ field.label }}
+              {% if field.field.required %}<span style="color:var(--danger);">*</span>{% endif %}
+            </label>
+            {{ field }}
+            {% if field.help_text %}
+              <div class="form-text">{{ field.help_text }}</div>
+            {% endif %}
+            {% for err in field.errors %}
+              <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+        {% endfor %}
+
+        <!-- Submit -->
+        <div class="col-12 mt-2">
+          <div class="d-flex gap-3 flex-column flex-sm-row">
+            <button class="btn btn-primary p-3 flex-grow-1" type="submit">
+              <i class="bi bi-save me-2"></i>
+              {% if formulario.instance.pk %}Salvar Alterações{% else %}Criar Plano de Viagem{% endif %}
+            </button>
+            {% if formulario.instance.pk %}
+              <a href="{% url 'destinos:detalhes_plano' formulario.instance.uuid %}"
+                 class="btn btn-ghost-navy p-3">
+                <i class="bi bi-x-circle me-1"></i>Cancelar
+              </a>
+            {% endif %}
+          </div>
+        </div>
+
+      </div><!-- /row -->
     </form>
   </div>
 </div>
 {% endblock %}
 
+
 {% block scripts_extras %}
-<script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const TOKEN = "{{ MAPBOX_TOKEN|default:'' }}";
-    if (!TOKEN || TOKEN.length < 10) {
-      console.error("MAPBOX_TOKEN inválido.");
+document.addEventListener('DOMContentLoaded', () => {
+
+  const TOKEN = "{{ MAPBOX_TOKEN|default:'' }}";
+  if (!TOKEN || TOKEN.length < 10) { console.warn("[Mapa] Token não configurado."); return; }
+
+  /* ── Dados da instância para edição ─────────────────────── */
+  const INST = {
+    pk:      "{{ formulario.instance.pk|default:'' }}",
+    lat:     "{{ formulario.instance.endereco_plano.latitude|default:'' }}",
+    lng:     "{{ formulario.instance.endereco_plano.longitude|default:'' }}",
+    cidade:  "{{ formulario.instance.cidade_destino|default:''|escapejs }}",
+    regiao:  "{{ formulario.instance.regiao_destino|default:''|escapejs }}",
+    pais:    "{{ formulario.instance.pais_destino.nome|default:''|escapejs }}",
+    paisCod: "{{ formulario.instance.pais_destino.codigo_iso|default:''|escapejs }}",
+  };
+
+  const isEditing = !!INST.pk;
+  const hasCoords = !!(INST.lat && INST.lng);
+
+  /* ── Elementos ───────────────────────────────────────────── */
+  const q$           = id => document.getElementById(id);
+  const inputConsulta    = q$('consulta_local');
+  const btnBuscar        = q$('btn_buscar');
+  const btnLimpar        = q$('btn_limpar');
+  const inputCidade      = q$('id_cidade_destino');
+  const inputRegiao      = q$('id_regiao_destino');
+  const inputPaisDisplay = q$('id_pais_destino_display');
+  const inputLatitude    = q$('id_latitude');
+  const inputLongitude   = q$('id_longitude');
+  const inputPaisNome    = q$('id_pais_nome');
+  const inputPaisCodigo  = q$('id_pais_codigo_iso');
+  const locSummary       = q$('loc-summary');
+  const locSummaryText   = q$('loc-summary-text');
+
+  /* ── Mapa ─────────────────────────────────────────────────── */
+  mapboxgl.accessToken = TOKEN;
+
+  const initCenter = hasCoords
+    ? [parseFloat(INST.lng), parseFloat(INST.lat)]
+    : [-46.6333, -23.5505];
+
+  const mapa = new mapboxgl.Map({
+    container: 'mapa',
+    style:     'mapbox://styles/mapbox/streets-v12',
+    center:    initCenter,
+    zoom:      hasCoords ? 13 : 10,
+  });
+  mapa.addControl(new mapboxgl.NavigationControl());
+
+  /* ── Marcador ─────────────────────────────────────────────── */
+  let marcador = null;
+  const setMarker  = (lng, lat) => {
+    if (marcador) marcador.remove();
+    marcador = new mapboxgl.Marker({ color: '#1a3a5c' }).setLngLat([lng, lat]).addTo(mapa);
+  };
+  const clearMarker = () => { if (marcador) { marcador.remove(); marcador = null; } };
+
+  /* ── Summary ─────────────────────────────────────────────── */
+  const showSummary = (cidade, regiao, pais) => {
+    const parts = [cidade, regiao, pais].filter(Boolean);
+    if (parts.length) {
+      locSummaryText.textContent = parts.join(', ');
+      locSummary.style.display = '';
+    }
+  };
+  const hideSummary = () => {
+    locSummary.style.display = 'none';
+    locSummaryText.textContent = '';
+  };
+
+  /* ── Pré-preencher na edição ─────────────────────────────── */
+  if (isEditing) {
+    if (inputPaisDisplay && INST.pais) inputPaisDisplay.value = INST.pais;
+    if (inputPaisNome)   inputPaisNome.value   = INST.pais;
+    if (inputPaisCodigo) inputPaisCodigo.value = INST.paisCod;
+
+    // Marca como válidos os que já têm valor
+    [inputCidade, inputRegiao, inputPaisDisplay].forEach(el => {
+      if (el?.value) el.classList.add('is-valid');
+    });
+
+    showSummary(INST.cidade, INST.regiao, INST.pais);
+
+    if (hasCoords) {
+      const lat = parseFloat(INST.lat), lng = parseFloat(INST.lng);
+      setMarker(lng, lat);
+      inputLatitude.value  = lat;
+      inputLongitude.value = lng;
+    } else if (INST.cidade || INST.pais) {
+      // Sem coords salvas → geocoding do endereço ao carregar
+      mapa.on('load', async () => {
+        const q = [INST.cidade, INST.regiao, INST.pais].filter(Boolean).join(', ');
+        const feats = await forwardGeocode(q, 1);
+        if (feats?.[0]) {
+          const [lng, lat] = feats[0].center;
+          setMarker(lng, lat);
+          mapa.flyTo({ center: [lng, lat], zoom: 12 });
+          inputLatitude.value  = lat;
+          inputLongitude.value = lng;
+        }
+      });
+    }
+  }
+
+  /* ── Geocoding ───────────────────────────────────────────── */
+  function extractLocation(feature) {
+    const out = { cidade: '', estado: '', pais: '', paisCodigo: '' };
+    if (!feature) return out;
+    [feature, ...(feature.context || [])].forEach(c => {
+      if (!c?.id) return;
+      const id = String(c.id), txt = c.text || '';
+      if (/^(place|locality|district|neighborhood)/.test(id)) out.cidade   ||= txt;
+      if (/^region/.test(id))  out.estado   ||= txt;
+      if (/^country/.test(id)) {
+        out.pais       ||= txt;
+        out.paisCodigo ||= (c.properties?.short_code || '').toUpperCase();
+      }
+    });
+    return out;
+  }
+
+  async function reverseGeocode(lng, lat) {
+    try {
+      const r = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${TOKEN}&language=pt&limit=1`
+      );
+      const d = await r.json();
+      return d?.features?.[0] ? extractLocation(d.features[0]) : null;
+    } catch { return null; }
+  }
+
+  async function forwardGeocode(q, limit = 5) {
+    try {
+      const r = await fetch(
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${TOKEN}&language=pt&limit=${limit}`
+      );
+      const d = await r.json();
+      return d?.features || [];
+    } catch { return []; }
+  }
+
+  function fillInputs(loc, coords) {
+    if (!loc) return;
+    if (loc.cidade) { inputCidade.value = loc.cidade; inputCidade.classList.add('is-valid'); }
+    if (loc.estado) { inputRegiao.value = loc.estado; inputRegiao.classList.add('is-valid'); }
+    if (loc.pais)   {
+      inputPaisDisplay.value = loc.pais;
+      inputPaisDisplay.classList.add('is-valid');
+      inputPaisNome.value    = loc.pais;
+      inputPaisCodigo.value  = loc.paisCodigo || '';
+    }
+    if (coords) { inputLatitude.value = coords.lat; inputLongitude.value = coords.lng; }
+    showSummary(loc.cidade, loc.estado, loc.pais);
+  }
+
+  /* ── Clique no mapa ──────────────────────────────────────── */
+  mapa.on('click', async e => {
+    const { lng, lat } = e.lngLat;
+    setMarker(lng, lat);
+    mapa.flyTo({ center: [lng, lat], zoom: 14 });
+    const loc = await reverseGeocode(lng, lat);
+    if (loc) fillInputs(loc, { lng, lat });
+  });
+
+  /* ── Buscar ──────────────────────────────────────────────── */
+  const doBuscar = async () => {
+    const q = inputConsulta.value.trim();
+    if (!q) { inputConsulta.focus(); return; }
+    const digits = q.replace(/\D/g, '');
+
+    if (digits.length === 8) {
+      try {
+        const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
+        const j = await r.json();
+        if (j.erro) { alert('CEP não encontrado'); return; }
+        const endereco = [j.logradouro, j.bairro, j.localidade, j.uf].filter(Boolean).join(', ');
+        const feats = await forwardGeocode(endereco, 1);
+        if (feats?.[0]) {
+          const [lng, lat] = feats[0].center;
+          setMarker(lng, lat); mapa.flyTo({ center: [lng, lat], zoom: 14 });
+          const loc = extractLocation(feats[0]);
+          loc.cidade ||= j.localidade; loc.estado ||= j.uf;
+          loc.pais   ||= 'Brasil'; loc.paisCodigo ||= 'BR';
+          fillInputs(loc, { lng, lat });
+        } else {
+          fillInputs({ cidade: j.localidade, estado: j.uf, pais: 'Brasil', paisCodigo: 'BR' }, null);
+        }
+      } catch { alert('Erro ao consultar CEP'); }
       return;
     }
 
-    mapboxgl.accessToken = TOKEN;
+    const feats = await forwardGeocode(q, 5);
+    if (!feats.length) { alert('Local não encontrado'); return; }
+    const chosen = feats.find(f => f.place_type.includes('address'))
+                || feats.find(f => f.place_type.includes('place'))
+                || feats[0];
+    const [lng, lat] = chosen.center;
+    setMarker(lng, lat); mapa.flyTo({ center: [lng, lat], zoom: 14 });
+    fillInputs(extractLocation(chosen), { lng, lat });
+  };
 
-    const mapa = new mapboxgl.Map({
-      container: 'mapa',
-      style: 'mapbox://styles/mapbox/streets-v12',
-      center: [-46.6333, -23.5505],
-      zoom: 11
+  btnBuscar.addEventListener('click', doBuscar);
+  inputConsulta.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); doBuscar(); } });
+
+  /* ── Limpar ──────────────────────────────────────────────── */
+  btnLimpar.addEventListener('click', () => {
+    clearMarker(); hideSummary(); inputConsulta.value = '';
+    [inputCidade, inputRegiao, inputPaisDisplay].forEach(el => {
+      el.value = ''; el.classList.remove('is-valid', 'is-invalid');
     });
-
-    mapa.addControl(new mapboxgl.NavigationControl());
-
-    // Elementos do formulário
-    const inputConsulta = document.getElementById('consulta_local');
-    const btnBuscar = document.getElementById('btn_buscar');
-    const btnLimpar = document.getElementById('btn_limpar');
-    const inputCidade = document.getElementById('id_cidade_destino');
-    const inputRegiao = document.getElementById('id_regiao_destino');
-    const inputPaisDisplay = document.getElementById('id_pais_destino_display');
-
-    // Campos hidden
-    const inputLatitude = document.getElementById('id_latitude');
-    const inputLongitude = document.getElementById('id_longitude');
-    const inputPaisNome = document.getElementById('id_pais_nome');
-    const inputPaisCodigo = document.getElementById('id_pais_codigo_iso');
-
-    let marcador = null;
-
-    const setMarker = (lng, lat) => {
-      if (marcador) marcador.remove();
-      marcador = new mapboxgl.Marker({ color: '#ff6b6b' })
-        .setLngLat([lng, lat])
-        .addTo(mapa);
-    };
-
-    const clearMarker = () => {
-      if (marcador) {
-        marcador.remove();
-        marcador = null;
-      }
-    };
-
-    function extractLocationFromFeature(feature) {
-      const out = { cidade: '', estado: '', pais: '', paisCodigo: '' };
-      if (!feature) return out;
-
-      const all = [feature, ...(feature.context || [])];
-
-      all.forEach(c => {
-        if (!c?.id) return;
-        const id = String(c.id);
-        const txt = c.text || '';
-
-        if (/^(place|locality|district|neighborhood)/.test(id)) {
-          out.cidade ||= txt;
-        }
-        if (/^region/.test(id)) {
-          out.estado ||= txt;
-        }
-        if (/^country/.test(id)) {
-          out.pais ||= txt;
-          // Extrai código ISO do país (ex: "country.8605048517" -> pega properties.short_code)
-          if (c.properties?.short_code) {
-            out.paisCodigo = c.properties.short_code.toUpperCase();
-          }
-        }
-      });
-
-      return out;
-    }
-
-    function preencherInputsFromLocation(loc, coords = null) {
-      if (!loc) return;
-
-      // Preenche cidade e região
-      if (loc.cidade) {
-        inputCidade.value = loc.cidade;
-        inputCidade.classList.add('is-valid');
-      }
-
-      if (loc.estado) {
-        inputRegiao.value = loc.estado;
-        inputRegiao.classList.add('is-valid');
-      }
-
-      // Preenche país (campo display)
-      if (loc.pais) {
-        inputPaisDisplay.value = loc.pais;
-        inputPaisDisplay.classList.add('is-valid');
-
-        // Salva nos campos hidden
-        inputPaisNome.value = loc.pais;
-        inputPaisCodigo.value = loc.paisCodigo || '';
-      }
-
-      // Salva coordenadas
-      if (coords) {
-        inputLatitude.value = coords.lat;
-        inputLongitude.value = coords.lng;
-      }
-    }
-
-    async function reverseGeocode(lng, lat) {
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${TOKEN}&language=pt&limit=1`
-        );
-        const data = await res.json();
-        return data?.features?.[0] ? extractLocationFromFeature(data.features[0]) : null;
-      } catch (err) {
-        console.error('Erro no reverseGeocode:', err);
-        return null;
-      }
-    }
-
-    async function forwardGeocode(query, limit = 1) {
-      try {
-        const res = await fetch(
-          `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(query)}.json?access_token=${TOKEN}&language=pt&limit=${limit}`
-        );
-        const data = await res.json();
-        return data?.features || [];
-      } catch (err) {
-        console.error('Erro no forwardGeocode:', err);
-        return [];
-      }
-    }
-
-    // Evento de clique no mapa
-    mapa.on('click', async e => {
-      const { lng, lat } = e.lngLat;
-      setMarker(lng, lat);
-
-      const loc = await reverseGeocode(lng, lat);
-      if (loc) {
-        preencherInputsFromLocation(loc, { lng, lat });
-      }
-
-      mapa.flyTo({ center: [lng, lat], zoom: 14 });
-    });
-
-    // Limpar mapa
-    btnLimpar.addEventListener('click', () => {
-      clearMarker();
-      inputConsulta.value = '';
-      inputCidade.value = '';
-      inputRegiao.value = '';
-      inputPaisDisplay.value = '';
-      inputLatitude.value = '';
-      inputLongitude.value = '';
-      inputPaisNome.value = '';
-      inputPaisCodigo.value = '';
-
-      // Remove validação visual
-      [inputCidade, inputRegiao, inputPaisDisplay].forEach(el => {
-        el.classList.remove('is-valid', 'is-invalid');
-      });
-    });
-
-    // Buscar localização
-    btnBuscar.addEventListener('click', async () => {
-      const q = inputConsulta.value.trim();
-      if (!q) {
-        alert('Digite um CEP ou endereço');
-        return;
-      }
-
-      const digits = q.replace(/\D/g, '');
-
-      // Busca por CEP brasileiro
-      if (digits.length === 8) {
-        try {
-          const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
-          const j = await r.json();
-
-          if (j.erro) {
-            alert('CEP não encontrado');
-            return;
-          }
-
-          const endereco = [j.logradouro, j.bairro, j.localidade, j.uf]
-            .filter(Boolean)
-            .join(', ');
-
-          const features = await forwardGeocode(endereco);
-
-          if (features?.[0]) {
-            const f = features[0];
-            const [lng, lat] = f.center;
-            setMarker(lng, lat);
-            mapa.flyTo({ center: [lng, lat], zoom: 14 });
-
-            const loc = extractLocationFromFeature(f);
-            loc.cidade ||= j.localidade;
-            loc.estado ||= j.uf;
-            loc.pais ||= 'Brasil';
-            loc.paisCodigo ||= 'BR';
-
-            preencherInputsFromLocation(loc, { lng, lat });
-          } else {
-            preencherInputsFromLocation({
-              cidade: j.localidade,
-              estado: j.uf,
-              pais: 'Brasil',
-              paisCodigo: 'BR'
-            });
-          }
-        } catch (err) {
-          console.error('Erro ao consultar CEP:', err);
-          alert('Erro ao consultar CEP');
-        }
-        return;
-      }
-
-      // Busca por endereço/local
-      const features = await forwardGeocode(q, 5);
-      if (!features.length) {
-        alert('Local não encontrado');
-        return;
-      }
-
-      const chosen = features.find(f => f.place_type.includes('address')) ||
-        features.find(f => f.place_type.includes('place')) ||
-        features[0];
-
-      const [lng, lat] = chosen.center;
-      setMarker(lng, lat);
-      mapa.flyTo({ center: [lng, lat], zoom: 14 });
-      preencherInputsFromLocation(extractLocationFromFeature(chosen), { lng, lat });
-    });
-
-    // Enter no input de busca
-    inputConsulta.addEventListener('keypress', e => {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        btnBuscar.click();
-      }
-    });
-
-    // Validação do formulário antes de enviar
-    document.getElementById('form-plano').addEventListener('submit', function (e) {
-      if (!inputPaisNome.value) {
-        e.preventDefault();
-        alert('Por favor, selecione uma localização no mapa antes de salvar.');
-        return false;
-      }
-    });
+    [inputLatitude, inputLongitude, inputPaisNome, inputPaisCodigo].forEach(el => el.value = '');
   });
+
+  /* ── Validação submit ────────────────────────────────────── */
+  document.getElementById('form-plano').addEventListener('submit', function (e) {
+    if (!inputPaisNome.value) {
+      e.preventDefault();
+      alert('Por favor, selecione uma localização no mapa antes de salvar.');
+      document.getElementById('mapa').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+});
 </script>
 {% endblock %}

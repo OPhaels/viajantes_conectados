@@ -13,20 +13,16 @@
 <!-- Hero -->
 <div class="meus-planos-container">
     <!-- Hero Section -->
-    <section class="planos-hero">
-        <div class="container">
-            <div class="row text-center">
-                <div class="col-12  mb-4 fade-in">
-                    <h1 class="hero-title">
-                        <i class="bi bi-map me-3"></i>
-                        {{ titulo }}
-                    </h1>
-                </div>
-                <p>Gerencie suas conversas e fique conectado com seus amigos</p>
-            </div>
-        </div>
-    </section>
-
+  <section class="viajantes-hero">
+    <div class="container">
+      <div class="text-center">
+        <h1 class="hero-title">
+          <i class="bi bi-people-fill me-2"></i>{{ titulo|default:"Conexões" }}
+        </h1>
+        <p class="hero-subtitle">Gerencie suas conversas e conecte-se com novos viajantes</p>
+      </div>
+    </div>
+  </section>
     <div class="container mb-5">
 
         {% if conversas_com_dados %}

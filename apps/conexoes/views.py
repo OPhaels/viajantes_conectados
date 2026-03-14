@@ -209,18 +209,31 @@ def view_lista_solicitacoes(request):
         status='pendente'
     ).select_related('destinatario').order_by('-data_criacao')
 
-    # Sugestões: usuários que não são amigos nem têm solicitação pendente
-    amigos_ids = Amizade.objects.filter(
+    # ── Amigos (para a aba Amigos no template) ───────────────
+    amizades = Amizade.objects.filter(
         Q(usuario1=request.user) | Q(usuario2=request.user),
         ativa=True
-    ).values_list('usuario1_id', 'usuario2_id')
+    ).select_related('usuario1', 'usuario2').order_by('-data_criacao')
 
-    ids_excluir = set()
-    for u1, u2 in amigos_ids:
-        ids_excluir.add(u1)
-        ids_excluir.add(u2)
+    amigos_dados = []
+    for amizade in amizades:
+        amigo = amizade.usuario2 if amizade.usuario1 == request.user else amizade.usuario1
+        planos_amigo = amigo.planos_viagem.filter(
+            ativo=True,
+            viagem_concluida=False
+        ).select_related('pais_destino')
+        amigos_dados.append({
+            'amigo': amigo,
+            'amizade': amizade,
+            'planos': planos_amigo,
+        })
 
-    ids_excluir.add(request.user.id)
+    # ── IDs a excluir das sugestões ──────────────────────────
+    ids_excluir = {request.user.id}
+
+    for amizade in amizades:
+        ids_excluir.add(amizade.usuario1_id)
+        ids_excluir.add(amizade.usuario2_id)
 
     pendentes_ids = SolicitacaoAmizade.objects.filter(
         Q(remetente=request.user) | Q(destinatario=request.user),
@@ -238,11 +251,11 @@ def view_lista_solicitacoes(request):
     return render(request, 'conexoes/solicitacoes.html', {
         'solicitacoes_recebidas': solicitacoes_recebidas,
         'solicitacoes_enviadas': solicitacoes_enviadas,
+        'amigos_dados': amigos_dados,
         'sugestoes': sugestoes,
         'titulo': _('Solicitações de Amizade'),
         'hoje': date.today().strftime('%Y-%m-%d'),
     })
-
 
 @login_required
 @csrf_protect

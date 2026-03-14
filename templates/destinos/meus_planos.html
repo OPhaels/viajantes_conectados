@@ -10,21 +10,16 @@
 {% block conteudo %}
 <div class="meus-planos-container">
     <!-- Hero Section -->
-    <section class="planos-hero">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center mb-4 fade-in">
-                    <h1 class="hero-title">
-                        <i class="bi bi-map me-3"></i>
-                        Meus Planos de Viagem
-                    </h1>
-                    <p class="hero-subtitle">
-                        Visualize, edite e acompanhe seus planos de viagem
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
+  <section class="viajantes-hero">
+    <div class="container">
+      <div class="text-center">
+        <h1 class="hero-title">
+          <i class="bi bi-people-fill me-2"></i>{{ titulo|default:"Meus Planos de Viagem" }}
+        </h1>
+        <p class="hero-subtitle">Organize seus planos de viagem para qualquer destino</p>
+      </div>
+    </div>
+  </section>
 
     <!-- Conteúdo Principal -->
     <section class="py-5">
@@ -157,7 +152,7 @@
                                 </a>
 
                                 <button type="button"
-                                        class="btn btn-sm btn-ghost-navy"
+                                        class="btn btn-sm btn-ghost-navy text-uppercase"
                                         style="border-color:rgba(192,57,43,.3);color:#c0392b;"
                                         onmouseenter="this.style.background='rgba(192,57,43,.08)'"
                                         onmouseleave="this.style.background=''"

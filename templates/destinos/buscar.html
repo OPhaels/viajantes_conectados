@@ -6,89 +6,138 @@
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
 <style>
-/* ── View-toggle active state ─────────────────────────── */
+/* ── Toggle buttons ───────────────────────────────────── */
 .view-btn { transition: var(--transition, .28s ease); }
-.view-btn.active {
-  background: var(--primary);
-  border-color: var(--primary);
-  color: #fff;
-}
+.view-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 
-/* ── List layout ──────────────────────────────────────── */
-.viagem-item.list-mode { flex: 0 0 100%; max-width: 100%; }
-
-.viajante-card.list-mode {
-  flex-direction: row;
-  align-items: stretch;
-}
-.viajante-card.list-mode .card-img-wrapper {
-  width: 200px;
-  min-width: 200px;
-  flex-shrink: 0;
-  height: auto;
-}
-.viajante-card.list-mode .card-img-wrapper img { height: 100%; }
-.viajante-card.list-mode .card-body {
-  flex-direction: row;
-  flex-wrap: wrap;
-  align-content: flex-start;
-}
-.viajante-card.list-mode .card-body > * { flex: 1 1 160px; }
-.viajante-card.list-mode .card-body .mt-auto { flex-basis: 100%; }
-
-@media (max-width: 575.98px) {
-  .viajante-card.list-mode { flex-direction: column; }
-  .viajante-card.list-mode .card-img-wrapper { width: 100%; min-width: 100%; height: 180px; }
-}
-
-/* ── Status chips sobre o card ────────────────────────── */
+/* ── Status chips ─────────────────────────────────────── */
 .status-chip {
   display: inline-flex; align-items: center; gap: .3rem;
-  font-size: .7rem; font-weight: 700;
-  padding: .28rem .75rem; border-radius: var(--pill);
+  font-size: .68rem; font-weight: 700;
+  padding: .25rem .7rem; border-radius: var(--pill);
   letter-spacing: .04em; text-transform: uppercase;
+  width: fit-content;
 }
-.status-chip.soon   { background: rgba(192,57,43,.12); color: #c0392b; border: 1px solid rgba(192,57,43,.25); }
-.status-chip.coming { background: rgba(212,168,71,.12); color: #b8891f; border: 1px solid rgba(212,168,71,.3); }
+.status-chip.soon   { background: rgba(192,57,43,.1);  color: #c0392b; border: 1px solid rgba(192,57,43,.25); }
+.status-chip.coming { background: rgba(212,168,71,.1);  color: #b8891f; border: 1px solid rgba(212,168,71,.3); }
 
-/* ── Empty state ──────────────────────────────────────── */
-.empty-state i { display: block; margin-bottom: .75rem; font-size: 3.5rem; opacity: .2; }
-
-/* ── Resultado count pill ─────────────────────────────── */
+/* ── Result pill ──────────────────────────────────────── */
 .result-pill {
   display: inline-flex; align-items: center; gap: .4rem;
-  font-size: .78rem; font-weight: 700;
-  color: var(--primary); letter-spacing: .04em;
+  font-size: .78rem; font-weight: 700; color: var(--primary);
   background: var(--accent-bg); border: 1px solid var(--accent-border);
   padding: .3rem .85rem; border-radius: var(--pill);
 }
 
-/* ── Conectar btn ─────────────────────────────────────── */
-.btn-conectar {
-  display: flex; align-items: center; justify-content: center; gap: .4rem;
-  padding: .45rem .9rem;
-  border-radius: var(--radius-sm);
-  font-size: .8rem; font-weight: 700;
-  border: 1.5px solid var(--accent-border);
-  color: var(--primary);
-  background: var(--accent-bg);
-  transition: var(--transition);
-  width: 100%;
-  cursor: pointer;
+/* ── Empty state ──────────────────────────────────────── */
+.empty-state i { display: block; margin-bottom: .75rem; font-size: 3.5rem; opacity: .2; }
+
+/* ── Bandeira como imagem de capa do card ─────────────── */
+.card-flag-cover {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  filter: brightness(.65) saturate(1.1);
+  transition: transform .45s ease, filter .35s ease;
 }
-.btn-conectar:hover {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #000;
+.viajante-card:hover .card-flag-cover {
+  transform: scale(1.07);
+  filter: brightness(.75) saturate(1.15);
 }
-.btn-conectar:disabled,
-.btn-conectar[disabled] {
-  opacity: .45; cursor: not-allowed;
-  background: var(--surface-alt); border-color: var(--border); color: var(--text-muted);
+/* overlay sobre a bandeira/imagem */
+.card-img-wrapper .img-flag-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,.08) 0%,
+    rgba(0,0,0,.15) 45%,
+    rgba(0,0,0,.72) 100%
+  );
 }
 
-/* ── Card ações vertical ──────────────────────────────── */
-.card-acoes { display: flex; flex-direction: column; gap: .5rem; }
+/* ── Botão conectar ───────────────────────────────────── */
+.btn-conectar {
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .3rem .75rem; border-radius: var(--radius-sm);
+  font-size: .76rem; font-weight: 700;
+  border: 1.5px solid var(--accent-border);
+  color: var(--primary); background: var(--accent-bg);
+  transition: var(--transition); cursor: pointer;
+  white-space: nowrap; flex-shrink: 0;
+}
+.btn-conectar:hover { background: var(--success); border-color: var(--success); color: #fff; }
+.btn-conectar:disabled { opacity: .4; cursor: not-allowed; background: var(--surface-alt); border-color: var(--border); color: var(--text-muted); }
+
+/* ══════════════════════════════════════════════════════
+   MODO LISTA — layout completo e sem bugs
+══════════════════════════════════════════════════════ */
+.viagem-item.list-mode {
+  flex: 0 0 100%;
+  max-width: 100%;
+}
+
+/* Card vira row */
+.viajante-card.list-mode {
+  flex-direction: row !important;
+  align-items: stretch;
+  height: auto !important;
+}
+
+/* Imagem lateral fixa */
+.viajante-card.list-mode .card-img-wrapper {
+  width: 220px;
+  min-width: 220px;
+  max-width: 220px;
+  flex-shrink: 0;
+  height: auto;
+  border-radius: var(--radius) 0 0 var(--radius);
+  overflow: hidden;
+}
+.viajante-card.list-mode .card-img-wrapper img {
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Body em coluna normal, sem flex-row quebrado */
+.viajante-card.list-mode .card-body {
+  flex-direction: column !important;
+  flex-wrap: nowrap !important;
+  align-content: flex-start;
+  padding: 1rem 1.25rem !important;
+  min-width: 0;
+  flex: 1;
+}
+
+/* Info items viram 2 colunas quando há espaço */
+.viajante-card.list-mode .viagem-info {
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.viajante-card.list-mode .viagem-info .info-item {
+  flex: 1 1 160px;
+  min-width: 0;
+}
+
+/* Ações ficam em linha no modo lista */
+.viajante-card.list-mode .card-acoes {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+}
+.viajante-card.list-mode .card-acoes a,
+.viajante-card.list-mode .card-acoes .btn-conectar,
+.viajante-card.list-mode .card-acoes form { width: auto !important; }
+
+/* Mobile: volta para coluna */
+@media (max-width: 575.98px) {
+  .viajante-card.list-mode { flex-direction: column !important; }
+  .viajante-card.list-mode .card-img-wrapper {
+    width: 100% !important; max-width: 100% !important;
+    height: 180px !important;
+    border-radius: var(--radius) var(--radius) 0 0;
+  }
+  .viajante-card.list-mode .viagem-info { flex-direction: column; }
+}
 </style>
 {% endblock %}
 
@@ -96,13 +145,10 @@
 {% block conteudo %}
 <div class="buscar-container">
 
-  <!-- ══════════════════════════════════════
-       HERO + FILTROS
-  ══════════════════════════════════════ -->
+  <!-- ══════ HERO + FILTROS ══════ -->
   <section class="busca-hero">
     <div class="container">
 
-      <!-- Cabeçalho -->
       <div class="text-center mb-4 reveal">
         <h1 class="hero-title">
           <i class="bi bi-globe-americas me-2"></i>Encontre Seu Companheiro de Viagem
@@ -112,59 +158,32 @@
         </p>
       </div>
 
-      <!-- Card de filtros -->
       <div class="row justify-content-center">
         <div class="col-12 col-lg-11 col-xl-10">
           <div class="filtros-card">
-
             <form method="get" action="{% url 'destinos:buscar' %}" id="formBusca" novalidate>
-
               <div class="row g-3 align-items-end">
 
-                <!-- País -->
                 <div class="col-12 col-sm-6 col-md-4">
-                  <label class="filtro-label">
-                    <i class="bi bi-geo-alt-fill me-1"></i>País de Destino
-                  </label>
-                  <input
-                    type="text"
-                    name="pais"
-                    class="form-control form-control-custom"
-                    placeholder="Ex: Brasil, Portugal…"
-                    value="{{ request.GET.pais|default:'' }}"
-                    autocomplete="off"
-                  >
+                  <label class="filtro-label"><i class="bi bi-geo-alt-fill me-1"></i>País de Destino</label>
+                  <input type="text" name="pais" class="form-control form-control-custom"
+                         placeholder="Ex: Brasil, Portugal…"
+                         value="{{ request.GET.pais|default:'' }}" autocomplete="off">
                 </div>
 
-                <!-- Cidade -->
                 <div class="col-12 col-sm-6 col-md-4">
-                  <label class="filtro-label">
-                    <i class="bi bi-pin-map-fill me-1"></i>Cidade
-                  </label>
-                  <input
-                    type="text"
-                    name="cidade"
-                    class="form-control form-control-custom"
-                    placeholder="Ex: Lisboa, Porto…"
-                    value="{{ request.GET.cidade|default:'' }}"
-                    autocomplete="off"
-                  >
+                  <label class="filtro-label"><i class="bi bi-pin-map-fill me-1"></i>Cidade</label>
+                  <input type="text" name="cidade" class="form-control form-control-custom"
+                         placeholder="Ex: Lisboa, Porto…"
+                         value="{{ request.GET.cidade|default:'' }}" autocomplete="off">
                 </div>
 
-                <!-- Data -->
                 <div class="col-12 col-sm-6 col-md-4">
-                  <label class="filtro-label">
-                    <i class="bi bi-calendar-check me-1"></i>Data de Início
-                  </label>
-                  <input
-                    type="date"
-                    name="data_inicio"
-                    class="form-control form-control-custom"
-                    value="{{ request.GET.data_inicio|default:'' }}"
-                  >
+                  <label class="filtro-label"><i class="bi bi-calendar-check me-1"></i>Data de Início</label>
+                  <input type="date" name="data_inicio" class="form-control form-control-custom"
+                         value="{{ request.GET.data_inicio|default:'' }}">
                 </div>
 
-                <!-- Ações -->
                 <div class="col-12">
                   <div class="d-flex gap-2 flex-column flex-sm-row">
                     <button type="submit" class="btn btn-custom btn-primario flex-grow-1">
@@ -178,8 +197,7 @@
 
               </div>
             </form>
-
-          </div><!-- /filtros-card -->
+          </div>
         </div>
       </div>
 
@@ -187,13 +205,11 @@
   </section>
 
 
-  <!-- ══════════════════════════════════════
-       RESULTADOS
-  ══════════════════════════════════════ -->
+  <!-- ══════ RESULTADOS ══════ -->
   <section class="py-5">
     <div class="container">
 
-      <!-- Header dos resultados -->
+      <!-- Header resultados -->
       <div class="resultados-header d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
         <div class="d-flex align-items-center gap-3 flex-wrap">
           <h2 class="mb-0">
@@ -201,87 +217,114 @@
           </h2>
           <span class="result-pill">
             <i class="bi bi-funnel-fill"></i>
-            {{ total_resultados|default:0 }}
-            resultado{% if total_resultados != 1 %}s{% endif %}
+            {{ total_resultados|default:0 }} resultado{% if total_resultados != 1 %}s{% endif %}
           </span>
         </div>
-
-        <!-- Toggle Grid/Lista -->
-        <div class="d-flex gap-1" role="group" aria-label="Modo de visualização">
+        <div class="d-flex gap-1" role="group">
           <button type="button" class="btn btn-outline-secondary view-btn active" id="btnGrid"
-                  title="Visualização em grade">
-            <i class="bi bi-grid-3x3-gap-fill"></i>
-          </button>
+                  title="Grade"><i class="bi bi-grid-3x3-gap-fill"></i></button>
           <button type="button" class="btn btn-outline-secondary view-btn" id="btnList"
-                  title="Visualização em lista">
-            <i class="bi bi-list-ul"></i>
-          </button>
+                  title="Lista"><i class="bi bi-list-ul"></i></button>
         </div>
       </div>
 
-      <!-- Grid -->
+      <!-- Grid de cards -->
       <div class="row g-4" id="viagensGrid">
 
         {% for plano in destinos %}
         <div class="col-12 col-md-6 col-xl-4 viagem-item">
-          <div class="card viajante-card h-100" data-pais="{{ plano.pais_destino.id|default:'' }}">
+          <div class="card viajante-card h-100">
 
-            <!-- ── Imagem ── -->
+            <!-- ── Capa: imagem do destino ou bandeira ── -->
             <div class="card-img-wrapper position-relative">
+
+              {# Tenta imagem do destino primeiro, cai na bandeira, cai em placeholder #}
               {% if plano.pais_destino and plano.pais_destino.imagem_url %}
                 <img src="{{ plano.pais_destino.imagem_url }}"
-                     class="card-img-top" alt="{{ plano.pais_destino.nome }}" loading="lazy">
+                     class="card-flag-cover card-img-top"
+                     alt="{{ plano.pais_destino.nome }}" loading="lazy"
+                     onerror="this.src='https://flagcdn.com/w1280/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png';">
+              {% elif plano.pais_destino and plano.pais_destino.codigo_iso %}
+                <img src="https://flagcdn.com/w1280/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
+                     class="card-flag-cover card-img-top"
+                     alt="Bandeira de {{ plano.pais_destino.nome }}" loading="lazy"
+                     onerror="this.parentElement.querySelector('.card-flag-ph').style.display='flex'; this.style.display='none';">
               {% else %}
-                <img src="https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800"
-                     class="card-img-top" alt="Destino" loading="lazy">
+                <div class="card-flag-ph bg-gradient-placeholder" style="height:220px;">
+                  <i class="bi bi-globe2"></i>
+                </div>
               {% endif %}
-              <div class="img-overlay"></div>
 
-              <!-- Bandeira -->
-              <span class="country-badge" style="width:46px;height:46px;padding:3px;">
-                {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
-                  <img
-                    src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
-                    alt="{{ plano.pais_destino.nome }}"
-                    style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
-                    onerror="this.closest('.country-badge').innerHTML='<i class=\'bi bi-globe2\' style=\'color:#1a3a5c;font-size:1.3rem;\'></i>'"
-                  >
-                {% else %}
-                  <i class="bi bi-globe2" style="color:#1a3a5c;font-size:1.3rem;"></i>
-                {% endif %}
+              <!-- Overlay gradiente -->
+              <div class="img-flag-overlay"></div>
+
+              <!-- Bandeira circular (canto) -->
+              {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
+              <span class="country-badge" style="width:44px;height:44px;padding:3px;">
+                <img src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
+                     alt="{{ plano.pais_destino.nome }}"
+                     style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
+                     onerror="this.closest('.country-badge').innerHTML='<i class=\'bi bi-globe2\' style=\'color:#1a3a5c;font-size:1.2rem;\'></i>'">
               </span>
+              {% endif %}
 
-              <!-- Nome país / cidade -->
+              <!-- Nome do destino sobre a imagem -->
               <div class="country-name">
-                <h5 class="mb-0">
-                  {{ plano.pais_destino.nome|default:"Destino a Definir" }}
-                </h5>
+                <h5 class="mb-0">{{ plano.pais_destino.nome|default:"Destino a Definir" }}</h5>
                 {% if plano.cidade_destino %}
                   <small><i class="bi bi-pin-map me-1"></i>{{ plano.cidade_destino }}</small>
                 {% endif %}
               </div>
+
+              <!-- Placeholder oculto para fallback JS -->
+              <div class="card-flag-ph bg-gradient-placeholder" style="display:none;height:220px;position:absolute;inset:0;">
+                <i class="bi bi-globe2"></i>
+              </div>
+
             </div>
             <!-- /card-img-wrapper -->
 
             <!-- ── Body ── -->
             <div class="card-body d-flex flex-column gap-3 p-3">
 
-              <!-- Viajante -->
-              <div class="d-flex align-items-center gap-2">
-                <div class="avatar-circle">{{ plano.usuario.get_nome_exibicao|first|upper }}</div>
-                <div class="min-w-0">
-                  <h6 class="mb-0 text-truncate">{{ plano.usuario.get_nome_exibicao|title }}</h6>
-                  <small class="text-muted">
-                    <i class="bi bi-geo-alt"></i>
-                    {% if plano.usuario.cidade %}
-                      {{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais }}{% endif %}
-                    {% elif plano.usuario.pais %}
-                      {{ plano.usuario.pais }}
-                    {% else %}
-                      Brasil
-                    {% endif %}
-                  </small>
+              <!-- Viajante + botão conectar na mesma linha -->
+              <div class="d-flex align-items-center justify-content-between gap-2">
+                <div class="d-flex align-items-center gap-2 min-w-0">
+                  <div class="avatar-circle flex-shrink-0">
+                    {{ plano.usuario.get_nome_exibicao|first|upper }}
+                  </div>
+                  <div class="min-w-0">
+                    <h6 class="mb-0 text-truncate" style="font-size:.88rem;">
+                      {{ plano.usuario.get_nome_exibicao|title }}
+                    </h6>
+                    <small class="text-muted" style="font-size:.75rem;">
+                      <i class="bi bi-geo-alt"></i>
+                      {% if plano.usuario.cidade %}{{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais }}{% endif %}
+                      {% elif plano.usuario.pais %}{{ plano.usuario.pais }}
+                      {% else %}Brasil{% endif %}
+                    </small>
+                  </div>
                 </div>
+
+                <!-- Conectar ao lado do nome -->
+                {% if plano.usuario == request.user %}
+                  <button class="btn-conectar" disabled style="font-size:.7rem;padding:.25rem .65rem;">
+                    <i class="bi bi-person-fill"></i>Você
+                  </button>
+                {% elif plano.usuario.uuid in amigos_uuids %}
+                  <button class="btn-conectar" disabled style="font-size:.7rem;padding:.25rem .65rem;background:rgba(45,158,107,.08);border-color:rgba(45,158,107,.25);color:var(--success);">
+                    <i class="bi bi-check-circle-fill"></i>Amigos
+                  </button>
+                {% else %}
+                  <form method="post"
+                        action="{% url 'conexoes:enviar_solicitacao' plano.usuario.uuid %}"
+                        style="margin:0;flex-shrink:0;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-conectar" style="font-size:.7rem;padding:.25rem .65rem;">
+                      <i class="bi bi-person-plus-fill"></i>Conectar
+                    </button>
+                  </form>
+                {% endif %}
               </div>
 
               <!-- Infos da viagem -->
@@ -289,8 +332,8 @@
                 <div class="info-item">
                   <i class="bi bi-calendar-event" style="color:var(--accent);"></i>
                   <div>
-                    <small class="text-muted d-block" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Período</small>
-                    <span class="fw-semibold" style="font-size:.85rem;">
+                    <small class="text-muted d-block" style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Período</small>
+                    <span class="fw-semibold" style="font-size:.83rem;">
                       {{ plano.data_inicio|date:"d/m/Y" }}
                       {% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}
                     </span>
@@ -299,12 +342,12 @@
                 <div class="info-item">
                   <i class="bi bi-hourglass-split" style="color:var(--accent);"></i>
                   <div>
-                    <small class="text-muted d-block" style="font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Duração</small>
-                    <span class="fw-semibold" style="font-size:.85rem;">
+                    <small class="text-muted d-block" style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Duração</small>
+                    <span class="fw-semibold" style="font-size:.83rem;">
                       {% if plano.duracao_dias %}
                         {{ plano.duracao_dias }} dia{{ plano.duracao_dias|pluralize }}
                       {% else %}
-                        <span style="color:var(--text-muted);">Indefinida</span>
+                        <span class="text-muted">Indefinida</span>
                       {% endif %}
                     </span>
                   </div>
@@ -313,7 +356,7 @@
 
               <!-- Descrição -->
               {% if plano.descricao %}
-              <p class="text-muted mb-0" style="font-size:.84rem;line-height:1.55;">
+              <p class="text-muted mb-0" style="font-size:.83rem;line-height:1.55;">
                 {{ plano.descricao|truncatewords:18 }}
               </p>
               {% endif %}
@@ -329,33 +372,12 @@
                 {% endwith %}
               {% endif %}
 
-              <!-- ── Ações ── -->
+              <!-- Ver detalhes — apenas este, conectar subiu para junto do nome -->
               <div class="mt-auto card-acoes">
-
                 <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
-                   class="btn btn-custom btn-primario btn-sm">
+                   class="btn btn-custom btn-primario btn-sm w-100">
                   <i class="bi bi-eye me-1"></i>Ver Detalhes
                 </a>
-
-                {% if plano.usuario == request.user %}
-                  <button class="btn-conectar" disabled>
-                    <i class="bi bi-person-fill"></i>Seu Plano
-                  </button>
-                {% elif plano.usuario.uuid in amigos_uuids %}
-                  <button class="btn-conectar" disabled>
-                    <i class="bi bi-check-circle-fill"></i>Já Conectados
-                  </button>
-                {% else %}
-                  <form method="post"
-                        action="{% url 'conexoes:enviar_solicitacao' plano.usuario.uuid %}"
-                        style="margin:0;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn-conectar">
-                      <i class="bi bi-person-plus-fill"></i>Conectar
-                    </button>
-                  </form>
-                {% endif %}
-
               </div>
 
             </div>
@@ -383,15 +405,13 @@
       </div>
       <!-- /viagensGrid -->
 
-      <!-- ── Paginação ── -->
+      <!-- Paginação -->
       {% if destinos.has_other_pages %}
       <nav class="mt-5" aria-label="Paginação">
         <ul class="pagination justify-content-center flex-wrap gap-1">
-
           {% if destinos.has_previous %}
           <li class="page-item">
-            <a class="page-link"
-               href="?page={{ destinos.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <a class="page-link" href="?page={{ destinos.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
               <i class="bi bi-chevron-left"></i>
             </a>
           </li>
@@ -402,23 +422,18 @@
               <li class="page-item active"><span class="page-link">{{ num }}</span></li>
             {% elif num > destinos.number|add:'-3' and num < destinos.number|add:'3' %}
               <li class="page-item">
-                <a class="page-link"
-                   href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
-                  {{ num }}
-                </a>
+                <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
               </li>
             {% endif %}
           {% endfor %}
 
           {% if destinos.has_next %}
           <li class="page-item">
-            <a class="page-link"
-               href="?page={{ destinos.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
+            <a class="page-link" href="?page={{ destinos.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
               <i class="bi bi-chevron-right"></i>
             </a>
           </li>
           {% endif %}
-
         </ul>
       </nav>
       {% endif %}
@@ -435,7 +450,6 @@
 (function () {
   'use strict';
 
-  /* ── View toggle: Grid ↔ Lista ───────────────────────── */
   const btnGrid  = document.getElementById('btnGrid');
   const btnList  = document.getElementById('btnList');
   const grid     = document.getElementById('viagensGrid');
@@ -443,13 +457,15 @@
 
   function setGrid() {
     grid.querySelectorAll('.viagem-item').forEach(el => {
-      el.classList.remove('list-mode');
-      el.className = el.className
-        .replace(/col-12\s*/g, '')
-        .trim();
-      el.classList.add('col-12', 'col-md-6', 'col-xl-4');
+      el.classList.remove('list-mode', 'col-12-forced');
+      // garante as 3 colunas padrão
+      if (!el.classList.contains('col-md-6')) el.classList.add('col-md-6');
+      if (!el.classList.contains('col-xl-4')) el.classList.add('col-xl-4');
     });
-    grid.querySelectorAll('.viajante-card').forEach(c => c.classList.remove('list-mode'));
+    grid.querySelectorAll('.viajante-card').forEach(c => {
+      c.classList.remove('list-mode');
+      c.classList.add('h-100');
+    });
     btnGrid.classList.add('active');
     btnList.classList.remove('active');
     localStorage.setItem(PREF_KEY, 'grid');
@@ -458,9 +474,12 @@
   function setList() {
     grid.querySelectorAll('.viagem-item').forEach(el => {
       el.classList.remove('col-md-6', 'col-xl-4');
-      el.classList.add('col-12', 'list-mode');
+      el.classList.add('list-mode');
     });
-    grid.querySelectorAll('.viajante-card').forEach(c => c.classList.add('list-mode'));
+    grid.querySelectorAll('.viajante-card').forEach(c => {
+      c.classList.add('list-mode');
+      c.classList.remove('h-100');
+    });
     btnList.classList.add('active');
     btnGrid.classList.remove('active');
     localStorage.setItem(PREF_KEY, 'list');
@@ -469,26 +488,19 @@
   btnGrid?.addEventListener('click', setGrid);
   btnList?.addEventListener('click', setList);
 
-  // Restaura preferência salva
   if (localStorage.getItem(PREF_KEY) === 'list') setList();
 
-  /* ── Limpar filtros: remove params da URL ────────────── */
+  /* Limpar filtros */
   document.getElementById('btnLimpar')?.addEventListener('click', function (e) {
     e.preventDefault();
     window.location.href = this.href.split('?')[0];
   });
 
-  /* ── Scroll reveal ───────────────────────────────────── */
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (e.isIntersecting) {
-        e.target.classList.add('visible');
-        observer.unobserve(e.target);
-      }
-    });
+  /* Scroll reveal */
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
-
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
 
 })();
 </script>

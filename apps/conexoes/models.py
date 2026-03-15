@@ -7,7 +7,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-
+from django.conf import settings
 
 class SolicitacaoAmizade(models.Model):
     """Modelo para gerenciar solicitações de amizade."""
@@ -157,3 +157,25 @@ class Amizade(models.Model):
         """Remove a amizade."""
         self.ativa = False
         self.save()
+
+class Bloqueio(models.Model):
+    bloqueador   = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='bloqueios_feitos',
+        on_delete=models.CASCADE
+    )
+    bloqueado    = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name='bloqueios_recebidos',
+        on_delete=models.CASCADE
+    )
+    data_criacao = models.DateTimeField(auto_now_add=True)
+ 
+    class Meta:
+        unique_together = ('bloqueador', 'bloqueado')
+        verbose_name    = 'Bloqueio'
+        verbose_name_plural = 'Bloqueios'
+        ordering = ['-data_criacao']
+ 
+    def __str__(self):
+        return f'{self.bloqueador} bloqueou {self.bloqueado}'

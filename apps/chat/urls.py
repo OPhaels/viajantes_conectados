@@ -14,6 +14,10 @@ urlpatterns = [
     path('conversa/<uuid:uuid_conversa>/mensagens/', views.view_mensagens_json, name='mensagens_json'),
     path('mensagem/<int:mensagem_id>/apagar/', views.view_apagar_mensagem, name='apagar_mensagem'),
  
+    # URL do bloquear pode ficar no app conexoes:
+    path('conversa/<uuid:uuid_conversa>/apagar/', views.view_apagar_conversa, name='apagar_conversa'),
+    path('bloquear/<uuid:uuid_usuario>/', views.view_bloquear_usuario, name='bloquear_usuario'),
+
     # ── Polling e status ────────────────────────────────────────────────────
     path('nao-lidas/', views.view_nao_lidas_json, name='nao_lidas_json'),
     path('conversa/<uuid:uuid_conversa>/digitando/', views.view_digitando, name='digitando'),

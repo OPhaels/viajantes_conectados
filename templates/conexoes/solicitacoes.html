@@ -73,7 +73,7 @@
 .cx-badge-novo {
   font-size: .62rem; font-weight: 800; letter-spacing: .05em;
   text-transform: uppercase; padding: .18em .55em; border-radius: 4px;
-  background: var(--accent); color: #000; vertical-align: middle; margin-left: .4rem;
+  background: var(--danger); color: #ffffff; vertical-align: middle; margin-left: .4rem;
 }
 
 /* Status badge */
@@ -107,7 +107,7 @@
 .cx-btn.unfriend { background: transparent; color: var(--danger); border-color: rgba(192,57,43,.25); }
 .cx-btn.unfriend:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
 .cx-btn.add { background: var(--accent-bg); color: var(--primary); border-color: var(--accent-border); }
-.cx-btn.add:hover { background: var(--accent); color: #000; border-color: var(--accent); transform: translateY(-1px); }
+.cx-btn.add:hover { background: var(--success); color: #ffffff; border-color: var(--accent); transform: translateY(-1px); }
 
 /* Card de sugestão */
 .cx-suggest-card {
@@ -205,6 +205,12 @@
       </button>
       <button class="cx-tab" data-panel="sugestoes">
         <i class="bi bi-person-plus"></i> Descobrir
+      </button>
+      <button class="cx-tab" data-panel="bloqueados">
+        <i class="bi bi-slash-circle"></i> Bloqueados
+        {% if bloqueados %}
+          <span class="cx-count" style="background:var(--danger);color:#fff;">{{ bloqueados|length }}</span>
+        {% endif %}
       </button>
     </div>
 
@@ -331,12 +337,13 @@
       {% if amigos_dados %}
         <div class="cx-section-label">
           <i class="bi bi-heart-fill"></i>
-          {{ amigos_dados|length }} amigo{% if amigos_dados|length != 1 %}s{% endif %}
+          <span id="amigos-count">{{ amigos_dados|length }}</span>
+          amigo{% if amigos_dados|length != 1 %}s{% endif %}
         </div>
 
         {% for item in amigos_dados %}
           {% with u=item.amigo %}
-          <div class="cx-card">
+          <div class="cx-card" id="amigo-card-{{ u.uuid }}">
 
             <div class="cx-avatar">
               {% if u.foto_perfil %}
@@ -383,18 +390,25 @@
               <a href="{% url 'usuarios:perfil_publico' uuid=u.uuid %}" class="cx-btn profile">
                 <i class="bi bi-person"></i>Perfil
               </a>
-              <form method="post" action="{% url 'conexoes:desfazer_amizade' uuid_amigo=u.uuid %}" style="margin:0;">
-                {% csrf_token %}
-                <button type="submit" class="cx-btn unfriend"
-                        onclick="return confirm('Desfazer amizade com {{ u.get_nome_exibicao }}?')">
-                  <i class="bi bi-person-dash"></i>Desfazer
-                </button>
-              </form>
+              <button class="cx-btn unfriend"
+                      onclick="desfazerAmizade('{{ u.uuid }}', '{{ u.get_nome_exibicao }}', this)">
+                <i class="bi bi-person-dash"></i>Remover
+              </button>
+              <button class="cx-btn" style="background:rgba(192,57,43,.06);color:var(--danger);border-color:rgba(192,57,43,.2);"
+                      onclick="bloquearAmigo('{{ u.uuid }}', '{{ u.get_nome_exibicao }}', this)">
+                <i class="bi bi-slash-circle"></i>Bloquear
+              </button>
             </div>
 
           </div>
           {% endwith %}
         {% endfor %}
+
+        <div id="amigos-empty" class="cx-empty" style="display:none;">
+          <i class="bi bi-heart"></i>
+          <h5>Nenhuma amizade ainda</h5>
+          <p style="font-size:.88rem;">Aceite solicitações ou descubra viajantes na aba "Descobrir".</p>
+        </div>
 
       {% else %}
         <div class="cx-empty">
@@ -441,7 +455,7 @@
               <div class="cx-suggest-btns">
                 <form method="post" action="{% url 'conexoes:enviar_solicitacao' uuid_destinatario=usuario.uuid %}" style="margin:0;">
                   {% csrf_token %}
-                  <button type="submit" class="cx-btn add w-100">
+                  <button type="submit" class="cx-btn add w-100 justify-content-center">
                     <i class="bi bi-person-plus-fill"></i>Adicionar
                   </button>
                 </form>
@@ -463,6 +477,50 @@
             Experimente a <a href="{% url 'destinos:buscar' %}" style="color:var(--accent);font-weight:600;">busca de viajantes</a>
             para encontrar pessoas com destinos similares!
           </p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ══════ PAINEL: BLOQUEADOS ══════ -->
+    <div class="cx-panel" id="panel-bloqueados">
+      {% if bloqueados %}
+        <div class="cx-section-label">
+          <i class="bi bi-slash-circle"></i>
+          {{ bloqueados|length }} usuário{% if bloqueados|length != 1 %}s{% endif %} bloqueado{% if bloqueados|length != 1 %}s{% endif %}
+        </div>
+
+        {% for b in bloqueados %}
+        <div class="cx-card" id="bloqueado-card-{{ b.bloqueado.uuid }}">
+          <div class="cx-avatar">
+            {% if b.bloqueado.foto_perfil %}
+              <img src="{{ b.bloqueado.foto_perfil.url }}" alt="{{ b.bloqueado.get_nome_exibicao }}">
+            {% else %}
+              {{ b.bloqueado.get_nome_exibicao|first|upper }}
+            {% endif %}
+          </div>
+          <div class="cx-info">
+            <div class="cx-name">{{ b.bloqueado.get_nome_exibicao }}</div>
+            <div class="cx-meta">
+              <i class="bi bi-calendar3"></i> Bloqueado em {{ b.data_criacao|date:"d/m/Y" }}
+              &ensp;<span class="cx-status" style="background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);color:var(--danger);">
+                <i class="bi bi-slash-circle-fill"></i>Bloqueado
+              </span>
+            </div>
+          </div>
+          <div class="cx-btns">
+            <button class="cx-btn accept"
+                    onclick="desbloquear('{{ b.bloqueado.uuid }}', '{{ b.bloqueado.get_nome_exibicao }}', this)">
+              <i class="bi bi-person-check"></i>Desbloquear
+            </button>
+          </div>
+        </div>
+        {% endfor %}
+
+      {% else %}
+        <div class="cx-empty">
+          <i class="bi bi-slash-circle"></i>
+          <h5>Nenhum usuário bloqueado</h5>
+          <p style="font-size:.88rem;">Você não bloqueou nenhum usuário.</p>
         </div>
       {% endif %}
     </div>
@@ -491,7 +549,10 @@
 (function () {
   'use strict';
 
+  const CSRF = '{{ csrf_token }}';
   const PREF = 'vc_cx_tab';
+
+  /* ── Tabs ─────────────────────────────────────────── */
   const tabs   = document.querySelectorAll('.cx-tab');
   const panels = document.querySelectorAll('.cx-panel');
 
@@ -501,18 +562,142 @@
     localStorage.setItem(PREF, name);
   }
 
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => activate(tab.dataset.panel));
-  });
+  tabs.forEach(tab => tab.addEventListener('click', () => activate(tab.dataset.panel)));
 
-  // Restaura aba salva, ou abre "recebidas" se houver notificações
-  const saved = localStorage.getItem(PREF);
+  const saved  = localStorage.getItem(PREF);
   const hasNew = document.querySelector('#panel-recebidas .cx-card');
+  if (hasNew)       activate('recebidas');
+  else if (saved)   activate(saved);
 
-  if (hasNew) {
-    activate('recebidas');
-  } else if (saved) {
-    activate(saved);
+  /* ── Helper AJAX ──────────────────────────────────── */
+  async function post(url) {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': CSRF,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    });
+    return r;
+  }
+
+  /* ── Remoção animada de card ──────────────────────── */
+  function removerCard(el, callback) {
+    el.style.transition = 'opacity .25s ease, transform .25s ease, max-height .3s ease';
+    el.style.opacity    = '0';
+    el.style.transform  = 'translateX(-12px)';
+    el.style.overflow   = 'hidden';
+    setTimeout(() => {
+      el.style.maxHeight = '0';
+      el.style.padding   = '0';
+      el.style.margin    = '0';
+      setTimeout(() => { el.remove(); if (callback) callback(); }, 300);
+    }, 250);
+  }
+
+  /* ── Atualiza contador de amigos ──────────────────── */
+  function atualizarContadorAmigos() {
+    const cards = document.querySelectorAll('[id^="amigo-card-"]');
+    const span  = document.getElementById('amigos-count');
+    if (span) span.textContent = cards.length;
+    const emptyEl = document.getElementById('amigos-empty');
+    if (emptyEl) emptyEl.style.display = cards.length === 0 ? 'block' : 'none';
+  }
+
+  /* ── Desfazer amizade (AJAX + remoção visual) ─────── */
+  window.desfazerAmizade = async function(uuid, nome, btn) {
+    if (!confirm(`Remover ${nome} dos seus amigos?`)) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    try {
+      const r = await post(`/conexoes/desfazer-amizade/${uuid}/`);
+      if (r.ok || r.status === 302) {
+        const card = document.getElementById(`amigo-card-${uuid}`);
+        if (card) removerCard(card, atualizarContadorAmigos);
+      } else {
+        alert('Erro ao remover amigo. Tente novamente.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-person-dash"></i>Remover';
+      }
+    } catch (_) {
+      alert('Erro de conexão. Tente novamente.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-dash"></i>Remover';
+    }
+  };
+
+  /* ── Bloquear amigo ───────────────────────────────── */
+  window.bloquearAmigo = async function(uuid, nome, btn) {
+    if (!confirm(`Bloquear ${nome}?\n\nIsso irá:\n• Remover dos seus amigos\n• Encerrar conversas\n• Impedir contato futuro`)) return;
+
+    btn.disabled = true;
+
+    try {
+      await post(`/conexoes/bloquear/${uuid}/`);
+      /* Remove da lista de amigos */
+      const card = document.getElementById(`amigo-card-${uuid}`);
+      if (card) removerCard(card, atualizarContadorAmigos);
+
+      /* Mostra feedback */
+      mostrarToast(`${nome} foi bloqueado.`, 'var(--danger)');
+    } catch (_) {
+      alert('Erro ao bloquear. Tente novamente.');
+      btn.disabled = false;
+    }
+  };
+
+  /* ── Desbloquear ──────────────────────────────────── */
+  window.desbloquear = async function(uuid, nome, btn) {
+    if (!confirm(`Desbloquear ${nome}? Você poderá adicionar esta pessoa como amigo novamente.`)) return;
+
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
+
+    try {
+      const r = await post(`/conexoes/desbloquear/${uuid}/`);
+      if (r.ok) {
+        const card = document.getElementById(`bloqueado-card-${uuid}`);
+        if (card) removerCard(card, () => {
+          /* Atualiza badge da aba */
+          const badge = document.querySelector('#panel-bloqueados').previousElementSibling
+            ?.querySelector('.cx-count');
+          /* Mostra feedback */
+          mostrarToast(`${nome} foi desbloqueado.`, 'var(--success)');
+        });
+      } else {
+        alert('Erro ao desbloquear. Tente novamente.');
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-person-check"></i>Desbloquear';
+      }
+    } catch (_) {
+      alert('Erro de conexão. Tente novamente.');
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-person-check"></i>Desbloquear';
+    }
+  };
+
+  /* ── Toast genérico ───────────────────────────────── */
+  function mostrarToast(msg, cor) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = `
+      position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(8px);
+      background:${cor};color:#fff;padding:.55rem 1.25rem;
+      border-radius:var(--pill,100px);font-size:.83rem;font-weight:600;
+      box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;
+      transition:opacity .2s ease,transform .2s ease;z-index:9999;
+      pointer-events:none;white-space:nowrap;
+    `;
+    document.body.appendChild(t);
+    requestAnimationFrame(() => {
+      t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
+    });
+    setTimeout(() => {
+      t.style.opacity = '0';
+      setTimeout(() => t.remove(), 300);
+    }, 2800);
   }
 
 })();

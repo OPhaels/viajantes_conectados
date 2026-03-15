@@ -199,42 +199,40 @@ def enviar_solicitacao(request, uuid_destinatario):
 @require_http_methods(["GET"])
 def view_lista_solicitacoes(request):
     """Lista todas as solicitações de amizade do usuário."""
+    from .models import Bloqueio  # import local para não quebrar se ainda não migrou
+ 
     solicitacoes_recebidas = SolicitacaoAmizade.objects.filter(
         destinatario=request.user,
         status='pendente'
     ).select_related('remetente').order_by('-data_criacao')
-
+ 
     solicitacoes_enviadas = SolicitacaoAmizade.objects.filter(
         remetente=request.user,
         status='pendente'
     ).select_related('destinatario').order_by('-data_criacao')
-
-    # ── Amigos (para a aba Amigos no template) ───────────────
+ 
+    # Amigos
     amizades = Amizade.objects.filter(
         Q(usuario1=request.user) | Q(usuario2=request.user),
         ativa=True
     ).select_related('usuario1', 'usuario2').order_by('-data_criacao')
-
+ 
     amigos_dados = []
+    ids_excluir  = {request.user.id}
+ 
     for amizade in amizades:
         amigo = amizade.usuario2 if amizade.usuario1 == request.user else amizade.usuario1
         planos_amigo = amigo.planos_viagem.filter(
-            ativo=True,
-            viagem_concluida=False
+            ativo=True, viagem_concluida=False
         ).select_related('pais_destino')
         amigos_dados.append({
-            'amigo': amigo,
+            'amigo':   amigo,
             'amizade': amizade,
-            'planos': planos_amigo,
+            'planos':  planos_amigo,
         })
-
-    # ── IDs a excluir das sugestões ──────────────────────────
-    ids_excluir = {request.user.id}
-
-    for amizade in amizades:
-        ids_excluir.add(amizade.usuario1_id)
-        ids_excluir.add(amizade.usuario2_id)
-
+        ids_excluir.add(amigo.id)
+ 
+    # IDs com solicitação pendente
     pendentes_ids = SolicitacaoAmizade.objects.filter(
         Q(remetente=request.user) | Q(destinatario=request.user),
         status='pendente'
@@ -242,19 +240,33 @@ def view_lista_solicitacoes(request):
     for r, d in pendentes_ids:
         ids_excluir.add(r)
         ids_excluir.add(d)
-
+ 
+    # Bloqueados (exclui também das sugestões)
+    try:
+        bloqueados = Bloqueio.objects.filter(
+            bloqueador=request.user
+        ).select_related('bloqueado').order_by('-data_criacao')
+ 
+        for b in bloqueados:
+            ids_excluir.add(b.bloqueado.id)
+    except Exception:
+        bloqueados = []
+ 
+    # Sugestões
     sugestoes = Usuario.objects.filter(
         ativo=True
     ).exclude(id__in=ids_excluir).order_by('?')[:8]
-
+ 
     return render(request, 'conexoes/solicitacoes.html', {
         'solicitacoes_recebidas': solicitacoes_recebidas,
-        'solicitacoes_enviadas': solicitacoes_enviadas,
-        'amigos_dados': amigos_dados,
-        'sugestoes': sugestoes,
-        'titulo': _('Solicitações de Amizade'),
-        'hoje': date.today().strftime('%Y-%m-%d'),
+        'solicitacoes_enviadas':  solicitacoes_enviadas,
+        'amigos_dados':           amigos_dados,
+        'sugestoes':              sugestoes,
+        'bloqueados':             bloqueados,
+        'titulo':                 _('Solicitações de Amizade'),
+        'hoje':                   date.today().strftime('%Y-%m-%d'),
     })
+
 
 @login_required
 @csrf_protect

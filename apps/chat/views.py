@@ -7,7 +7,9 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 from django.db.models import Max, Q
 from datetime import date
+from django.views.decorators.http import require_POST
 import logging
+from django.db import transaction
 
 from .models import Conversa, Mensagem
 from apps.usuarios.models import Usuario
@@ -99,20 +101,20 @@ def view_conversa(request, uuid_conversa):
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
 def view_iniciar_conversa(request, uuid_usuario):
-    """Inicia uma nova conversa com um amigo."""
+    """Inicia ou retoma uma conversa com um amigo."""
     outro_usuario = get_object_or_404(Usuario, uuid=uuid_usuario)
-
+ 
     if not Amizade.sao_amigos(request.user, outro_usuario):
         messages.error(request, _('Você só pode conversar com amigos.'))
         return redirect('destinos:buscar')
-
+ 
     conversa = Conversa.obter_ou_criar_conversa(request.user, outro_usuario)
-
+ 
     logger.info(f'Conversa iniciada: {request.user.email} <-> {outro_usuario.email}')
     return redirect('chat:conversa', uuid_conversa=conversa.uuid)
-
+ 
 
 @login_required
 @require_http_methods(["POST"])
@@ -206,7 +208,149 @@ def view_mensagens_json(request, uuid_conversa):
         'digitando': digitando,
     })
 
-
+@login_required
+@require_POST
+def view_apagar_conversa(request, uuid_conversa):
+    """
+    Apaga todas as mensagens da conversa e desativa ela.
+    Apenas participantes podem apagar.
+    """
+    from .models import Conversa, Mensagem
+ 
+    conversa = get_object_or_404(Conversa, uuid=uuid_conversa)
+ 
+    if not conversa.participantes.filter(id=request.user.id).exists():
+        return JsonResponse({'erro': 'Sem permissão.'}, status=403)
+ 
+    try:
+        with transaction.atomic():
+            # Apaga todas as mensagens
+            Mensagem.objects.filter(conversa=conversa).delete()
+            # Desativa a conversa
+            conversa.ativa = False
+            conversa.save(update_fields=['ativa'])
+ 
+        logger.info(f'Conversa {uuid_conversa} apagada por {request.user.email}')
+        return JsonResponse({'status': 'ok'})
+ 
+    except Exception as e:
+        logger.error(f'Erro ao apagar conversa {uuid_conversa}: {e}')
+        return JsonResponse({'erro': 'Erro ao apagar conversa.'}, status=500)
+ 
+@login_required
+@require_POST
+def view_desfazer_amizade_ajax(request, uuid_amigo):
+    """
+    Desfaz amizade via AJAX — retorna JSON para remoção visual imediata.
+    Substitui a view view_desfazer_amizade (que fazia redirect).
+    """
+    from apps.usuarios.models import Usuario
+    from .models import Amizade
+ 
+    amigo = get_object_or_404(Usuario, uuid=uuid_amigo)
+ 
+    if not Amizade.sao_amigos(request.user, amigo):
+        return JsonResponse({'erro': 'Vocês não são amigos.'}, status=400)
+ 
+    try:
+        with transaction.atomic():
+            amizade = Amizade.objects.filter(
+                Q(usuario1=request.user, usuario2=amigo) |
+                Q(usuario1=amigo, usuario2=request.user),
+                ativa=True
+            ).first()
+ 
+            if amizade:
+                amizade.desfazer_amizade()
+                logger.info(f'Amizade desfeita (AJAX): {request.user.email} <-> {amigo.email}')
+ 
+        return JsonResponse({'status': 'ok'})
+ 
+    except Exception as e:
+        logger.error(f'Erro ao desfazer amizade {uuid_amigo}: {e}')
+        return JsonResponse({'erro': 'Erro ao remover amigo.'}, status=500)
+ 
+ 
+@login_required
+@require_POST
+def view_bloquear_usuario(request, uuid_usuario):
+    """
+    Bloqueia um usuário:
+    1. Desfaz amizade
+    2. Desativa conversas entre os dois
+    3. Cria registro de Bloqueio
+    """
+    from apps.usuarios.models import Usuario
+    from .models import Amizade, Bloqueio
+ 
+    alvo = get_object_or_404(Usuario, uuid=uuid_usuario)
+ 
+    if alvo == request.user:
+        return JsonResponse({'erro': 'Operação inválida.'}, status=400)
+ 
+    try:
+        with transaction.atomic():
+ 
+            # 1. Desfaz amizade se existir
+            amizade = Amizade.objects.filter(
+                Q(usuario1=request.user, usuario2=alvo) |
+                Q(usuario1=alvo, usuario2=request.user),
+                ativa=True
+            ).first()
+            if amizade:
+                amizade.desfazer_amizade()
+ 
+            # 2. Desativa conversas
+            try:
+                from apps.chat.models import Conversa
+                Conversa.objects.filter(
+                    participantes=request.user, ativa=True
+                ).filter(participantes=alvo).update(ativa=False)
+            except Exception as e:
+                logger.warning(f'Não foi possível desativar conversas ao bloquear: {e}')
+ 
+            # 3. Cria registro de bloqueio
+            Bloqueio.objects.get_or_create(
+                bloqueador=request.user,
+                bloqueado=alvo
+            )
+ 
+        logger.info(f'Bloqueio criado: {request.user.email} -> {alvo.email}')
+        return JsonResponse({'status': 'ok'})
+ 
+    except Exception as e:
+        logger.error(f'Erro ao bloquear {uuid_usuario}: {e}')
+        return JsonResponse({'erro': 'Erro ao bloquear usuário.'}, status=500)
+ 
+ 
+@login_required
+@require_POST
+def view_desbloquear_usuario(request, uuid_usuario):
+    """
+    Desbloqueia um usuário — remove o registro de Bloqueio.
+    Não restaura amizade automaticamente (usuário pode readicionar manualmente).
+    """
+    from apps.usuarios.models import Usuario
+    from .models import Bloqueio
+ 
+    alvo = get_object_or_404(Usuario, uuid=uuid_usuario)
+ 
+    try:
+        deleted, _ = Bloqueio.objects.filter(
+            bloqueador=request.user,
+            bloqueado=alvo
+        ).delete()
+ 
+        if deleted:
+            logger.info(f'Desbloqueio: {request.user.email} desbloqueou {alvo.email}')
+            return JsonResponse({'status': 'ok'})
+        else:
+            return JsonResponse({'erro': 'Bloqueio não encontrado.'}, status=404)
+ 
+    except Exception as e:
+        logger.error(f'Erro ao desbloquear {uuid_usuario}: {e}')
+        return JsonResponse({'erro': 'Erro ao desbloquear.'}, status=500)
+    
 @login_required
 @require_http_methods(["POST"])
 def view_apagar_mensagem(request, mensagem_id):
@@ -224,11 +368,34 @@ def view_apagar_mensagem(request, mensagem_id):
 
 
 @login_required
-@require_http_methods(["POST"])
+@require_http_methods(["GET", "POST"])
+def view_iniciar_conversa(request, uuid_usuario):
+    """
+    Inicia ou retoma uma conversa com um amigo.
+    Restringe a não-amigos — redireciona com mensagem de erro.
+    """
+    outro_usuario = get_object_or_404(Usuario, uuid=uuid_usuario)
+ 
+    # Não pode conversar consigo mesmo
+    if outro_usuario == request.user:
+        messages.error(request, _('Você não pode iniciar uma conversa consigo mesmo.'))
+        return redirect('chat:conversas')
+ 
+    # Apenas amigos podem conversar
+    if not Amizade.sao_amigos(request.user, outro_usuario):
+        messages.error(request, _('Você só pode conversar com pessoas da sua lista de amigos.'))
+        return redirect('destinos:buscar')
+ 
+    conversa = Conversa.obter_ou_criar_conversa(request.user, outro_usuario)
+    logger.info(f'Conversa iniciada: {request.user.email} <-> {outro_usuario.email}')
+    return redirect('chat:conversa', uuid_conversa=conversa.uuid)
+    
+@login_required
+@require_http_methods(["GET", "POST"])
 def view_nao_lidas_json(request):
     """Retorna contagem de mensagens não lidas por conversa (para polling na lista)."""
     conversas = Conversa.objects.filter(participantes=request.user, ativa=True)
-
+ 
     data = {
         str(c.uuid): Mensagem.objects.filter(
             conversa=c,
@@ -236,7 +403,7 @@ def view_nao_lidas_json(request):
         ).exclude(remetente=request.user).count()
         for c in conversas
     }
-
+ 
     return JsonResponse(data)
 
 

@@ -239,7 +239,6 @@ def view_lista_solicitacoes(request):
         Q(remetente=request.user) | Q(destinatario=request.user),
         status='pendente'
     ).values_list('remetente_id', 'destinatario_id')
-
     for r, d in pendentes_ids:
         ids_excluir.add(r)
         ids_excluir.add(d)

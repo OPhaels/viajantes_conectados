@@ -1,4 +1,5 @@
 {% load static %}
+{% load widget_tweaks %}
 <!DOCTYPE html>
 <html lang="pt-BR">
 
@@ -11,7 +12,6 @@
   <meta name="author" content="Viajantes Conectados">
   <meta name="theme-color" content="#1a3a5c">
 
-  <!-- Segurança básica -->
   <meta http-equiv="X-Content-Type-Options" content="nosniff">
   <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin">
 
@@ -20,209 +20,206 @@
 
   <title>{% block titulo %}Viajantes Conectados{% endblock %}</title>
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5.3 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
-  <!-- Mapbox GL -->
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
-
-  <!-- Base Styles -->
   <link rel="stylesheet" href="{% static 'css/base.css' %}">
 
   <style>
-  /* ── Navbar melhorada — sobrepõe base.css ──────────────── */
-
-  .navbar-custom {
-    background: rgba(255,255,255,.97);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 1px 0 rgba(0,0,0,.07), 0 2px 12px rgba(0,0,0,.04);
-    padding: .75rem 0;
-    position: sticky; top: 0; z-index: 1000;
-    transition: box-shadow .28s ease, background .28s ease;
-    border-bottom: 1px solid rgba(0,0,0,.06);
-  }
-  .navbar-custom.scrolled {
-    box-shadow: 0 2px 20px rgba(0,0,0,.1);
-  }
-
-  /* Brand */
-  .navbar-brand {
-    font-weight: 800;
-    font-size: 1.25rem;
-    color: var(--cor-primaria, #1a3a5c) !important;
-    letter-spacing: -.025em;
-    display: flex; align-items: center; gap: .45rem;
-    transition: opacity .2s ease;
-  }
-  .navbar-brand:hover { opacity: .82; transform: none; }
-  .navbar-brand i { color: var(--cor-acento, #d4a847); font-size: 1.35rem; }
-
-  /* Links normais */
-  .nav-link {
-    color: #4b5563 !important;
-    font-weight: 500;
-    font-size: .88rem;
-    padding: .45rem .75rem !important;
-    border-radius: 8px;
-    margin: 0 .1rem;
-    position: relative;
-    transition: color .2s ease, background .2s ease;
-    display: flex; align-items: center; gap: .35rem;
-  }
-  .nav-link::after { display: none; } /* remove underline do base.css */
-
-  /* Hover — azul escuro, sem laranja */
-  .nav-link:hover {
-    color: var(--cor-primaria, #1a3a5c) !important;
-    background: rgba(26,58,92,.06);
-  }
-
-  /* Link ATIVO — página atual */
-  .nav-link.nav-ativo {
-    color: var(--cor-primaria, #1a3a5c) !important;
-    font-weight: 700;
-    background: rgba(26,58,92,.08);
-  }
-  .nav-link.nav-ativo::before {
-    content: '';
-    position: absolute;
-    bottom: 4px; left: 50%;
-    transform: translateX(-50%);
-    width: 20px; height: 2.5px;
-    background: var(--cor-acento, #d4a847);
-    border-radius: 2px;
-  }
-
-  /* Badge de notificação */
-  .nav-badge {
-    display: inline-flex; align-items: center; justify-content: center;
-    min-width: 18px; height: 18px; padding: 0 4px;
-    background: #dc2626; color: #fff;
-    font-size: .62rem; font-weight: 800;
-    border-radius: 9px;
-    margin-left: .2rem;
-    line-height: 1;
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  /* Dropdown do usuário */
-  .nav-user-btn {
-    display: flex; align-items: center; gap: .45rem;
-    padding: .38rem .85rem !important;
-    border-radius: 100px !important;
-    border: 1.5px solid rgba(26,58,92,.15) !important;
-    color: var(--cor-primaria, #1a3a5c) !important;
-    font-weight: 700 !important; font-size: .84rem !important;
-    background: rgba(26,58,92,.04) !important;
-    transition: background .2s ease, border-color .2s ease !important;
-  }
-  .nav-user-btn:hover, .nav-user-btn.show {
-    background: rgba(26,58,92,.1) !important;
-    border-color: rgba(26,58,92,.3) !important;
-    color: var(--cor-primaria, #1a3a5c) !important;
-  }
-  .nav-user-btn::before { display: none; }
-  .nav-user-btn::after  { display: none; } /* remove caret padrão */
-
-  .nav-user-caret {
-    font-size: .65rem; opacity: .5; transition: transform .2s ease;
-  }
-  .nav-user-btn.show .nav-user-caret { transform: rotate(180deg); }
-
-  /* Dropdown menu */
-  .dropdown-menu {
-    border: 1px solid rgba(0,0,0,.08);
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,.12);
-    padding: .4rem;
-    min-width: 200px;
-    margin-top: .5rem !important;
-  }
-  .dropdown-item {
-    border-radius: 8px; padding: .55rem .85rem;
-    font-size: .86rem; font-weight: 500;
-    color: #374151;
-    display: flex; align-items: center; gap: .55rem;
-    transition: background .15s ease, color .15s ease;
-  }
-  .dropdown-item i { color: var(--cor-primaria, #1a3a5c); font-size: .95rem; width: 16px; text-align: center; }
-  .dropdown-item:hover { background: rgba(26,58,92,.07); color: var(--cor-primaria, #1a3a5c); }
-  .dropdown-item:active { background: rgba(26,58,92,.12); color: var(--cor-primaria, #1a3a5c); }
-  .dropdown-item.text-danger { color: #dc2626 !important; }
-  .dropdown-item.text-danger i { color: #dc2626; }
-  .dropdown-item.text-danger:hover { background: rgba(220,38,38,.07); }
-  .dropdown-divider { margin: .3rem .4rem; border-color: rgba(0,0,0,.07); }
-
-  /* Botões CTA no nav (cadastrar/entrar) */
-  .nav-cta-outline {
-    padding: .38rem .9rem !important;
-    border-radius: 8px !important;
-    border: 1.5px solid rgba(26,58,92,.2) !important;
-    color: var(--cor-primaria, #1a3a5c) !important;
-    font-weight: 600 !important; font-size: .84rem !important;
-    transition: background .2s, border-color .2s !important;
-  }
-  .nav-cta-outline:hover {
-    background: rgba(26,58,92,.06) !important;
-    border-color: var(--cor-primaria, #1a3a5c) !important;
-  }
-  .nav-cta-filled {
-    padding: .38rem .9rem !important;
-    border-radius: 8px !important;
-    background: var(--cor-primaria, #1a3a5c) !important;
-    color: #fff !important;
-    font-weight: 700 !important; font-size: .84rem !important;
-    border: 1.5px solid var(--cor-primaria, #1a3a5c) !important;
-    transition: background .2s, transform .2s !important;
-  }
-  .nav-cta-filled:hover {
-    background: var(--cor-primaria-light, #2a5298) !important;
-    border-color: var(--cor-primaria-light, #2a5298) !important;
-    color: #fff !important;
-    transform: translateY(-1px) !important;
-  }
-  .nav-cta-filled::before, .nav-cta-outline::before { display: none; }
-
-  /* Toggler mobile */
-  .navbar-toggler {
-    border: 1.5px solid rgba(26,58,92,.2);
-    border-radius: 8px;
-    padding: .35rem .6rem;
-    color: var(--cor-primaria, #1a3a5c);
-    transition: background .2s;
-  }
-  .navbar-toggler:hover { background: rgba(26,58,92,.06); }
-  .navbar-toggler:focus { box-shadow: 0 0 0 3px rgba(26,58,92,.1); }
-  .navbar-toggler-icon {
-    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231a3a5c' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-  }
-
-  /* Mobile: collapse menu */
-  @media (max-width: 991.98px) {
-    .navbar-collapse {
-      background: rgba(255,255,255,.98);
-      border-radius: 12px;
-      border: 1px solid rgba(0,0,0,.07);
-      box-shadow: 0 8px 32px rgba(0,0,0,.1);
-      margin-top: .5rem;
-      padding: .75rem;
+    /* ── Navbar ─────────────────────────────────────────────── */
+    .navbar-custom {
+      background: rgba(255,255,255,.97);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      box-shadow: 0 1px 0 rgba(0,0,0,.07), 0 2px 12px rgba(0,0,0,.04);
+      padding: .75rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      transition: box-shadow .28s ease, background .28s ease;
+      border-bottom: 1px solid rgba(0,0,0,.06);
     }
-    .nav-link { padding: .6rem .85rem !important; }
-    .nav-link.nav-ativo::before { display: none; }
-    .nav-link.nav-ativo { border-left: 3px solid var(--cor-acento, #d4a847); border-radius: 0 8px 8px 0; padding-left: .7rem !important; }
-    .nav-user-btn { border-radius: 8px !important; width: 100%; justify-content: flex-start; margin-top: .25rem; }
-    .dropdown-menu { box-shadow: none; border: none; background: rgba(26,58,92,.04); }
-    .nav-cta-filled, .nav-cta-outline { width: 100%; justify-content: center; margin-top: .2rem; }
-  }
+    .navbar-custom.scrolled { box-shadow: 0 2px 20px rgba(0,0,0,.1); }
+
+    .navbar-brand {
+      font-weight: 800; font-size: 1.25rem;
+      color: var(--cor-primaria, #1a3a5c) !important;
+      letter-spacing: -.025em;
+      display: flex; align-items: center; gap: .45rem;
+      transition: opacity .2s ease;
+    }
+    .navbar-brand:hover { opacity: .82; transform: none; }
+    .navbar-brand i { color: var(--cor-acento, #d4a847); font-size: 1.35rem; }
+
+    .nav-link {
+      color: #4b5563 !important; font-weight: 500; font-size: .88rem;
+      padding: .45rem .75rem !important; border-radius: 8px; margin: 0 .1rem;
+      position: relative; transition: color .2s ease, background .2s ease;
+      display: flex; align-items: center; gap: .35rem;
+    }
+    .nav-link::after { display: none; }
+    .nav-link:hover { color: var(--cor-primaria, #1a3a5c) !important; background: rgba(26,58,92,.06); }
+    .nav-link.nav-ativo { color: var(--cor-primaria, #1a3a5c) !important; font-weight: 700; background: rgba(26,58,92,.08); }
+    .nav-link.nav-ativo::before {
+      content: ''; position: absolute; bottom: 4px; left: 50%;
+      transform: translateX(-50%); width: 20px; height: 2.5px;
+      background: var(--cor-acento, #d4a847); border-radius: 2px;
+    }
+
+    .nav-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      background: #dc2626; color: #fff;
+      font-size: .62rem; font-weight: 800; border-radius: 9px;
+      margin-left: .2rem; line-height: 1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    /* Badge dinâmico do chat (atualizado pelo JS) */
+    #nav-chat-badge {
+      display: none;
+      align-items: center; justify-content: center;
+      min-width: 18px; height: 18px; padding: 0 4px;
+      background: #dc2626; color: #fff;
+      font-size: .62rem; font-weight: 800; border-radius: 9px;
+      margin-left: .2rem; line-height: 1;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    #nav-chat-badge.visible { display: inline-flex; }
+
+    .nav-user-btn {
+      display: flex; align-items: center; gap: .45rem;
+      padding: .38rem .85rem !important; border-radius: 100px !important;
+      border: 1.5px solid rgba(26,58,92,.15) !important;
+      color: var(--cor-primaria, #1a3a5c) !important;
+      font-weight: 700 !important; font-size: .84rem !important;
+      background: rgba(26,58,92,.04) !important;
+      transition: background .2s ease, border-color .2s ease !important;
+    }
+    .nav-user-btn:hover, .nav-user-btn.show {
+      background: rgba(26,58,92,.1) !important;
+      border-color: rgba(26,58,92,.3) !important;
+      color: var(--cor-primaria, #1a3a5c) !important;
+    }
+    .nav-user-btn::before, .nav-user-btn::after { display: none; }
+    .nav-user-caret { font-size: .65rem; opacity: .5; transition: transform .2s ease; }
+    .nav-user-btn.show .nav-user-caret { transform: rotate(180deg); }
+
+    .dropdown-menu {
+      border: 1px solid rgba(0,0,0,.08); border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.12);
+      padding: .4rem; min-width: 200px; margin-top: .5rem !important;
+    }
+    .dropdown-item {
+      border-radius: 8px; padding: .55rem .85rem;
+      font-size: .86rem; font-weight: 500; color: #374151;
+      display: flex; align-items: center; gap: .55rem;
+      transition: background .15s ease, color .15s ease;
+    }
+    .dropdown-item i { color: var(--cor-primaria, #1a3a5c); font-size: .95rem; width: 16px; text-align: center; }
+    .dropdown-item:hover { background: rgba(26,58,92,.07); color: var(--cor-primaria, #1a3a5c); }
+    .dropdown-item:active { background: rgba(26,58,92,.12); color: var(--cor-primaria, #1a3a5c); }
+    .dropdown-item.text-danger { color: #dc2626 !important; }
+    .dropdown-item.text-danger i { color: #dc2626; }
+    .dropdown-item.text-danger:hover { background: rgba(220,38,38,.07); }
+    .dropdown-divider { margin: .3rem .4rem; border-color: rgba(0,0,0,.07); }
+
+    .nav-cta-outline {
+      padding: .38rem .9rem !important; border-radius: 8px !important;
+      border: 1.5px solid rgba(26,58,92,.2) !important;
+      color: var(--cor-primaria, #1a3a5c) !important;
+      font-weight: 600 !important; font-size: .84rem !important;
+      transition: background .2s, border-color .2s !important;
+    }
+    .nav-cta-outline:hover { background: rgba(26,58,92,.06) !important; border-color: var(--cor-primaria, #1a3a5c) !important; }
+
+    .nav-cta-filled {
+      padding: .38rem .9rem !important; border-radius: 8px !important;
+      background: var(--cor-primaria, #1a3a5c) !important;
+      color: #fff !important; font-weight: 700 !important; font-size: .84rem !important;
+      border: 1.5px solid var(--cor-primaria, #1a3a5c) !important;
+      transition: background .2s, transform .2s !important;
+    }
+    .nav-cta-filled:hover {
+      background: var(--cor-primaria-light, #2a5298) !important;
+      border-color: var(--cor-primaria-light, #2a5298) !important;
+      color: #fff !important; transform: translateY(-1px) !important;
+    }
+    .nav-cta-filled::before, .nav-cta-outline::before { display: none; }
+
+    .navbar-toggler {
+      border: 1.5px solid rgba(26,58,92,.2); border-radius: 8px;
+      padding: .35rem .6rem; color: var(--cor-primaria, #1a3a5c); transition: background .2s;
+    }
+    .navbar-toggler:hover { background: rgba(26,58,92,.06); }
+    .navbar-toggler:focus { box-shadow: 0 0 0 3px rgba(26,58,92,.1); }
+    .navbar-toggler-icon {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='%231a3a5c' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    }
+
+    @media (max-width: 991.98px) {
+      .navbar-collapse {
+        background: rgba(255,255,255,.98); border-radius: 12px;
+        border: 1px solid rgba(0,0,0,.07);
+        box-shadow: 0 8px 32px rgba(0,0,0,.1);
+        margin-top: .5rem; padding: .75rem;
+      }
+      .nav-link { padding: .6rem .85rem !important; }
+      .nav-link.nav-ativo::before { display: none; }
+      .nav-link.nav-ativo { border-left: 3px solid var(--cor-acento, #d4a847); border-radius: 0 8px 8px 0; padding-left: .7rem !important; }
+      .nav-user-btn { border-radius: 8px !important; width: 100%; justify-content: flex-start; margin-top: .25rem; }
+      .dropdown-menu { box-shadow: none; border: none; background: rgba(26,58,92,.04); }
+      .nav-cta-filled, .nav-cta-outline { width: 100%; justify-content: center; margin-top: .2rem; }
+    }
+
+    /* ── Toast global de notificação ────────────────────────── */
+    #g-toast-wrap {
+      position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 10000;
+      display: flex; flex-direction: column; gap: .5rem; pointer-events: none;
+    }
+    .g-toast {
+      background: var(--surface, #fff);
+      border: 1px solid var(--border, #e5e7eb);
+      border-left: 4px solid var(--primary, #1a3a5c);
+      border-radius: var(--radius, 10px);
+      padding: .65rem 1rem .65rem .85rem;
+      box-shadow: 0 8px 24px rgba(0,0,0,.12);
+      display: flex; align-items: center; gap: .65rem;
+      min-width: 260px; max-width: 340px;
+      pointer-events: all; cursor: pointer;
+      opacity: 0; transform: translateX(24px);
+      transition: opacity .22s ease, transform .22s ease;
+    }
+    .g-toast.show  { opacity: 1; transform: translateX(0); }
+    .g-toast.dying { opacity: 0; transform: translateX(24px); }
+
+    .g-toast-av {
+      width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, #1a3a5c, #2a5298);
+      color: #fff; font-weight: 800; font-size: .9rem;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .g-toast-av img { width: 100%; height: 100%; object-fit: cover; }
+
+    .g-toast-body { flex: 1; min-width: 0; }
+    .g-toast-nome {
+      font-size: .8rem; font-weight: 700; color: var(--text-main, #111);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .g-toast-msg {
+      font-size: .75rem; color: var(--text-muted, #6b7280);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .g-toast-close {
+      background: none; border: none; padding: 0;
+      color: var(--text-muted, #6b7280); cursor: pointer;
+      font-size: .8rem; flex-shrink: 0; line-height: 1;
+    }
+    .g-toast-close:hover { color: var(--text-main, #111); }
   </style>
 
   {% block estilos_extras %}{% endblock %}
@@ -230,7 +227,6 @@
 
 <body class="background-animado">
 
-  <!-- Loading overlay -->
   <div class="loading-overlay" id="loading" aria-hidden="true">
     <div class="spinner"></div>
   </div>
@@ -238,104 +234,88 @@
   <!-- ══════ NAVBAR ══════ -->
   <nav class="navbar navbar-expand-lg navbar-custom" aria-label="Navegação principal">
     <div class="container">
-
-      <!-- Brand -->
       <a class="navbar-brand" href="{% url 'home' %}">
         <i class="bi bi-airplane-engines"></i>
         Viajantes Conectados
       </a>
 
-      <!-- Toggler mobile -->
-      <button class="navbar-toggler" type="button"
-              data-bs-toggle="collapse" data-bs-target="#navbarNav"
-              aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir menu">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+        aria-controls="navbarNav" aria-expanded="false" aria-label="Abrir menu">
         <span class="navbar-toggler-icon"></span>
       </button>
 
-      <!-- Links -->
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-1">
 
           {% if user.is_authenticated %}
 
-            <li class="nav-item">
-              <a class="nav-link {% if request.resolver_match.url_name == 'buscar' %}nav-ativo{% endif %}"
-                 href="{% url 'destinos:buscar' %}">
-                <i class="bi bi-search"></i>Buscar Viagens
-              </a>
-            </li>
+          <li class="nav-item">
+            <a class="nav-link {% if request.resolver_match.url_name == 'buscar' %}nav-ativo{% endif %}"
+              href="{% url 'destinos:buscar' %}">
+              <i class="bi bi-search"></i>Buscar Viagens
+            </a>
+          </li>
 
-            <li class="nav-item">
-              <a class="nav-link {% if 'conexoes' in request.resolver_match.app_name %}nav-ativo{% endif %}"
-                 href="{% url 'conexoes:solicitacoes' %}">
-                <i class="bi bi-people"></i>Conexões
-                {% if solicitacoes_pendentes %}
-                  <span class="nav-badge" aria-label="{{ solicitacoes_pendentes }} solicitações">{{ solicitacoes_pendentes }}</span>
-                {% endif %}
-              </a>
-            </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'conexoes' in request.resolver_match.app_name %}nav-ativo{% endif %}"
+              href="{% url 'conexoes:solicitacoes' %}">
+              <i class="bi bi-people"></i>Conexões
+              {% if solicitacoes_pendentes %}
+              <span class="nav-badge">{{ solicitacoes_pendentes }}</span>
+              {% endif %}
+            </a>
+          </li>
 
-            <li class="nav-item">
-              <a class="nav-link {% if 'chat' in request.resolver_match.app_name %}nav-ativo{% endif %}"
-                 href="{% url 'chat:conversas' %}">
-                <i class="bi bi-chat-dots"></i>Chat
-                {% if mensagens_nao_lidas %}
-                  <span class="nav-badge" aria-label="{{ mensagens_nao_lidas }} mensagens não lidas">{{ mensagens_nao_lidas }}</span>
-                {% endif %}
-              </a>
-            </li>
+          <li class="nav-item">
+            <a class="nav-link {% if 'chat' in request.resolver_match.app_name %}nav-ativo{% endif %}"
+              href="{% url 'chat:conversas' %}">
+              <i class="bi bi-chat-dots"></i>Chat
+              {# Badge estático (server-side) na carga inicial #}
+              {% if mensagens_nao_lidas %}
+              <span class="nav-badge" id="nav-chat-badge-static">{{ mensagens_nao_lidas }}</span>
+              {% endif %}
+              {# Badge dinâmico (JS) — atualizado pelo polling #}
+              <span id="nav-chat-badge" aria-live="polite"></span>
+            </a>
+          </li>
 
-            <!-- Dropdown do usuário -->
-            <li class="nav-item dropdown ms-lg-2">
-              <a class="nav-link nav-user-btn dropdown-toggle"
-                 href="#" id="userDropdown" role="button"
-                 data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-circle"></i>
-                {{ user.get_nome_exibicao|title|truncatechars:18 }}
-                <i class="bi bi-chevron-down nav-user-caret"></i>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                <li>
-                  <a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
-                    <i class="bi bi-person-fill"></i>Meu Perfil
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="{% url 'destinos:meus_planos' %}">
-                    <i class="bi bi-map-fill"></i>Meus Planos
-                  </a>
-                </li>
-                <li>
-                  <a class="dropdown-item" href="{% url 'usuarios:editar_perfil' %}">
-                    <i class="bi bi-pencil-fill"></i>Editar Perfil
-                  </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <form method="post" action="{% url 'usuarios:logout' %}" id="formLogout" style="margin:0;">
-                    {% csrf_token %}
-                    <button type="submit" class="dropdown-item text-danger w-100 text-start">
-                      <i class="bi bi-box-arrow-right"></i>Sair
-                    </button>
-                  </form>
-                </li>
-              </ul>
-            </li>
+          <li class="nav-item dropdown ms-lg-2">
+            <a class="nav-link nav-user-btn dropdown-toggle" href="#" id="userDropdown" role="button"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-person-circle"></i>
+              {{ user.get_nome_exibicao|title|truncatechars:18 }}
+              <i class="bi bi-chevron-down nav-user-caret"></i>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+              <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}"><i class="bi bi-person-fill"></i>Meu Perfil</a></li>
+              <li><a class="dropdown-item" href="{% url 'destinos:meus_planos' %}"><i class="bi bi-map-fill"></i>Meus Planos</a></li>
+              <li><a class="dropdown-item" href="{% url 'usuarios:editar_perfil' %}"><i class="bi bi-pencil-fill"></i>Editar Perfil</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <form method="post" action="{% url 'usuarios:logout' %}" style="margin:0;">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger w-100 text-start">
+                    <i class="bi bi-box-arrow-right"></i>Sair
+                  </button>
+                </form>
+              </li>
+            </ul>
+          </li>
 
           {% else %}
 
-            <li class="nav-item">
-              <a class="nav-link nav-cta-outline {% if request.resolver_match.url_name == 'login' %}nav-ativo{% endif %}"
-                 href="{% url 'usuarios:login' %}">
-                <i class="bi bi-box-arrow-in-right"></i>Entrar
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link nav-cta-filled {% if request.resolver_match.url_name == 'cadastro' %}nav-ativo{% endif %}"
-                 href="{% url 'usuarios:cadastro' %}">
-                <i class="bi bi-person-plus"></i>Cadastrar
-              </a>
-            </li>
+          <li class="nav-item">
+            <a class="nav-link nav-cta-outline {% if request.resolver_match.url_name == 'login' %}nav-ativo{% endif %}"
+              href="{% url 'usuarios:login' %}">
+              <i class="bi bi-box-arrow-in-right"></i>Entrar
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link nav-cta-filled {% if request.resolver_match.url_name == 'cadastro' %}nav-ativo{% endif %}"
+              href="{% url 'usuarios:cadastro' %}">
+              <i class="bi bi-person-plus"></i>Cadastrar
+            </a>
+          </li>
 
           {% endif %}
         </ul>
@@ -348,8 +328,7 @@
   <div id="site-alerts" class="alerts-fixed-container" role="alert" aria-live="polite">
     <div class="container">
       {% for mensagem in messages %}
-      <div class="alert alert-{{ mensagem.tags }} alert-custom alert-dismissible fade show d-flex align-items-center gap-3"
-           role="alert">
+      <div class="alert alert-{{ mensagem.tags }} alert-custom alert-dismissible fade show d-flex align-items-center gap-3" role="alert">
         <i class="bi
           {% if mensagem.tags == 'success' %}bi-check-circle-fill
           {% elif mensagem.tags == 'error' or mensagem.tags == 'danger' %}bi-exclamation-octagon-fill
@@ -369,68 +348,57 @@
     {% block conteudo %}{% endblock %}
   </main>
 
+  <!-- Container dos toasts — fora do main para não ser afetado por overflow -->
+  <div id="g-toast-wrap"></div>
+
   <!-- ══════ FOOTER ══════ -->
   <footer class="footer-custom mt-5">
     <div class="container">
       <div class="footer-content text-center">
-
         <h5 class="footer-logo">
           <i class="bi bi-airplane-engines" style="color:var(--cor-acento,#d4a847);"></i>
           Viajantes Conectados
         </h5>
-
         <p class="footer-description">
           Conecte-se com viajantes que compartilham o mesmo destino.
           Faça amigos, divida custos e viva experiências inesquecíveis.
         </p>
-
         <div class="footer-links">
           <a href="#">Política de Privacidade</a>
           <a href="#">Termos de Uso</a>
           <a href="#">Contato</a>
         </div>
-
         <div class="footer-social">
           <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
           <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
           <a href="#" aria-label="Twitter/X"><i class="bi bi-twitter-x"></i></a>
         </div>
-
-        <p class="footer-copy">
-          © {% now "Y" %} Viajantes Conectados. Todos os direitos reservados.
-        </p>
-
+        <p class="footer-copy">© {% now "Y" %} Viajantes Conectados. Todos os direitos reservados.</p>
       </div>
     </div>
   </footer>
 
-  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <!-- Mapbox GL JS -->
   <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
 
   <script>
+  /* ── Utilitários gerais ───────────────────────────────────── */
   (function () {
     'use strict';
 
-    /* ── Navbar scroll effect ──────────────────────────── */
     const navbar = document.querySelector('.navbar-custom');
-    const onScroll = () => navbar?.classList.toggle('scrolled', window.scrollY > 40);
-    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('scroll', () => navbar?.classList.toggle('scrolled', window.scrollY > 40), { passive: true });
 
-    /* ── Dropdown: rotacionar caret ────────────────────── */
     const userBtn = document.getElementById('userDropdown');
-    userBtn?.addEventListener('show.bs.dropdown',  () => userBtn.classList.add('show'));
-    userBtn?.addEventListener('hide.bs.dropdown',  () => userBtn.classList.remove('show'));
+    userBtn?.addEventListener('show.bs.dropdown', () => userBtn.classList.add('show'));
+    userBtn?.addEventListener('hide.bs.dropdown', () => userBtn.classList.remove('show'));
 
-    /* ── Auto-dismiss alertas após 5s ──────────────────── */
     setTimeout(() => {
       document.querySelectorAll('#site-alerts .alert').forEach(el => {
-        try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch {}
+        try { bootstrap.Alert.getOrCreateInstance(el).close(); } catch (_) {}
       });
     }, 5000);
 
-    /* ── Validação HTML5 de formulários ────────────────── */
     document.querySelectorAll('.needs-validation').forEach(form => {
       form.addEventListener('submit', e => {
         if (!form.checkValidity()) { e.preventDefault(); e.stopPropagation(); }
@@ -438,14 +406,10 @@
       }, false);
     });
 
-    /* ── Loading overlay helpers (expostos globalmente) ── */
     window.mostrarLoading  = () => document.getElementById('loading')?.classList.add('active');
     window.esconderLoading = () => document.getElementById('loading')?.classList.remove('active');
+    window.obterCsrfToken  = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value ?? '';
 
-    /* ── CSRF Token helper ─────────────────────────────── */
-    window.obterCsrfToken = () => document.querySelector('[name=csrfmiddlewaretoken]')?.value ?? '';
-
-    /* ── Fechar navbar mobile ao clicar em link ─────────── */
     document.querySelectorAll('.navbar-nav .nav-link:not(.dropdown-toggle)').forEach(link => {
       link.addEventListener('click', () => {
         const collapse = document.getElementById('navbarNav');
@@ -454,8 +418,155 @@
         }
       });
     });
-
   })();
+
+  /* ── Polling global de notificações (apenas usuário autenticado) ── */
+  {% if user.is_authenticated %}
+  (function () {
+    'use strict';
+
+    const URL_DETALHES  = '{% url "chat:nao_lidas_detalhes" %}';
+    const POLL_INTERVAL = 6000;
+
+    const badge         = document.getElementById('nav-chat-badge');
+    const badgeStatic   = document.getElementById('nav-chat-badge-static');
+    const toastWrap     = document.getElementById('g-toast-wrap');
+
+    /* Estado: uuid → última contagem conhecida */
+    let _contagens = {};
+    let _rodando   = false;
+
+    /* ── Toast ──────────────────────────────────────────────── */
+    function dispensar(el) {
+      el.classList.replace('show', 'dying');
+      el.addEventListener('transitionend', () => el.remove(), { once: true });
+    }
+
+    function mostrarToast({ nome, inicial, fotoUrl, preview, urlConversa }) {
+      const t = document.createElement('div');
+      t.className = 'g-toast';
+      t.setAttribute('role', 'alert');
+      t.setAttribute('aria-live', 'polite');
+      t.innerHTML = `
+        <div class="g-toast-av">
+          ${fotoUrl ? `<img src="${fotoUrl}" alt="${nome}" onerror="this.parentElement.textContent='${inicial}'">` : inicial}
+        </div>
+        <div class="g-toast-body">
+          <div class="g-toast-nome">${nome}</div>
+          <div class="g-toast-msg">${preview}</div>
+        </div>
+        <button class="g-toast-close" aria-label="Fechar">✕</button>`;
+
+      t.addEventListener('click', () => { window.location.href = urlConversa; });
+      t.querySelector('.g-toast-close').addEventListener('click', e => {
+        e.stopPropagation();
+        dispensar(t);
+      });
+
+      toastWrap.appendChild(t);
+      /* Dois rAF garantem que o browser pintou o estado inicial (opacity:0)
+         antes de adicionar .show, ativando a transição CSS */
+      requestAnimationFrame(() => requestAnimationFrame(() => t.classList.add('show')));
+      setTimeout(() => dispensar(t), 6000);
+    }
+
+    /* ── Badge do navbar ────────────────────────────────────── */
+    function atualizarBadge(total) {
+      /* Oculta o badge estático (server-side) assim que o JS assume o controle */
+      if (badgeStatic) badgeStatic.style.display = 'none';
+
+      if (total > 0) {
+        badge.textContent = total > 99 ? '99+' : total;
+        badge.classList.add('visible');
+      } else {
+        badge.textContent = '';
+        badge.classList.remove('visible');
+      }
+
+      /* Prefixo no título da aba */
+      document.title = document.title.replace(/^\(\d+\)\s*/, '');
+      if (total > 0) document.title = `(${total}) ${document.title}`;
+    }
+
+    /* ── Ciclo de polling ───────────────────────────────────── */
+    async function poll() {
+      if (_rodando) return;
+      _rodando = true;
+
+      try {
+        const r = await fetch(URL_DETALHES, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+          credentials: 'same-origin',
+        });
+
+        if (!r.ok) return;
+
+        /* Resposta: [ { uuid, total, nome, inicial, foto, preview }, ... ] */
+        const lista = await r.json();
+
+        let totalGeral = 0;
+        let houveNova  = false;
+        const vistos   = new Set();
+
+        for (const c of lista) {
+          const { uuid, total, nome, inicial, foto, preview } = c;
+          vistos.add(uuid);
+          totalGeral += total;
+
+          const anterior = _contagens[uuid] ?? 0;
+
+          if (total > anterior) {
+            houveNova = true;
+            /* Suprime o toast se o usuário já está nessa conversa */
+            const naConversa = window.CHAT?.conversaUuid === uuid;
+            if (!naConversa) {
+              mostrarToast({
+                nome:        nome    || 'Nova mensagem',
+                inicial:     inicial || '?',
+                fotoUrl:     foto    || '',
+                preview:     preview || 'Você tem uma nova mensagem.',
+                urlConversa: `/chat/conversa/${uuid}/`,
+              });
+            }
+          }
+
+          _contagens[uuid] = total;
+        }
+
+        /* Zera conversas que sumiram (lidas em outra aba/dispositivo) */
+        for (const uuid of Object.keys(_contagens)) {
+          if (!vistos.has(uuid)) _contagens[uuid] = 0;
+        }
+
+        atualizarBadge(totalGeral);
+
+        /* Notificação nativa do browser */
+        if (houveNova && Notification.permission === 'granted') {
+          new Notification('Viajantes Conectados', {
+            body: 'Você tem uma nova mensagem!',
+            icon: '{% static "img/logo.svg" %}',
+          });
+        }
+
+      } catch (_) {
+        /* Falha de rede — tenta no próximo ciclo */
+      } finally {
+        _rodando = false;
+      }
+    }
+
+    /* Pede permissão na primeira interação (evita bloqueio automático do browser) */
+    if ('Notification' in window && Notification.permission === 'default') {
+      document.addEventListener('click', function _once() {
+        Notification.requestPermission();
+        document.removeEventListener('click', _once);
+      }, { once: true });
+    }
+
+    poll();
+    setInterval(poll, POLL_INTERVAL);
+  })();
+  {% endif %}
   </script>
 
   {% block scripts_extras %}{% endblock %}

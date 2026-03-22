@@ -92,8 +92,8 @@
                         <!-- Conteúdo do Card -->
                         <div class="card-body">
                             <!-- País e Cidade -->
-                            <h5 class="card-title mb-2">
-                                <i class="bi bi-geo-alt-fill text-danger me-2"></i>
+                            <h5 class="card-title mb-2 bold">
+                                <i class="bi bi-geo-alt-fill text-danger"></i>
                                 {{ plano.pais_destino.nome }}
                             </h5>
 
@@ -152,12 +152,12 @@
                                 </a>
 
                                 <button type="button"
-                                        class="btn btn-sm btn-ghost-navy text-uppercase"
+                                        class="btn btn-sm btn-ghost-navy"
                                         style="border-color:rgba(192,57,43,.3);color:#c0392b;"
                                         onmouseenter="this.style.background='rgba(192,57,43,.08)'"
                                         onmouseleave="this.style.background=''"
                                         onclick="deletarPlano('{{ plano.uuid }}')">
-                                <i class="bi bi-trash3-fill me-1"></i>Deletar
+                                <i class="bi bi-trash3-fill me-1"></i>
                                 </button>
 
                             </div>

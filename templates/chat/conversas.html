@@ -8,6 +8,54 @@
 <style>
 .chat-wrap { max-width: 780px; margin: 1.5rem auto 3rem; }
 
+/* ── Card de viagem ───────────────────────────────────── */
+.viagem-card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  max-width: 320px;
+  box-shadow: var(--shadow-sm);
+  text-decoration: none;
+  display: block;
+  transition: box-shadow var(--transition), transform var(--transition);
+}
+.viagem-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+.viagem-card-img {
+  width: 100%; height: 130px; object-fit: cover; display: block;
+  filter: brightness(.72) saturate(1.1);
+}
+.viagem-card-img-ph {
+  width: 100%; height: 130px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,.3); font-size: 2.5rem;
+}
+.viagem-card-body { padding: .75rem .9rem .8rem; }
+.viagem-card-destino {
+  font-size: .92rem; font-weight: 800; color: var(--primary);
+  margin-bottom: .2rem; display: flex; align-items: center; gap: .35rem;
+}
+.viagem-card-destino i { color: var(--accent); font-size: .85rem; }
+.viagem-card-meta {
+  font-size: .75rem; color: var(--text-muted);
+  display: flex; flex-direction: column; gap: .15rem; margin-bottom: .55rem;
+}
+.viagem-card-meta span { display: flex; align-items: center; gap: .3rem; }
+.viagem-card-meta i { color: var(--accent); font-size: .72rem; }
+.viagem-card-msg {
+  font-size: .82rem; color: var(--text-main);
+  padding-top: .5rem; border-top: 1px solid var(--border);
+  line-height: 1.45;
+}
+.viagem-card-cta {
+  display: inline-flex; align-items: center; gap: .35rem;
+  margin-top: .5rem; font-size: .75rem; font-weight: 700;
+  color: var(--primary); text-decoration: none;
+}
+.viagem-card-cta:hover { color: var(--accent); }
+
+/* ── Header ───────────────────────────────────────────── */
 .chat-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: .85rem 1.1rem; background: var(--surface);
@@ -23,9 +71,14 @@
 }
 .ch-av img { width: 100%; height: 100%; object-fit: cover; }
 .ch-name { font-weight: 800; font-size: .95rem; color: var(--text-main); }
-.ch-status { font-size: .74rem; color: var(--success); display: flex; align-items: center; gap: .3rem; }
+.ch-status { font-size: .74rem; color: var(--text-muted); display: flex; align-items: center; gap: .3rem; }
+.ch-status.digitando { color: var(--primary); font-style: italic; }
 .ch-status i { font-size: .4rem; }
 
+/* ── Ações do header (bloqueio/desfazer amizade) ─────── */
+.chat-header-actions { display: flex; align-items: center; gap: .5rem; }
+
+/* ── Mensagens ────────────────────────────────────────── */
 .chat-messages {
   height: 480px; overflow-y: auto;
   padding: 1rem; background: var(--surface-alt);
@@ -68,7 +121,7 @@
   transition: background var(--transition), color var(--transition);
 }
 .msg-ab:hover     { background: var(--primary); color: #fff; border-color: var(--primary); }
-.msg-ab.red:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+.msg-ab.red:hover { background: var(--danger);  color: #fff; border-color: var(--danger); }
 
 .chat-empty {
   flex: 1; display: flex; flex-direction: column;
@@ -77,6 +130,21 @@
 }
 .chat-empty i { font-size: 2.2rem; opacity: .18; display: block; margin-bottom: .65rem; color: var(--primary); }
 
+/* ── Toast de notificação (substitui alert()) ─────────── */
+#chat-toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .65rem 1rem;
+  box-shadow: var(--shadow-md); font-size: .83rem; color: var(--text-main);
+  display: flex; align-items: center; gap: .5rem;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity .25s, transform .25s;
+  pointer-events: none;
+}
+#chat-toast.show { opacity: 1; transform: translateY(0); }
+#chat-toast i { color: var(--primary); }
+
+/* ── Input ────────────────────────────────────────────── */
 .chat-input-wrap {
   background: var(--surface); border: 1px solid var(--border); border-top: none;
   border-radius: 0 0 var(--radius) var(--radius); padding: .85rem 1rem;
@@ -90,7 +158,8 @@
   transition: border-color var(--transition), box-shadow var(--transition);
 }
 .chat-ta:focus {
-  border-color: var(--primary-light); box-shadow: 0 0 0 3px rgba(42,82,152,.1);
+  border-color: var(--primary-light);
+  box-shadow: 0 0 0 3px rgba(42,82,152,.1);
   background: var(--surface);
 }
 .chat-send {
@@ -101,7 +170,7 @@
   box-shadow: 0 2px 8px rgba(26,58,92,.22);
   transition: transform var(--transition), box-shadow var(--transition);
 }
-.chat-send:hover   { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,58,92,.35); }
+.chat-send:hover    { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(26,58,92,.35); }
 .chat-send:disabled { opacity: .4; cursor: not-allowed; transform: none; }
 
 .chat-footer { display: flex; justify-content: space-between; margin-top: .4rem; }
@@ -117,7 +186,6 @@
 <div class="container">
 <div class="chat-wrap">
 
-  <!-- Voltar para inbox -->
   <a href="{% url 'chat:conversas' %}" class="d-inline-flex align-items-center gap-1 mb-3"
      style="font-size:.83rem;font-weight:600;color:var(--text-muted);text-decoration:none;">
     <i class="bi bi-chevron-left"></i> Mensagens
@@ -135,32 +203,72 @@
       </div>
       <div>
         <div class="ch-name">{{ outro_participante.get_nome_exibicao }}</div>
-        <div class="ch-status"><i class="bi bi-circle-fill"></i>Online</div>
+        <div class="ch-status" id="chStatus">
+          <i class="bi bi-circle-fill"></i>
+          <span id="chStatusText">Online</span>
+        </div>
       </div>
     </div>
-    <a href="{% url 'usuarios:perfil_publico' uuid=outro_participante.uuid %}"
-       class="btn btn-ghost-navy btn-sm" style="font-size:.78rem;padding:.32rem .8rem;">
-      <i class="bi bi-person me-1"></i>Perfil
-    </a>
+
+    <div class="chat-header-actions">
+      <a href="{% url 'usuarios:perfil_publico' uuid=outro_participante.uuid %}"
+         class="btn btn-ghost-navy btn-sm" style="font-size:.78rem;padding:.32rem .8rem;">
+        <i class="bi bi-person me-1"></i>Perfil
+      </a>
+
+      <!-- Menu de ações -->
+      <div class="dropdown">
+        <button class="btn btn-ghost-navy btn-sm" data-bs-toggle="dropdown"
+                aria-expanded="false" style="font-size:.78rem;padding:.32rem .6rem;">
+          <i class="bi bi-three-dots-vertical"></i>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end">
+          <li>
+            <button class="dropdown-item" id="btnLimparConversa">
+              <i class="bi bi-trash3 me-2"></i>Limpar conversa
+            </button>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li>
+            <button class="dropdown-item text-danger" id="btnDesfazerAmizade">
+              <i class="bi bi-person-x me-2"></i>Desfazer amizade
+            </button>
+          </li>
+          <li>
+            <button class="dropdown-item text-danger" id="btnBloquear">
+              <i class="bi bi-slash-circle me-2"></i>Bloquear usuário
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 
   <!-- Mensagens -->
   <div class="chat-messages" id="chatMsgs">
-    {% if conversa.mensagens.all %}
-      {% for m in conversa.mensagens.all %}
+    {% if mensagens %}
+      {% for m in mensagens %}
       <div class="msg-row {% if m.remetente == request.user %}sent{% else %}received{% endif %}"
            data-id="{{ m.id }}">
         <div class="msg-actions">
-          <button class="msg-ab" onclick="copiar(this)" title="Copiar"><i class="bi bi-clipboard"></i></button>
+          <button class="msg-ab" onclick="copiar(this)" title="Copiar">
+            <i class="bi bi-clipboard"></i>
+          </button>
           {% if m.remetente == request.user %}
-          <button class="msg-ab red" onclick="apagar({{ m.id }},this)" title="Apagar"><i class="bi bi-trash3"></i></button>
+          <button class="msg-ab red" onclick="apagarMensagem({{ m.id }}, this)" title="Apagar">
+            <i class="bi bi-trash3"></i>
+          </button>
           {% endif %}
         </div>
         <div class="msg-bubble">
-          <div class="msg-text">{{ m.conteudo }}</div>
+          <div class="msg-text" data-id="{{ m.id }}">{{ m.conteudo }}</div>
+          <script type="application/json" data-msg-id="{{ m.id }}">{{ m.conteudo|safe }}</script>
           <div class="msg-meta">
-            {% if m.data_envio|date:"Y-m-d" == hoje %}{{ m.data_envio|time:"H:i" }}
-            {% else %}{{ m.data_envio|date:"d/m H:i" }}{% endif %}
+            {% if m.data_envio|date:"Y-m-d" == hoje %}
+              {{ m.data_envio|time:"H:i" }}
+            {% else %}
+              {{ m.data_envio|date:"d/m H:i" }}
+            {% endif %}
             {% if m.remetente == request.user %}
               <i class="bi bi-check2{% if m.lida %}-all{% endif %}"></i>
             {% endif %}
@@ -169,23 +277,34 @@
       </div>
       {% endfor %}
     {% else %}
-      <div class="chat-empty">
+      <div class="chat-empty" id="chatEmpty">
         <i class="bi bi-chat-dots"></i>
         <p style="font-size:.85rem;">Nenhuma mensagem ainda.<br>Diga olá! 👋</p>
       </div>
     {% endif %}
   </div>
 
+  <!-- Banner de aviso (amizade desfeita / bloqueio) — oculto por padrão -->
+  <div id="chatBanner" style="display:none; padding:.65rem 1rem;
+       background:var(--surface); border:1px solid var(--border); border-top:none;
+       border-left:4px solid var(--warning,#f59e0b);
+       font-size:.82rem; color:var(--text-muted); display:none; align-items:center; gap:.5rem;">
+    <i class="bi bi-exclamation-triangle-fill" style="color:var(--warning,#f59e0b);"></i>
+    <span id="chatBannerText"></span>
+  </div>
+
   <!-- Input -->
-  <div class="chat-input-wrap">
+  <div class="chat-input-wrap" id="chatInputWrap">
     <form id="formMsg" method="post"
           action="{% url 'chat:enviar_mensagem' uuid_conversa=conversa.uuid %}">
       {% csrf_token %}
       <div class="chat-input-row">
         <textarea id="chatTa" name="conteudo" class="chat-ta" rows="1"
                   placeholder="Digite uma mensagem…" required maxlength="2000"
-                  autocomplete="off"></textarea>
-        <button type="submit" class="chat-send" id="chatSend">
+                  autocomplete="off"
+                  {% if not sao_amigos %}disabled{% endif %}></textarea>
+        <button type="submit" class="chat-send" id="chatSend"
+                {% if not sao_amigos %}disabled{% endif %}>
           <i class="bi bi-send-fill"></i>
         </button>
       </div>
@@ -199,29 +318,58 @@
     </form>
   </div>
 
-</div>
-</div>
+  {% if not sao_amigos %}
+  <script>
+    document.getElementById('chatBannerText').textContent =
+      'Vocês não são mais amigos. Você pode ler o histórico, mas não enviar novas mensagens.';
+    document.getElementById('chatBanner').style.display = 'flex';
+    document.getElementById('chatTa').placeholder = 'Não é possível enviar mensagens.';
+  </script>
+  {% endif %}
+
+</div><!-- /.chat-wrap -->
+</div><!-- /.container -->
+
+<!-- Toast de notificação (substitui alert()) -->
+<div id="chat-toast"><i class="bi bi-envelope-fill"></i><span id="chat-toast-msg"></span></div>
 {% endblock %}
 
 
 {% block scripts_extras %}
 <script>
-window.CHAT_CONFIG = {
-  csrfToken:    '{{ csrf_token }}',
+const CHAT = {
+  csrf:         '{{ csrf_token }}',
   conversaUuid: '{{ conversa.uuid }}',
   usuarioUuid:  '{{ request.user.uuid }}',
-  urlEnviar:    '{% url "chat:enviar_mensagem" uuid_conversa=conversa.uuid %}',
-  urlMensagens: '{% url "chat:mensagens_json" uuid_conversa=conversa.uuid %}',
+  urlEnviar:    '{% url "chat:enviar_mensagem"      uuid_conversa=conversa.uuid %}',
+  urlMensagens: '{% url "chat:mensagens_json"        uuid_conversa=conversa.uuid %}',
+  urlDigitando: '{% url "chat:digitando"             uuid_conversa=conversa.uuid %}',
+  urlParou:     '{% url "chat:parou_digitar"         uuid_conversa=conversa.uuid %}',
+  urlLimpar:    '{% url "chat:apagar_conversa"       uuid_conversa=conversa.uuid %}',
+  urlBloquear:  '{% url "chat:bloquear_usuario"      uuid_usuario=outro_participante.uuid %}',
+  urlDesfazer:  '{% url "chat:desfazer_amizade_ajax" uuid_amigo=outro_participante.uuid %}',
 };
 
-/* Scroll */
-const box = document.getElementById('chatMsgs');
-box.scrollTop = box.scrollHeight;
+/* ── Toast ──────────────────────────────────────────────── */
+let _toastTimer;
+function toast(msg, duracao = 3500) {
+  const el  = document.getElementById('chat-toast');
+  const txt = document.getElementById('chat-toast-msg');
+  txt.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), duracao);
+}
 
-/* Contador + resize */
+/* ── Scroll ─────────────────────────────────────────────── */
+const box = document.getElementById('chatMsgs');
+function scrollFim() { box.scrollTop = box.scrollHeight; }
+scrollFim();
+
+/* ── Contador + auto-resize do textarea ─────────────────── */
 const ta = document.getElementById('chatTa');
 const ct = document.getElementById('chatCounter');
-ta.addEventListener('input', function() {
+ta.addEventListener('input', function () {
   const n = this.value.length;
   ct.textContent = `${n} / 2000`;
   ct.classList.toggle('warn', n > 1800);
@@ -229,25 +377,399 @@ ta.addEventListener('input', function() {
   this.style.height = Math.min(this.scrollHeight, 120) + 'px';
 });
 
-/* Enter envia */
+/* Enter envia, Shift+Enter quebra linha */
 ta.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); document.getElementById('formMsg').requestSubmit(); }
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    document.getElementById('formMsg').requestSubmit();
+  }
 });
 
-/* Copiar */
-window.copiar = function(btn) {
-  const t = btn.closest('.msg-row')?.querySelector('.msg-text')?.textContent;
-  if (t) navigator.clipboard.writeText(t).then(() => alert('Copiado!'));
+/* ── Indicador de digitação ─────────────────────────────── */
+let _digitandoTimer;
+let _estaDigitando = false;
+
+async function enviarDigitando() {
+  try {
+    await fetch(CHAT.urlDigitando, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CHAT.csrf },
+    });
+  } catch (_) { /* silencioso */ }
+}
+
+async function enviarParouDigitar() {
+  _estaDigitando = false;
+  try {
+    await fetch(CHAT.urlParou, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CHAT.csrf },
+    });
+  } catch (_) { /* silencioso */ }
+}
+
+ta.addEventListener('input', () => {
+  if (!_estaDigitando) {
+    _estaDigitando = true;
+    enviarDigitando();
+  }
+  clearTimeout(_digitandoTimer);
+  _digitandoTimer = setTimeout(enviarParouDigitar, 2500);
+});
+
+/* ── Renderiza cards de viagem ──────────────────────────── */
+function renderizarCard(el) {
+  if (!el) return;
+
+  // Lê o JSON bruto do <script type="application/json"> irmão, ou do dataset
+  // (para mensagens adicionadas via AJAX que usam dataset.json)
+  let raw = el.dataset.json || '';
+  if (!raw) {
+    const msgId = el.dataset.id;
+    const script = msgId
+      ? document.querySelector(`script[data-msg-id="${msgId}"]`)
+      : el.closest('.msg-bubble')?.querySelector('script[type="application/json"]');
+    raw = script?.textContent?.trim() || '';
+  }
+  if (!raw) return;
+
+  let d;
+  try { d = JSON.parse(raw); } catch (_) { return; }
+  if (!d || d.__tipo !== 'viagem_card') return;
+
+  const bubble = el.closest('.msg-bubble');
+  if (!bubble) return;
+
+  const url = d.url || `/destinos/${d.uuid_plano}/`;
+
+  const imgEl = d.imagem
+    ? Object.assign(document.createElement('img'), {
+        src: d.imagem, alt: d.destino, className: 'viagem-card-img',
+        onerror() { this.replaceWith(Object.assign(document.createElement('div'),
+          { className: 'viagem-card-img-ph', innerHTML: '<i class="bi bi-globe2"></i>' })); }
+      })
+    : Object.assign(document.createElement('div'),
+        { className: 'viagem-card-img-ph', innerHTML: '<i class="bi bi-globe2"></i>' });
+
+  const metaItems = [
+    d.cidade  && `<span><i class="bi bi-pin-map-fill"></i>${d.cidade}</span>`,
+    d.periodo && `<span><i class="bi bi-calendar-event"></i>${d.periodo}</span>`,
+    d.duracao && `<span><i class="bi bi-hourglass-split"></i>${d.duracao}</span>`,
+    d.motivo  && `<span><i class="bi bi-heart"></i>${d.motivo}</span>`,
+  ].filter(Boolean).join('');
+
+  const body = document.createElement('div');
+  body.className = 'viagem-card-body';
+  body.innerHTML = `
+    <div class="viagem-card-destino"><i class="bi bi-geo-alt-fill"></i>${d.destino}</div>
+    <div class="viagem-card-meta">${metaItems}</div>
+    <div class="viagem-card-msg">${d.mensagem}</div>
+    <span class="viagem-card-cta"><i class="bi bi-arrow-right-circle-fill"></i>Ver detalhes da viagem</span>`;
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.className = 'viagem-card';
+  link.target = '_blank';
+  link.rel = 'noopener noreferrer';
+  link.appendChild(imgEl);
+  link.appendChild(body);
+
+  bubble.innerHTML = '';
+  bubble.appendChild(link);
+}
+
+function renderizarTodosCards() {
+  document.querySelectorAll('.msg-bubble').forEach(bubble => {
+    const script = bubble.querySelector('script[type="application/json"]');
+    if (!script) return;
+    const msgText = bubble.querySelector('.msg-text');
+    if (msgText) renderizarCard(msgText);
+  });
+}
+renderizarTodosCards();
+
+/* ── Copiar mensagem ────────────────────────────────────── */
+window.copiar = function (btn) {
+  const bubble = btn.closest('.msg-row')?.querySelector('.msg-bubble');
+  const txt = bubble?.querySelector('.msg-text')?.textContent?.trim()
+           || bubble?.querySelector('.viagem-card-msg')?.textContent?.trim()
+           || '';
+  if (!txt) return;
+  navigator.clipboard.writeText(txt)
+    .then(() => toast('Mensagem copiada!'))
+    .catch(() => toast('Não foi possível copiar.'));
 };
 
-/* Apagar */
-window.apagar = async function(id, btn) {
-  if (!confirm('Apagar mensagem?')) return;
-  const r = await fetch(`/chat/mensagem/${id}/`, {
-    method: 'DELETE',
-    headers: { 'X-CSRFToken': '{{ csrf_token }}' }
-  });
-  if (r.ok) btn.closest('.msg-row')?.remove();
+/* ── Apagar mensagem ────────────────────────────────────── */
+window.apagarMensagem = async function (id, btn) {
+  if (!confirm('Apagar esta mensagem?')) return;
+  try {
+    const r = await fetch(`/chat/mensagem/${id}/apagar/`, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CHAT.csrf },
+    });
+    if (r.ok) {
+      btn.closest('.msg-row')?.remove();
+      toast('Mensagem apagada.');
+    } else {
+      const data = await r.json().catch(() => ({}));
+      toast(data.erro || 'Não foi possível apagar a mensagem.');
+    }
+  } catch (_) {
+    toast('Erro de conexão. Tente novamente.');
+  }
 };
+
+/* ── Envio de mensagem via AJAX ─────────────────────────── */
+document.getElementById('formMsg').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  const conteudo = ta.value.trim();
+  if (!conteudo) return;
+
+  const btn = document.getElementById('chatSend');
+  btn.disabled = true;
+
+  try {
+    const r = await fetch(CHAT.urlEnviar, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': CHAT.csrf,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      body: new URLSearchParams({ conteudo }),
+    });
+
+    const data = await r.json().catch(() => ({}));
+
+    if (r.ok && data.status === 'ok') {
+      adicionarMensagem({
+        id:             data.id,
+        conteudo:       data.conteudo,
+        hora:           data.hora,
+        remetente_uuid: data.remetente_uuid,
+        lida:           false,
+      });
+      ta.value = '';
+      ta.style.height = 'auto';
+      ct.textContent = '0 / 2000';
+      ct.classList.remove('warn');
+      clearTimeout(_digitandoTimer);
+      enviarParouDigitar();
+    } else {
+      toast(data.erro || 'Não foi possível enviar a mensagem.');
+    }
+  } catch (_) {
+    toast('Erro de conexão. Verifique sua internet.');
+  } finally {
+    btn.disabled = false;
+    ta.focus();
+  }
+});
+
+/* ── Adiciona uma nova linha de mensagem ao DOM ─────────── */
+function adicionarMensagem(m) {
+  // Remove estado vazio se existir
+  document.getElementById('chatEmpty')?.remove();
+
+  const isMeu = m.remetente_uuid === CHAT.usuarioUuid;
+  const row = document.createElement('div');
+  row.className = `msg-row ${isMeu ? 'sent' : 'received'}`;
+  row.dataset.id = m.id;
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+
+  const msgText = document.createElement('div');
+  msgText.className = 'msg-text';
+  msgText.dataset.json = m.conteudo;
+  msgText.textContent = m.conteudo;
+
+  const msgMeta = document.createElement('div');
+  msgMeta.className = 'msg-meta';
+  msgMeta.innerHTML = `${m.hora} ${isMeu ? `<i class="bi bi-check2${m.lida ? '-all' : ''}"></i>` : ''}`;
+
+  bubble.appendChild(msgText);
+  bubble.appendChild(msgMeta);
+
+  const actions = document.createElement('div');
+  actions.className = 'msg-actions';
+  actions.innerHTML = `
+    <button class="msg-ab" onclick="copiar(this)" title="Copiar">
+      <i class="bi bi-clipboard"></i>
+    </button>
+    ${isMeu ? `<button class="msg-ab red" onclick="apagarMensagem(${m.id}, this)" title="Apagar">
+      <i class="bi bi-trash3"></i>
+    </button>` : ''}`;
+
+  row.appendChild(actions);
+  row.appendChild(bubble);
+  box.appendChild(row);
+  renderizarCard(msgText);
+  scrollFim();
+}
+
+/* ── Polling de mensagens novas ─────────────────────────── */
+let _ultimoId = (() => {
+  // Pega o maior ID já presente na página
+  const ids = [...document.querySelectorAll('.msg-row[data-id]')]
+    .map(el => parseInt(el.dataset.id, 10))
+    .filter(n => !isNaN(n));
+  return ids.length ? Math.max(...ids) : 0;
+})();
+
+/* ── Helpers de estado da UI ────────────────────────────── */
+function bloquearInput(motivo) {
+  document.getElementById('chatTa').disabled = true;
+  document.getElementById('chatSend').disabled = true;
+  document.getElementById('chatTa').placeholder = 'Não é possível enviar mensagens.';
+  const banner = document.getElementById('chatBanner');
+  document.getElementById('chatBannerText').textContent = motivo;
+  banner.style.display = 'flex';
+}
+
+function limparDOM() {
+  document.querySelectorAll('#chatMsgs .msg-row').forEach(el => el.remove());
+  if (!document.getElementById('chatEmpty')) {
+    const empty = document.createElement('div');
+    empty.id = 'chatEmpty';
+    empty.className = 'chat-empty';
+    empty.innerHTML = '<i class="bi bi-chat-dots"></i><p style="font-size:.85rem;">Nenhuma mensagem ainda.<br>Diga olá! 👋</p>';
+    document.getElementById('chatMsgs').appendChild(empty);
+  }
+  _ultimoId = 0;
+}
+
+/* ── Polling de mensagens ───────────────────────────────── */
+let _statusDigitando = false;
+const chStatus     = document.getElementById('chStatus');
+const chStatusText = document.getElementById('chStatusText');
+
+async function pollMensagens() {
+  try {
+    const r = await fetch(`${CHAT.urlMensagens}?after=${_ultimoId}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    });
+
+    if (!r.ok) return;
+
+    const data = await r.json();
+
+    // ── Eventos de controle ──────────────────────────────
+    if (data.evento === 'bloqueado') {
+      clearInterval(_pollInterval);
+      bloquearInput('Você foi bloqueado por este usuário.');
+      toast('Você não pode mais acessar esta conversa.');
+      setTimeout(() => { window.location.href = '{% url "chat:conversas" %}'; }, 2500);
+      return;
+    }
+
+    if (data.evento === 'amizade_desfeita') {
+      bloquearInput('Vocês não são mais amigos. Não é possível enviar novas mensagens.');
+      return;
+    }
+
+    if (data.evento === 'conversa_limpa') {
+      limparDOM();
+      toast('O histórico da conversa foi limpo.');
+      return;
+    }
+
+    // ── Indicador de digitando ───────────────────────────
+    if (data.digitando !== _statusDigitando) {
+      _statusDigitando = data.digitando;
+      if (data.digitando) {
+        chStatus.classList.add('digitando');
+        chStatusText.textContent = 'digitando…';
+      } else {
+        chStatus.classList.remove('digitando');
+        chStatusText.textContent = 'Online';
+      }
+    }
+
+    // ── Novas mensagens ──────────────────────────────────
+    if (data.mensagens?.length) {
+      data.mensagens.forEach(m => {
+        if (!document.querySelector(`.msg-row[data-id="${m.id}"]`)) {
+          adicionarMensagem(m);
+          if (m.remetente_uuid !== CHAT.usuarioUuid) {
+            toast('📩 Nova mensagem');
+          }
+        }
+        if (m.id > _ultimoId) _ultimoId = m.id;
+      });
+    }
+  } catch (_) {
+    // Sem conexão — tenta no próximo ciclo
+  }
+}
+
+const _pollInterval = setInterval(pollMensagens, 3000);
+
+/* ── Limpar conversa ────────────────────────────────────── */
+document.getElementById('btnLimparConversa').addEventListener('click', async () => {
+  if (!confirm('Limpar todo o histórico desta conversa?\nAs mensagens serão removidas para ambos os participantes.')) return;
+  try {
+    const r = await fetch(CHAT.urlLimpar, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CHAT.csrf },
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.status === 'ok') {
+      // Limpa o DOM sem redirecionar — conversa continua ativa
+      document.querySelectorAll('#chatMsgs .msg-row').forEach(el => el.remove());
+      if (!document.getElementById('chatEmpty')) {
+        const empty = document.createElement('div');
+        empty.id = 'chatEmpty';
+        empty.className = 'chat-empty';
+        empty.innerHTML = '<i class="bi bi-chat-dots"></i><p style="font-size:.85rem;">Nenhuma mensagem ainda.<br>Diga olá! 👋</p>';
+        document.getElementById('chatMsgs').appendChild(empty);
+      }
+      _ultimoId = 0;
+      toast('Conversa limpa com sucesso.');
+    } else {
+      toast(data.erro || 'Não foi possível limpar a conversa.');
+    }
+  } catch (_) {
+    toast('Erro de conexão. Tente novamente.');
+  }
+});
+
+/* ── Bloquear usuário ───────────────────────────────────── */
+document.getElementById('btnBloquear').addEventListener('click', async () => {
+  if (!confirm('Bloquear este usuário? A amizade será desfeita e a conversa encerrada.')) return;
+  try {
+    const r = await fetch(CHAT.urlBloquear, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CHAT.csrf },
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.status === 'ok') {
+      window.location.href = '{% url "chat:conversas" %}';
+    } else {
+      toast(data.erro || 'Não foi possível bloquear o usuário.');
+    }
+  } catch (_) {
+    toast('Erro de conexão. Tente novamente.');
+  }
+});
+
+/* ── Desfazer amizade ───────────────────────────────────── */
+document.getElementById('btnDesfazerAmizade').addEventListener('click', async () => {
+  if (!confirm('Desfazer amizade com {{ outro_participante.get_nome_exibicao }}?')) return;
+  try {
+    const r = await fetch(CHAT.urlDesfazer, {
+      method: 'POST',
+      headers: { 'X-CSRFToken': CHAT.csrf },
+    });
+    const data = await r.json().catch(() => ({}));
+    if (r.ok && data.status === 'ok') {
+      window.location.href = '{% url "chat:conversas" %}';
+    } else {
+      toast(data.erro || 'Não foi possível desfazer a amizade.');
+    }
+  } catch (_) {
+    toast('Erro de conexão. Tente novamente.');
+  }
+});
 </script>
 {% endblock %}

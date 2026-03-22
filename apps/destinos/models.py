@@ -1,9 +1,8 @@
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from apps.usuarios.models import Usuario
 import uuid
-
 
 
 class Pais(models.Model):
@@ -88,7 +87,7 @@ class PlanoViagem(models.Model):
     # Datas
     data_inicio = models.DateField(_('data de início'))
     data_fim = models.DateField(_('data de término'), null=True, blank=True)
-    flexibilidade_datas = models.BooleanField(
+    datas_flexiveis = models.BooleanField(
         _('datas flexíveis'),
         default=False,
         help_text=_('Indica se as datas podem ser ajustadas')
@@ -116,8 +115,8 @@ class PlanoViagem(models.Model):
         default='publico'
     )
     
-    # Orçamento (opcional)
-    orcamento_diario_min = models.DecimalField(
+    # Orçamento (mensal, como usado no template)
+    orcamento_mensal_minimo = models.DecimalField(
         _('orçamento mensal mínimo'),
         max_digits=10,
         decimal_places=2,
@@ -125,13 +124,13 @@ class PlanoViagem(models.Model):
         blank=True,
         validators=[MinValueValidator(0)]
     )
-    orcamento_diario_max = models.DecimalField(
-        _('orçamento mensal máximo'),
-        max_digits=10,
-        decimal_places=2,
-        null=True,
+    
+    # Imagens (lista de URLs públicas)
+    imagens_urls = models.JSONField(
+        verbose_name=_('URLs de imagens'),
+        default=list,
         blank=True,
-        validators=[MinValueValidator(0)]
+        help_text=_('Lista de URLs públicas de imagens do destino (máx. 6). Ex: ["url1", "url2"]')
     )
     
     # Status
@@ -173,12 +172,11 @@ class PlanoViagem(models.Model):
         # Nível 'amigos'
         from apps.conexoes.models import Amizade
         return Amizade.sao_amigos(self.usuario, usuario_solicitante)
-    
+
 
 class EnderecoPlano(models.Model):
     """
     Endereço e coordenadas associados a um PlanoViagem (1:1).
-    Não altera o PlanoViagem original.
     """
     plano = models.OneToOneField(
         PlanoViagem,
@@ -207,10 +205,10 @@ class EnderecoPlano(models.Model):
     def __str__(self):
         return f"{self.endereco} — {self.cidade} / {self.estado}"
 
+
 class OfertaResidencia(models.Model):
     """
     Informações da oferta de residência (opcional), vinculada a um PlanoViagem.
-    Criada somente se o usuário marcar 'oferece_residencia' no formulário.
     """
     plano = models.OneToOneField(
         PlanoViagem,

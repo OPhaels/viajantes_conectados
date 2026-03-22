@@ -149,13 +149,19 @@ class FormularioEditarPerfil(forms.ModelForm):
         }
     
     def clean_foto_perfil(self):
-        """Valida o upload da foto."""
+        """Valida o upload da foto e preserva a existente se não enviada."""
         foto = self.cleaned_data.get('foto_perfil')
+
+        # FileInput retorna False quando nenhum arquivo é enviado.
+        # Sem esse check, Django apaga a foto atual silenciosamente.
+        if foto is False or foto is None:
+            return self.instance.foto_perfil  # mantém a foto atual
+
         if foto:
-            if foto.size > 5 * 1024 * 1024:  # 5MB
+            if foto.size > 5 * 1024 * 1024:
                 raise ValidationError(_('A imagem não pode exceder 5MB.'))
-            
-            if not foto.content_type in ['image/jpeg', 'image/png', 'image/webp']:
-                raise ValidationError(_('Formato de imagem não suportado. Use JPEG, PNG ou WebP.'))
-        
+
+            if foto.content_type not in ['image/jpeg', 'image/png', 'image/webp']:
+                raise ValidationError(_('Formato não suportado. Use JPEG, PNG ou WebP.'))
+
         return foto

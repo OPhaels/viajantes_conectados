@@ -9,8 +9,8 @@
 :root {
   --primary:       #1a3a5c;
   --primary-light: #2a5298;
-  --accent:        #4e47d4;
-  --accent-light:  #a17ef9;
+  --accent:        #4761d4;
+  --accent-light:  #657fff;
   --accent-bg:     rgba(212,168,71,.10);
   --accent-border: rgba(212,168,71,.25);
   --success:       #2d9e6b;
@@ -170,7 +170,7 @@
   color: var(--accent); display: block; line-height: 1;
 }
 .stat-label {
-  color: rgba(255,255,255,.45); font-weight: 600;
+  color: rgba(0, 0, 0, 0.45); font-weight: 600;
   font-size: .75rem; letter-spacing: .05em; text-transform: uppercase;
   margin-top: .6rem; display: block;
 }
@@ -240,6 +240,7 @@
   box-shadow: 0 0 0 3px rgba(42,82,152,.12);
   transform: translateY(-1px);
 }
+
 .input-group-text {
   background: var(--surface-alt); border: 1.5px solid var(--border);
   border-right: none; border-radius: var(--radius-sm) 0 0 var(--radius-sm);
@@ -451,7 +452,7 @@
 .stats-label  { color: var(--text-muted); font-size: .82rem; font-weight: 600; margin-top: .35rem; }
 .stat-item    { display: flex; justify-content: space-between; align-items: center; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
 .stat-item:last-child { border-bottom: none; }
-.stat-value   { font-size: 1.4rem; font-weight: 800; color: var(--primary); }
+.stat-value   { font-size: 1.4rem; font-weight: 800; color: var(--text-main); opacity: 0.8; }
 
 /* Badges, header, toggle */
 .badge-motivo { font-size: .82rem; padding: .35rem .75rem; border-radius: var(--radius-sm); }
@@ -583,7 +584,7 @@ textarea.form-control { resize: vertical; min-height: 90px; }
 .plano-card-wrapper:nth-child(6){animation-delay:.30s}
 
 .card-body    { padding: 1.1rem 1.2rem .75rem; }
-.card-title   { font-family: 'Playfair Display', Georgia, serif; font-size: 1rem; color: var(--primary); }
+.card-title   { font-size: 1rem; color: var(--primary);}
 .card-subtitle { font-size: .8rem; }
 .card-footer  { padding: .85rem 1.2rem 1rem; }
 .card-footer .btn-sm { font-size: .76rem; font-weight: 700; border-radius: var(--radius-sm) !important; padding: .35rem .7rem; transition: var(--transition); }

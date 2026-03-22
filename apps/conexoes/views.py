@@ -12,11 +12,49 @@ from django.utils import timezone
 from datetime import timedelta, date
 import logging
 
-from .models import SolicitacaoAmizade, Amizade
+from .models import SolicitacaoAmizade, Amizade, Bloqueio
 from apps.usuarios.models import Usuario
 
 logger = logging.getLogger(__name__)
 
+
+# =========================
+# HELPER INTERNO
+# =========================
+
+def _ha_bloqueio(usuario_a, usuario_b):
+    """Retorna True se existe bloqueio em qualquer direção entre os dois."""
+    return Bloqueio.objects.filter(
+        Q(bloqueador=usuario_a, bloqueado=usuario_b) |
+        Q(bloqueador=usuario_b, bloqueado=usuario_a)
+    ).exists()
+
+
+def _criar_amizade_atomica(user_a, user_b, solicitacao=None):
+    """
+    Cria ou reativa amizade entre dois usuários e opcionalmente
+    marca a solicitação como aceita. Deve ser chamado dentro de atomic().
+    """
+    amizade, criada = Amizade.objects.get_or_create(
+        usuario1=min(user_a, user_b, key=lambda u: u.id),
+        usuario2=max(user_a, user_b, key=lambda u: u.id),
+        defaults={'ativa': True},
+    )
+    if not criada:
+        amizade.ativa = True
+        amizade.save(update_fields=['ativa'])
+
+    if solicitacao:
+        solicitacao.status = 'aceita'
+        solicitacao.data_resposta = timezone.now()
+        solicitacao.save(update_fields=['status', 'data_resposta'])
+
+    return amizade
+
+
+# =========================
+# ENVIAR SOLICITAÇÃO (form normal)
+# =========================
 
 @login_required
 @csrf_protect
@@ -37,61 +75,42 @@ def view_enviar_solicitacao_amizade(request, uuid_usuario):
         messages.error(request, _('Este usuário não está disponível.'))
         return redirect('destinos:buscar')
 
+    # ── Bloqueio em qualquer direção ──────────────────────
+    if _ha_bloqueio(request.user, destinatario):
+        messages.error(request, _('Não é possível enviar solicitação para este usuário.'))
+        return redirect('destinos:buscar')
+
     if Amizade.sao_amigos(request.user, destinatario):
         messages.info(request, _('Você já é amigo deste usuário.'))
         return redirect('conexoes:amigos')
 
-    # Verificar se já existe solicitação pendente em ambas as direções
     solicitacao_existente = SolicitacaoAmizade.objects.filter(
         Q(remetente=request.user, destinatario=destinatario) |
         Q(remetente=destinatario, destinatario=request.user),
-        status='pendente'
+        status='pendente',
     ).first()
 
     if solicitacao_existente:
-        # Se o destinatário já enviou solicitação para mim, aceitar automaticamente
-        if solicitacao_existente.remetente == destinatario and solicitacao_existente.destinatario == request.user:
+        # Destinatário já enviou para mim → aceitar automaticamente
+        if solicitacao_existente.remetente == destinatario:
             try:
                 with transaction.atomic():
-                    # Criar amizade
-                    amizade, criada = Amizade.objects.get_or_create(
-                        usuario1=min(request.user, destinatario, key=lambda u: u.id),
-                        usuario2=max(request.user, destinatario, key=lambda u: u.id),
-                        defaults={'ativa': True}
-                    )
-                    if not criada:
-                        amizade.ativa = True
-                        amizade.save(update_fields=['ativa'])
-
-                    # Aceitar a solicitação existente
-                    solicitacao_existente.status = 'aceita'
-                    solicitacao_existente.data_resposta = timezone.now()
-                    solicitacao_existente.save(update_fields=['status', 'data_resposta'])
-
-                    messages.success(
-                        request,
-                        _(f'Parabéns! Você e {destinatario.get_nome_exibicao()} agora são amigos!')
-                    )
-                    logger.info(f'Amizade automática criada: {request.user.email} <-> {destinatario.email}')
-                    return redirect('conexoes:amigos')
-            except Exception as erro:
-                logger.error(f'Erro ao criar amizade automática: {str(erro)}')
+                    _criar_amizade_atomica(request.user, destinatario, solicitacao_existente)
+                messages.success(request, _(f'Parabéns! Você e {destinatario.get_nome_exibicao()} agora são amigos!'))
+                logger.info('Amizade automática criada: %s <-> %s', request.user.email, destinatario.email)
+                return redirect('conexoes:amigos')
+            except Exception as e:
+                logger.error('Erro ao criar amizade automática: %s', e)
                 messages.error(request, _('Erro ao processar solicitação. Tente novamente.'))
                 return redirect('destinos:buscar')
         else:
-            # Já enviei solicitação anteriormente
             messages.info(request, _('Já existe uma solicitação pendente entre vocês.'))
             return redirect('conexoes:solicitacoes')
 
     limite_tempo = timezone.now() - timedelta(hours=1)
-    solicitacoes_recentes = SolicitacaoAmizade.objects.filter(
-        remetente=request.user,
-        data_criacao__gte=limite_tempo
-    ).count()
-
-    if solicitacoes_recentes >= 10:
+    if SolicitacaoAmizade.objects.filter(remetente=request.user, data_criacao__gte=limite_tempo).count() >= 10:
         messages.error(request, _('Limite de solicitações por hora atingido.'))
-        logger.warning(f'Limite de solicitações excedido: {request.user.email}')
+        logger.warning('Limite de solicitações excedido: %s', request.user.email)
         return redirect('destinos:buscar')
 
     try:
@@ -100,70 +119,59 @@ def view_enviar_solicitacao_amizade(request, uuid_usuario):
             SolicitacaoAmizade.objects.create(
                 remetente=request.user,
                 destinatario=destinatario,
-                mensagem=mensagem[:500]
+                mensagem=mensagem[:500],
             )
-            messages.success(request, _(f'Solicitação enviada para {destinatario.get_nome_exibicao()}!'))
-            logger.info(f'Solicitação enviada: {request.user.email} -> {destinatario.email}')
-    except Exception as erro:
-        logger.error(f'Erro ao enviar solicitação: {str(erro)}')
+        messages.success(request, _(f'Solicitação enviada para {destinatario.get_nome_exibicao()}!'))
+        logger.info('Solicitação enviada: %s -> %s', request.user.email, destinatario.email)
+    except Exception as e:
+        logger.error('Erro ao enviar solicitação: %s', e)
         messages.error(request, _('Erro ao enviar solicitação. Tente novamente.'))
 
     return redirect('destinos:buscar')
 
 
+# =========================
+# ENVIAR SOLICITAÇÃO (AJAX / get_or_create)
+# =========================
+
 @login_required
 @require_POST
 def enviar_solicitacao(request, uuid_destinatario):
-    """Envia solicitação com get_or_create para evitar UNIQUE constraint."""
+    """Envia solicitação via AJAX com get_or_create."""
     destinatario = get_object_or_404(Usuario, uuid=uuid_destinatario)
 
     if destinatario == request.user:
         messages.error(request, _('Operação inválida.'))
         return redirect('destinos:buscar')
 
+    # ── Bloqueio em qualquer direção ──────────────────────
+    if _ha_bloqueio(request.user, destinatario):
+        messages.error(request, _('Não é possível enviar solicitação para este usuário.'))
+        return redirect('destinos:buscar')
+
     if Amizade.sao_amigos(request.user, destinatario):
         messages.info(request, _('Vocês já são amigos.'))
         return redirect('conexoes:amigos')
 
-    # Verificar se já existe solicitação pendente em ambas as direções
     solicitacao_existente = SolicitacaoAmizade.objects.filter(
         Q(remetente=request.user, destinatario=destinatario) |
         Q(remetente=destinatario, destinatario=request.user),
-        status='pendente'
+        status='pendente',
     ).first()
 
     if solicitacao_existente:
-        # Se o destinatário já enviou solicitação para mim, aceitar automaticamente
-        if solicitacao_existente.remetente == destinatario and solicitacao_existente.destinatario == request.user:
+        if solicitacao_existente.remetente == destinatario:
             try:
                 with transaction.atomic():
-                    # Criar amizade
-                    amizade, criada = Amizade.objects.get_or_create(
-                        usuario1=min(request.user, destinatario, key=lambda u: u.id),
-                        usuario2=max(request.user, destinatario, key=lambda u: u.id),
-                        defaults={'ativa': True}
-                    )
-                    if not criada:
-                        amizade.ativa = True
-                        amizade.save(update_fields=['ativa'])
-
-                    # Aceitar a solicitação existente
-                    solicitacao_existente.status = 'aceita'
-                    solicitacao_existente.data_resposta = timezone.now()
-                    solicitacao_existente.save(update_fields=['status', 'data_resposta'])
-
-                    messages.success(
-                        request,
-                        _(f'Parabéns! Você e {destinatario.get_nome_exibicao()} agora são amigos!')
-                    )
-                    logger.info(f'Amizade automática criada: {request.user.email} <-> {destinatario.email}')
-                    return redirect('conexoes:amigos')
-            except Exception as erro:
-                logger.error(f'Erro ao criar amizade automática: {str(erro)}')
+                    _criar_amizade_atomica(request.user, destinatario, solicitacao_existente)
+                messages.success(request, _(f'Parabéns! Você e {destinatario.get_nome_exibicao()} agora são amigos!'))
+                logger.info('Amizade automática criada: %s <-> %s', request.user.email, destinatario.email)
+                return redirect('conexoes:amigos')
+            except Exception as e:
+                logger.error('Erro ao criar amizade automática: %s', e)
                 messages.error(request, _('Erro ao processar solicitação. Tente novamente.'))
                 return redirect('destinos:buscar')
         else:
-            # Já enviei solicitação anteriormente
             messages.warning(request, _('Solicitação já enviada anteriormente.'))
             return redirect('conexoes:solicitacoes')
 
@@ -172,91 +180,99 @@ def enviar_solicitacao(request, uuid_destinatario):
             solicitacao, criado = SolicitacaoAmizade.objects.get_or_create(
                 remetente=request.user,
                 destinatario=destinatario,
-                defaults={'status': 'pendente'}
+                defaults={'status': 'pendente'},
             )
-
             if criado:
                 messages.success(request, _('Solicitação enviada com sucesso!'))
-                logger.info(f'Solicitação enviada: {request.user.email} -> {destinatario.email}')
+                logger.info('Solicitação enviada: %s -> %s', request.user.email, destinatario.email)
             elif solicitacao.status == 'pendente':
                 messages.warning(request, _('Solicitação já enviada anteriormente.'))
             else:
-                # Reativa solicitação cancelada/recusada
                 solicitacao.status = 'pendente'
                 solicitacao.data_criacao = timezone.now()
                 solicitacao.save(update_fields=['status', 'data_criacao'])
                 messages.success(request, _('Solicitação enviada com sucesso!'))
-                logger.info(f'Solicitação reativada: {request.user.email} -> {destinatario.email}')
-
-    except Exception as erro:
-        logger.error(f'Erro ao enviar solicitação: {str(erro)}')
+                logger.info('Solicitação reativada: %s -> %s', request.user.email, destinatario.email)
+    except Exception as e:
+        logger.error('Erro ao enviar solicitação: %s', e)
         messages.error(request, _('Erro ao enviar solicitação. Tente novamente.'))
 
     return redirect('destinos:buscar')
 
 
+# =========================
+# LISTA DE SOLICITAÇÕES
+# =========================
+
 @login_required
 @require_http_methods(["GET"])
 def view_lista_solicitacoes(request):
-    """Lista todas as solicitações de amizade do usuário."""
-    from .models import Bloqueio  # import local para não quebrar se ainda não migrou
- 
+    """Lista solicitações recebidas, enviadas, amigos e sugestões."""
+    bloqueados_ids = set(
+        Bloqueio.objects.filter(
+            Q(bloqueador=request.user) | Q(bloqueado=request.user)
+        ).values_list('bloqueador_id', 'bloqueado_id')
+        .__iter__()
+    )
+    # Achata os pares em um set simples
+    ids_excluir = set()
+    for par in Bloqueio.objects.filter(
+        Q(bloqueador=request.user) | Q(bloqueado=request.user)
+    ).values_list('bloqueador_id', 'bloqueado_id'):
+        ids_excluir.update(par)
+    ids_excluir.discard(request.user.id)
+
+    # Solicitações recebidas — exclui remetentes bloqueados
     solicitacoes_recebidas = SolicitacaoAmizade.objects.filter(
         destinatario=request.user,
-        status='pendente'
+        status='pendente',
+    ).exclude(
+        remetente__id__in=ids_excluir,
     ).select_related('remetente').order_by('-data_criacao')
- 
+
     solicitacoes_enviadas = SolicitacaoAmizade.objects.filter(
         remetente=request.user,
-        status='pendente'
+        status='pendente',
     ).select_related('destinatario').order_by('-data_criacao')
- 
-    # Amigos
+
     amizades = Amizade.objects.filter(
         Q(usuario1=request.user) | Q(usuario2=request.user),
-        ativa=True
+        ativa=True,
     ).select_related('usuario1', 'usuario2').order_by('-data_criacao')
- 
+
     amigos_dados = []
-    ids_excluir  = {request.user.id}
- 
+    pendentes_ids = set()
+    pendentes_ids.add(request.user.id)
+
     for amizade in amizades:
         amigo = amizade.usuario2 if amizade.usuario1 == request.user else amizade.usuario1
         planos_amigo = amigo.planos_viagem.filter(
             ativo=True, viagem_concluida=False
         ).select_related('pais_destino')
-        amigos_dados.append({
-            'amigo':   amigo,
-            'amizade': amizade,
-            'planos':  planos_amigo,
-        })
-        ids_excluir.add(amigo.id)
- 
-    # IDs com solicitação pendente
-    pendentes_ids = SolicitacaoAmizade.objects.filter(
+        amigos_dados.append({'amigo': amigo, 'amizade': amizade, 'planos': planos_amigo})
+        pendentes_ids.add(amigo.id)
+
+    for r, d in SolicitacaoAmizade.objects.filter(
         Q(remetente=request.user) | Q(destinatario=request.user),
-        status='pendente'
-    ).values_list('remetente_id', 'destinatario_id')
-    for r, d in pendentes_ids:
-        ids_excluir.add(r)
-        ids_excluir.add(d)
- 
-    # Bloqueados (exclui também das sugestões)
-    try:
-        bloqueados = Bloqueio.objects.filter(
-            bloqueador=request.user
-        ).select_related('bloqueado').order_by('-data_criacao')
- 
-        for b in bloqueados:
-            ids_excluir.add(b.bloqueado.id)
-    except Exception:
-        bloqueados = []
- 
-    # Sugestões
-    sugestoes = Usuario.objects.filter(
-        ativo=True
-    ).exclude(id__in=ids_excluir).order_by('?')[:8]
- 
+        status='pendente',
+    ).values_list('remetente_id', 'destinatario_id'):
+        pendentes_ids.add(r)
+        pendentes_ids.add(d)
+
+    bloqueados = Bloqueio.objects.filter(
+        bloqueador=request.user,
+    ).select_related('bloqueado').order_by('-data_criacao')
+    for b in bloqueados:
+        pendentes_ids.add(b.bloqueado.id)
+
+    # Sugestões excluem bloqueados
+    sugestoes = (
+        Usuario.objects
+        .filter(ativo=True)
+        .exclude(id__in=pendentes_ids | ids_excluir)
+        .order_by('?')[:8]
+    )
+
     return render(request, 'conexoes/solicitacoes.html', {
         'solicitacoes_recebidas': solicitacoes_recebidas,
         'solicitacoes_enviadas':  solicitacoes_enviadas,
@@ -268,69 +284,70 @@ def view_lista_solicitacoes(request):
     })
 
 
+# =========================
+# RESPONDER SOLICITAÇÃO
+# =========================
+
 @login_required
 @csrf_protect
 @require_http_methods(["POST"])
 def view_responder_solicitacao(request, uuid_solicitacao, acao):
     """
     Responde a uma solicitação de amizade.
-    Aceita as ações 'aceitar' e 'rejeitar' (template usa 'rejeitar').
+    Rejeita automaticamente se houver bloqueio ativo entre os usuários.
     """
     solicitacao = get_object_or_404(
         SolicitacaoAmizade,
         uuid=uuid_solicitacao,
         destinatario=request.user,
-        status='pendente'
+        status='pendente',
     )
 
     try:
         with transaction.atomic():
             if acao == 'aceitar':
-                # Verificar se já são amigos (precaução extra)
+                # Bloquear aceite se houver bloqueio (pode ter sido bloqueado após o envio)
+                if _ha_bloqueio(request.user, solicitacao.remetente):
+                    solicitacao.status = 'recusada'
+                    solicitacao.data_resposta = timezone.now()
+                    solicitacao.save(update_fields=['status', 'data_resposta'])
+                    messages.error(request, _('Não é possível aceitar esta solicitação.'))
+                    return redirect('conexoes:solicitacoes')
+
                 if Amizade.sao_amigos(request.user, solicitacao.remetente):
                     solicitacao.status = 'aceita'
                     solicitacao.save(update_fields=['status'])
-                    messages.info(request, _(f'Vocês já eram amigos!'))
-                    logger.info(f'Solicitação aceita (já eram amigos): {solicitacao.remetente.email} <-> {request.user.email}')
+                    messages.info(request, _('Vocês já eram amigos!'))
                     return redirect('conexoes:amigos')
 
-                # get_or_create evita UNIQUE constraint caso amizade já exista
-                amizade, criada = Amizade.objects.get_or_create(
-                    usuario1=min(request.user, solicitacao.remetente, key=lambda u: u.id),
-                    usuario2=max(request.user, solicitacao.remetente, key=lambda u: u.id),
-                    defaults={'ativa': True}
-                )
-                if not criada:
-                    amizade.ativa = True
-                    amizade.save(update_fields=['ativa'])
-
-                solicitacao.status = 'aceita'
-                solicitacao.data_resposta = timezone.now()
-                solicitacao.save(update_fields=['status', 'data_resposta'])
-
+                _criar_amizade_atomica(request.user, solicitacao.remetente, solicitacao)
                 messages.success(
                     request,
-                    _(f'Você agora é amigo de {solicitacao.remetente.get_nome_exibicao()}!')
+                    _(f'Você agora é amigo de {solicitacao.remetente.get_nome_exibicao()}!'),
                 )
-                logger.info(f'Solicitação aceita: {solicitacao.remetente.email} <-> {request.user.email}')
+                logger.info('Solicitação aceita: %s <-> %s', solicitacao.remetente.email, request.user.email)
 
             elif acao in ('rejeitar', 'recusar'):
                 solicitacao.status = 'recusada'
                 solicitacao.data_resposta = timezone.now()
                 solicitacao.save(update_fields=['status', 'data_resposta'])
                 messages.info(request, _('Solicitação rejeitada.'))
-                logger.info(f'Solicitação rejeitada: {solicitacao.remetente.email} -> {request.user.email}')
+                logger.info('Solicitação rejeitada: %s -> %s', solicitacao.remetente.email, request.user.email)
 
             else:
                 messages.error(request, _('Ação inválida.'))
                 return redirect('conexoes:solicitacoes')
 
-    except Exception as erro:
-        logger.error(f'Erro ao responder solicitação: {str(erro)}')
+    except Exception as e:
+        logger.error('Erro ao responder solicitação: %s', e)
         messages.error(request, _('Erro ao processar solicitação. Tente novamente.'))
 
     return redirect('conexoes:solicitacoes')
 
+
+# =========================
+# CANCELAR SOLICITAÇÃO
+# =========================
 
 @login_required
 @csrf_protect
@@ -341,20 +358,23 @@ def view_cancelar_solicitacao(request, uuid_solicitacao):
         SolicitacaoAmizade,
         uuid=uuid_solicitacao,
         remetente=request.user,
-        status='pendente'
+        status='pendente',
     )
-
     try:
         solicitacao.status = 'cancelada'
         solicitacao.save(update_fields=['status'])
         messages.success(request, _('Solicitação cancelada.'))
-        logger.info(f'Solicitação cancelada: {request.user.email}')
-    except Exception as erro:
-        logger.error(f'Erro ao cancelar solicitação: {str(erro)}')
+        logger.info('Solicitação cancelada: %s', request.user.email)
+    except Exception as e:
+        logger.error('Erro ao cancelar solicitação: %s', e)
         messages.error(request, _('Erro ao cancelar solicitação.'))
 
     return redirect('conexoes:solicitacoes')
 
+
+# =========================
+# LISTA DE AMIGOS
+# =========================
 
 @login_required
 @require_http_methods(["GET"])
@@ -363,85 +383,74 @@ def view_lista_amigos(request):
     try:
         amizades = Amizade.objects.filter(
             Q(usuario1=request.user) | Q(usuario2=request.user),
-            ativa=True
+            ativa=True,
         ).select_related('usuario1', 'usuario2').order_by('-data_criacao')
 
         amigos_dados = []
+        amigos_ids   = set()
+
         for amizade in amizades:
             amigo = amizade.usuario2 if amizade.usuario1 == request.user else amizade.usuario1
             planos_amigo = amigo.planos_viagem.filter(
-                ativo=True,
-                viagem_concluida=False
+                ativo=True, viagem_concluida=False,
             ).select_related('pais_destino')
-
-            amigos_dados.append({
-                'amigo': amigo,
-                'amizade': amizade,
-                'planos': planos_amigo,
-            })
-
-        # Debug: imprimir número de amigos encontrados
-        logger.info(f'Usuário {request.user.email} tem {len(amigos_dados)} amigos')
-
-        paginador = Paginator(amigos_dados, 12)
-        pagina_numero = request.GET.get('page', 1)
-
-        try:
-            amigos_paginados = paginador.get_page(pagina_numero)
-        except Exception as e:
-            logger.error(f'Erro na paginação: {str(e)}')
-            amigos_paginados = paginador.get_page(1)
-
-        # Todos os usuários (para conexões) - incluindo status de amizade/pendência
-        usuarios_ativos = Usuario.objects.filter(ativo=True).exclude(id=request.user.id)
-
-        # Já são amigos?
-        amigos_ids = set()
-        for amizade in amizades:
-            amigo = amizade.usuario2 if amizade.usuario1 == request.user else amizade.usuario1
+            amigos_dados.append({'amigo': amigo, 'amizade': amizade, 'planos': planos_amigo})
             amigos_ids.add(amigo.id)
 
-        # Solicitações pendentes entre o usuário e outros
-        pendentes = SolicitacaoAmizade.objects.filter(
-            Q(remetente=request.user) | Q(destinatario=request.user),
-            status='pendente'
-        ).values_list('remetente_id', 'destinatario_id')
+        logger.info('Usuário %s tem %d amigos', request.user.email, len(amigos_dados))
+
+        paginador       = Paginator(amigos_dados, 12)
+        amigos_paginados = paginador.get_page(request.GET.get('page', 1))
 
         pendentes_ids = set()
-        for r, d in pendentes:
+        for r, d in SolicitacaoAmizade.objects.filter(
+            Q(remetente=request.user) | Q(destinatario=request.user),
+            status='pendente',
+        ).values_list('remetente_id', 'destinatario_id'):
             pendentes_ids.add(r)
             pendentes_ids.add(d)
 
+        # Bloqueados não aparecem na lista de conexões possíveis
+        bloqueados_ids = set()
+        for par in Bloqueio.objects.filter(
+            Q(bloqueador=request.user) | Q(bloqueado=request.user)
+        ).values_list('bloqueador_id', 'bloqueado_id'):
+            bloqueados_ids.update(par)
+        bloqueados_ids.discard(request.user.id)
+
         todos_usuarios = []
-        for usuario in usuarios_ativos:
+        for usuario in (
+            Usuario.objects
+            .filter(ativo=True)
+            .exclude(id=request.user.id)
+            .exclude(id__in=bloqueados_ids)
+        ):
             if usuario.id in amigos_ids:
                 status = 'amigo'
             elif usuario.id in pendentes_ids:
                 status = 'pendente'
             else:
                 status = 'nenhum'
-
-            todos_usuarios.append({
-                'usuario': usuario,
-                'status': status,
-            })
+            todos_usuarios.append({'usuario': usuario, 'status': status})
 
         return render(request, 'conexoes/lista_amigos.html', {
-            'amigos_dados': amigos_paginados,
-            'total_amigos': len(amigos_dados),
+            'amigos_dados':  amigos_paginados,
+            'total_amigos':  len(amigos_dados),
             'todos_usuarios': todos_usuarios,
-            'titulo': _('Meus Amigos'),
+            'titulo':        _('Meus Amigos'),
         })
 
-    except Exception as erro:
-        logger.error(f'Erro ao listar amigos para {request.user.email}: {str(erro)}')
+    except Exception as e:
+        logger.error('Erro ao listar amigos para %s: %s', request.user.email, e)
         messages.error(request, _('Erro ao carregar lista de amigos. Tente novamente.'))
         return render(request, 'conexoes/lista_amigos.html', {
-            'amigos_dados': [],
-            'total_amigos': 0,
-            'titulo': _('Meus Amigos'),
+            'amigos_dados': [], 'total_amigos': 0, 'titulo': _('Meus Amigos'),
         })
 
+
+# =========================
+# DESFAZER AMIZADE
+# =========================
 
 @login_required
 @csrf_protect
@@ -450,7 +459,6 @@ def view_desfazer_amizade(request, uuid_amigo):
     """Remove uma amizade."""
     amigo = get_object_or_404(Usuario, uuid=uuid_amigo)
 
-    # Verificar se realmente são amigos
     if not Amizade.sao_amigos(request.user, amigo):
         messages.error(request, _('Vocês não são amigos.'))
         return redirect('conexoes:amigos')
@@ -460,18 +468,103 @@ def view_desfazer_amizade(request, uuid_amigo):
             amizade = Amizade.objects.filter(
                 Q(usuario1=request.user, usuario2=amigo) |
                 Q(usuario1=amigo, usuario2=request.user),
-                ativa=True
+                ativa=True,
             ).first()
-
             if amizade:
                 amizade.desfazer_amizade()
                 messages.success(request, _(f'Amizade com {amigo.get_nome_exibicao()} desfeita.'))
-                logger.info(f'Amizade desfeita: {request.user.email} <-> {amigo.email}')
+                logger.info('Amizade desfeita: %s <-> %s', request.user.email, amigo.email)
             else:
                 messages.error(request, _('Amizade não encontrada.'))
-
-    except Exception as erro:
-        logger.error(f'Erro ao desfazer amizade: {str(erro)}')
+    except Exception as e:
+        logger.error('Erro ao desfazer amizade: %s', e)
         messages.error(request, _('Erro ao desfazer amizade. Tente novamente.'))
 
     return redirect('conexoes:amigos')
+
+
+@login_required
+@require_http_methods(["POST"])
+def view_desfazer_amizade_ajax(request, uuid_amigo):
+    """Remove amizade via AJAX."""
+    amigo = get_object_or_404(Usuario, uuid=uuid_amigo)
+    if not Amizade.sao_amigos(request.user, amigo):
+        return JsonResponse({'erro': 'Vocês não são amigos.'}, status=400)
+    try:
+        with transaction.atomic():
+            amizade = Amizade.objects.filter(
+                Q(usuario1=request.user, usuario2=amigo) |
+                Q(usuario1=amigo, usuario2=request.user),
+                ativa=True,
+            ).first()
+            if amizade:
+                amizade.desfazer_amizade()
+        return JsonResponse({'status': 'ok'})
+    except Exception as e:
+        logger.error('Erro ao desfazer amizade %s: %s', uuid_amigo, e)
+        return JsonResponse({'erro': 'Erro ao remover amigo.'}, status=500)
+
+
+# =========================
+# BLOQUEAR / DESBLOQUEAR
+# =========================
+
+@login_required
+@require_http_methods(["POST"])
+def view_bloquear_usuario(request, uuid_usuario):
+    """Bloqueia um usuário: desfaz amizade, desativa conversas e registra o bloqueio."""
+    alvo = get_object_or_404(Usuario, uuid=uuid_usuario)
+
+    if alvo == request.user:
+        return JsonResponse({'erro': 'Operação inválida.'}, status=400)
+
+    try:
+        with transaction.atomic():
+            amizade = Amizade.objects.filter(
+                Q(usuario1=request.user, usuario2=alvo) |
+                Q(usuario1=alvo, usuario2=request.user),
+                ativa=True,
+            ).first()
+            if amizade:
+                amizade.desfazer_amizade()
+
+            # Cancela solicitações pendentes em ambas as direções
+            SolicitacaoAmizade.objects.filter(
+                Q(remetente=request.user, destinatario=alvo) |
+                Q(remetente=alvo, destinatario=request.user),
+                status='pendente',
+            ).update(status='cancelada')
+
+            try:
+                from apps.chat.models import Conversa
+                Conversa.objects.filter(
+                    participantes=request.user, ativa=True,
+                ).filter(participantes=alvo).update(ativa=False)
+            except Exception as e:
+                logger.warning('Erro ao desativar conversas: %s', e)
+
+            Bloqueio.objects.get_or_create(bloqueador=request.user, bloqueado=alvo)
+
+        logger.info('Usuário %s bloqueou %s', request.user.email, alvo.email)
+        return JsonResponse({'status': 'ok'})
+    except Exception as e:
+        logger.error('Erro ao bloquear %s: %s', uuid_usuario, e)
+        return JsonResponse({'erro': 'Erro ao bloquear.'}, status=500)
+
+
+@login_required
+@require_http_methods(["POST"])
+def view_desbloquear_usuario(request, uuid_usuario):
+    """Remove o bloqueio sobre um usuário."""
+    alvo = get_object_or_404(Usuario, uuid=uuid_usuario)
+    try:
+        deleted, _ = Bloqueio.objects.filter(
+            bloqueador=request.user, bloqueado=alvo,
+        ).delete()
+        if deleted:
+            logger.info('Usuário %s desbloqueou %s', request.user.email, alvo.email)
+            return JsonResponse({'status': 'ok'})
+        return JsonResponse({'erro': 'Bloqueio não encontrado.'}, status=404)
+    except Exception as e:
+        logger.error('Erro ao desbloquear %s: %s', uuid_usuario, e)
+        return JsonResponse({'erro': 'Erro ao desbloquear.'}, status=500)

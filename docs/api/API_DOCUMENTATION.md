@@ -229,7 +229,6 @@ Content-Type: application/json
   "descricao": "Férias na praia e visitação de pontos turísticos",
   "nivel_privacidade": "publico",
   "orcamento_diario_min": 50,
-  "orcamento_diario_max": 150
 }
 ```
 

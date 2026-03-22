@@ -46,7 +46,7 @@
         </label>
 
         <div class="input-map mb-2">
-          <input id="consulta_local" type="text" class="form-control"
+          <input id="consulta_local" type="text" class="form-control form-control-custom"
                  placeholder="CEP ou endereço (ex: 01311-000)"
                  value="{% if formulario.instance.pk and formulario.instance.cidade_destino %}{{ formulario.instance.cidade_destino }}{% if formulario.instance.pais_destino %}, {{ formulario.instance.pais_destino.nome }}{% endif %}{% endif %}">
           <button id="btn_buscar" type="button" class="btn btn-primary">
@@ -110,7 +110,7 @@
             País de destino
             <span class="badge bg-success badge-auto ms-1">Auto</span>
           </label>
-          <input type="text" id="id_pais_destino_display" class="form-control campo-readonly" readonly
+          <input type="text" id="id_pais_destino_display" class="form-control form-control-custom campo-readonly" readonly
                  placeholder="Detectado pelo mapa"
                  value="{{ formulario.instance.pais_destino.nome|default:'' }}">
         </div>
@@ -148,7 +148,7 @@
             type="date"
             name="data_inicio"
             id="id_data_inicio"
-            class="form-control{% if formulario.data_inicio.errors %} is-invalid{% endif %}"
+            class="form-control form-control-custom{% if formulario.data_inicio.errors %} is-invalid{% endif %}"
             value="{{ formulario.instance.data_inicio|date:'Y-m-d'|default:'' }}"
             {% if formulario.data_inicio.field.required %}required{% endif %}
           >
@@ -166,7 +166,7 @@
             class="form-control{% if formulario.data_fim.errors %} is-invalid{% endif %}"
             value="{{ formulario.instance.data_fim|date:'Y-m-d'|default:'' }}"
           >
-          <div class="form-text">Deixe em branco se não tiver data de retorno.</div>
+          <div class="form-text"></div>
           {% for err in formulario.data_fim.errors %}
             <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
           {% endfor %}
@@ -183,12 +183,11 @@
             <label class="form-check-label" for="id_datas_flexiveis">
               Datas flexíveis
             </label>
-            <div class="form-text">As datas podem ser ajustadas</div>
           </div>
         </div>
 
         <!-- Demais campos do formulário (exceto os já renderizados) -->
-        {% for field in formulario %}
+        {% for field in formulario.visible_fields %}
           {% if field.name not in "pais_destino,cidade_destino,regiao_destino,data_inicio,data_fim,datas_flexiveis" %}
           <div class="col-12 {% if field.field.widget.attrs.rows %}{% else %}col-md-6{% endif %}">
             <label class="form-label fw-bold" for="{{ field.id_for_label }}">
@@ -209,13 +208,13 @@
         <!-- Submit -->
         <div class="col-12 mt-2">
           <div class="d-flex gap-3 flex-column flex-sm-row">
-            <button class="btn btn-primary p-3 flex-grow-1" type="submit">
+            <button class="btn btn-primary p-3 flex-grow-1 mt-3" type="submit">
               <i class="bi bi-save me-2"></i>
               {% if formulario.instance.pk %}Salvar Alterações{% else %}Criar Plano de Viagem{% endif %}
             </button>
             {% if formulario.instance.pk %}
               <a href="{% url 'destinos:detalhes_plano' formulario.instance.uuid %}"
-                 class="btn btn-ghost-navy p-3">
+                 class="btn btn-outline-danger p-3 flex-grow-1 mt-3">
                 <i class="bi bi-x-circle me-1"></i>Cancelar
               </a>
             {% endif %}
@@ -248,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   const isEditing = !!INST.pk;
-  const hasCoords = !!(INST.lat && INST.lng);
+  const hasCoords = INST.lat !== '' && INST.lng !== '';
 
   /* ── Elementos ───────────────────────────────────────────── */
   const q$           = id => document.getElementById(id);
@@ -322,18 +321,47 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (INST.cidade || INST.pais) {
       // Sem coords salvas → geocoding do endereço ao carregar
       mapa.on('load', async () => {
-        const q = [INST.cidade, INST.regiao, INST.pais].filter(Boolean).join(', ');
-        const feats = await forwardGeocode(q, 1);
-        if (feats?.[0]) {
-          const [lng, lat] = feats[0].center;
-          setMarker(lng, lat);
-          mapa.flyTo({ center: [lng, lat], zoom: 12 });
-          inputLatitude.value  = lat;
-          inputLongitude.value = lng;
+        if (isEditing) {
+
+          if (inputPaisDisplay && INST.pais) inputPaisDisplay.value = INST.pais;
+          if (inputPaisNome)   inputPaisNome.value   = INST.pais;
+          if (inputPaisCodigo) inputPaisCodigo.value = INST.paisCod;
+
+          [inputCidade, inputRegiao, inputPaisDisplay].forEach(el => {
+            if (el && el.value) el.classList.add('is-valid');
+          });
+
+          showSummary(INST.cidade, INST.regiao, INST.pais);
+
+          if (hasCoords) {
+            const lat = parseFloat(INST.lat);
+            const lng = parseFloat(INST.lng);
+
+            setMarker(lng, lat);
+            mapa.flyTo({ center: [lng, lat], zoom: 13 });
+
+            inputLatitude.value  = lat;
+            inputLongitude.value = lng;
+
+          } else if (INST.cidade || INST.pais) {
+
+            const q = [INST.cidade, INST.regiao, INST.pais].filter(Boolean).join(', ');
+            const feats = await forwardGeocode(q, 1);
+
+            if (feats?.[0]) {
+              const [lng, lat] = feats[0].center;
+
+              setMarker(lng, lat);
+              mapa.flyTo({ center: [lng, lat], zoom: 12 });
+
+              inputLatitude.value  = lat;
+              inputLongitude.value = lng;
+            }
+          }
         }
+
       });
-    }
-  }
+    }}
 
   /* ── Geocoding ───────────────────────────────────────────── */
   function extractLocation(feature) {

@@ -1,112 +1,135 @@
+from attrs import field
 from django import forms
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Layout, Submit, Row, Column, Field
 from .models import PlanoViagem, Pais
-
+from .utils import validar_lista_urls_imagem
 
 class FormularioPlanoViagem(forms.ModelForm):
-    """Formulário para criar/editar planos de viagem."""
-    
+
+    imagens_urls = forms.CharField(
+        label='Imagens do Destino',
+        required=False,
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': 'Cole uma URL por linha (máx. 6)'
+        }),
+    )
+
     class Meta:
         model = PlanoViagem
         fields = [
             'pais_destino', 'cidade_destino', 'regiao_destino',
-            'data_inicio', 'data_fim', 'flexibilidade_datas',
+            'data_inicio', 'data_fim', 'datas_flexiveis',
             'motivo_viagem', 'descricao', 'nivel_privacidade',
-            'orcamento_diario_min', 'orcamento_diario_max'
+            'orcamento_mensal_minimo',
+            'imagens_urls',
         ]
         widgets = {
-            'pais_destino': forms.Select(attrs={
-                'class': 'form-control form-control-custom',
-                'required': True
-            }),
-            'cidade_destino': forms.TextInput(attrs={
-                'class': 'form-control form-control-custom',
-                'placeholder': 'Ex: Paris'
-            }),
-            'regiao_destino': forms.TextInput(attrs={
-                'class': 'form-control form-control-custom',
-                'placeholder': 'Ex: Île-de-France'
-            }),
-            'data_inicio': forms.DateInput(attrs={
-                'class': 'form-control form-control-custom',
-                'type': 'date',
-                'required': True
-            }),
-            'data_fim': forms.DateInput(attrs={
-                'class': 'form-control form-control-custom',
-                'type': 'date'
-            }),
-            'flexibilidade_datas': forms.CheckboxInput(attrs={
-                'class': 'form-check-input'
-            }),
-            'motivo_viagem': forms.Select(attrs={
-                'class': 'form-control form-control-custom'
-            }),
-            'descricao': forms.Textarea(attrs={
-                'class': 'form-control form-control-custom',
-                'rows': 4,
-                'placeholder': 'Descreva seus planos e interesses...'
-            }),
-            'nivel_privacidade': forms.Select(attrs={
-                'class': 'form-control form-control-custom'
-            }),
-            'orcamento_diario_min': forms.NumberInput(attrs={
-                'class': 'form-control form-control-custom',
-                'placeholder': '0.00',
-                'step': '0.01'
-            }),
-            'orcamento_diario_max': forms.NumberInput(attrs={
-                'class': 'form-control form-control-custom',
-                'placeholder': '0.00',
-                'step': '0.01'
-            }),
+            'data_inicio': forms.DateInput(attrs={'type': 'date'}),
+            'data_fim': forms.DateInput(attrs={'type': 'date'}),
+            'motivo_viagem': forms.Select(),
+            'nivel_privacidade': forms.Select(),
+            'descricao': forms.Textarea(attrs={'rows': 5}),
         }
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+
+        # 🔥 PADRONIZA TODOS OS CAMPOS
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs['class'] = 'form-select'
+            else:
+                existing = field.widget.attrs.get('class', '')
+                field.widget.attrs['class'] = f'{existing} form-control'.strip()
+
+        # pré-preenche imagens
+        if self.instance and self.instance.pk and self.instance.imagens_urls:
+            self.initial['imagens_urls'] = '\n'.join(self.instance.imagens_urls)
+
+        self.fields['pais_destino'].queryset = Pais.objects.filter(ativo=True).order_by('nome')
+
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'needs-validation'
 
-        # definir obrigatoriedade correta
-        self.fields['data_inicio'].required = True
-        self.fields['data_fim'].required = False
+    def clean_imagens_urls(self):
+        valor = self.cleaned_data.get('imagens_urls', '')
+        urls = [u.strip() for u in valor.splitlines() if u.strip()]
 
-        # carregar países ativos
-        self.fields['pais_destino'].queryset = Pais.objects.filter(ativo=True).order_by('nome')
-    
+        if len(urls) > 6:
+            raise ValidationError('Máximo de 6 imagens permitidas.')
+
+        erros = validar_lista_urls_imagem(urls)
+        if erros:
+            raise ValidationError(erros)
+
+        return urls
+
     def clean(self):
-        """Validações customizadas."""
-        dados_limpos = super().clean()
-        
-        data_inicio = dados_limpos.get('data_inicio')
-        data_fim = dados_limpos.get('data_fim')
-        orcamento_min = dados_limpos.get('orcamento_diario_min')
-        orcamento_max = dados_limpos.get('orcamento_diario_max')
+        dados = super().clean()
 
-        # data_inicio obrigatória
+        data_inicio = dados.get('data_inicio')
+        data_fim = dados.get('data_fim')
+        orcamento_mensal_minimo = dados.get('orcamento_mensal_minimo')
+
         if not data_inicio:
             raise ValidationError(_('A data de início é obrigatória.'))
 
-        # data_fim opcional – só validar se preenchida
-        if data_inicio and data_fim:
-            if data_fim <= data_inicio:
-                raise ValidationError(
-                    _('A data de término deve ser posterior à data de início.')
-                )
-        
-        # orçamento
-        if orcamento_min and orcamento_max:
-            if orcamento_max < orcamento_min:
-                raise ValidationError(
-                    _('O orçamento máximo deve ser maior que o mínimo.')
-                )
-        
-        return dados_limpos
+        if data_inicio and data_fim and data_fim <= data_inicio:
+            raise ValidationError(_('A data de término deve ser posterior à data de início.'))
 
+        return dados
+
+ 
+class CampoUrlsImagens(forms.Field):
+    """
+    Campo customizado para múltiplas URLs de imagem.
+    Aceita uma URL por linha no textarea.
+    """
+    widget = forms.Textarea
+ 
+    def __init__(self, *args, **kwargs):
+        kwargs.setdefault('required', False)
+        kwargs.setdefault('help_text',
+            'Cole uma URL por linha (máx. 6). Use apenas imagens públicas com HTTPS.'
+        )
+        super().__init__(*args, **kwargs)
+        self.widget.attrs.update({
+            'class': 'form-control',
+            'rows': 4,
+            'placeholder': (
+                'https://images.unsplash.com/...\n'
+                'https://i.imgur.com/...\n'
+                'https://images.pexels.com/...'
+            ),
+        })
+ 
+    def to_python(self, value):
+        if not value:
+            return []
+        linhas = [l.strip() for l in value.strip().splitlines() if l.strip()]
+        return linhas
+ 
+    def validate(self, value):
+        super().validate(value)
+        if not value:
+            return
+        erros = validar_lista_urls_imagem(value)
+        if erros:
+            raise ValidationError(erros)
+ 
+    def prepare_value(self, value):
+        if isinstance(value, list):
+            return '\n'.join(value)
+        return value or ''
+    
 
 class FormularioBuscaViajantes(forms.Form):
     """Formulário para buscar viajantes por destino e critérios."""
@@ -163,3 +186,4 @@ class FormularioBuscaViajantes(forms.Form):
         self.helper = FormHelper()
         self.helper.form_method = 'get'
         self.helper.form_class = 'form-inline'
+        

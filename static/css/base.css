@@ -186,8 +186,7 @@ body {
 .btn-custom {
   padding: .75rem 1.75rem;
   border-radius: var(--raio-pill);
-  font-weight: 700;
-  text-transform: uppercase;
+  font-weight: 600;
   letter-spacing: .06em;
   font-size: .85rem;
   transition: var(--transicao-padrao);
@@ -196,7 +195,7 @@ body {
   overflow: hidden;
   align-items: center;
   text-align: center;
-  gap: .4rem;
+  gap: .5rem;
 }
 .btn-custom::before {
   content: '';
@@ -229,7 +228,7 @@ body {
 .btn-secundario:hover {
   transform: translateY(-3px);
   box-shadow: 0 8px 28px rgba(212, 168, 71, .45);
-  color: #000;
+  color: #ffffff;
 }
 
 .btn-acento {
@@ -274,7 +273,7 @@ body {
   text-decoration: none;
 }
 .btn-ghost-navy:hover {
-  background: var(--cor-primaria);
+  background: var(--danger);
   color: #fff;
   transform: translateY(-2px);
 }

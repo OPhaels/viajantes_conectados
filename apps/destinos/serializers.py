@@ -60,7 +60,7 @@ class PlanoViagemSerializer(serializers.ModelSerializer):
             'cidade_destino', 'regiao_destino', 'data_inicio', 'data_fim',
             'flexibilidade_datas', 'motivo_viagem', 'motivo_viagem_display',
             'descricao', 'nivel_privacidade', 'nivel_privacidade_display',
-            'orcamento_diario_min', 'orcamento_diario_max', 'ativo',
+            'orcamento_mensal_minimo', 'ativo',
             'viagem_concluida', 'data_criacao', 'data_atualizacao',
             'endereco_plano', 'oferta_residencia', 'duracao_dias'
         ]

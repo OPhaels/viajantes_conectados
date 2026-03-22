@@ -30,7 +30,7 @@
   display: inline-flex; align-items: center; justify-content: center;
   min-width: 20px; height: 20px; padding: 0 5px;
   border-radius: 10px; font-size: .67rem; font-weight: 800;
-  background: var(--accent); color: #000;
+  background: var(--success); color: #ffffff;
 }
 
 /* Painel de conteúdo */
@@ -473,10 +473,10 @@
         <div class="cx-empty">
           <i class="bi bi-people"></i>
           <h5>Nenhuma sugestão disponível</h5>
-          <p style="font-size:.88rem;">
-            Experimente a <a href="{% url 'destinos:buscar' %}" style="color:var(--accent);font-weight:600;">busca de viajantes</a>
-            para encontrar pessoas com destinos similares!
-          </p>
+          
+              <a href="{% url 'destinos:buscar_viajantes' %}" class="btn btn-ghost-navy btn-sm">
+                Ver planos ativos de outros viajantes
+              </a>
         </div>
       {% endif %}
     </div>
@@ -534,7 +534,7 @@
         Visite a busca de viajantes para encontrar pessoas que vão para os mesmos destinos que você.
       </p>
       <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-primario btn-sm">
-        <i class="bi bi-search me-1"></i>Buscar Viajantes
+        <i class="bi bi-search me-1 text-white"></i>Buscar Viajantes
       </a>
     </div>
     {% endif %}

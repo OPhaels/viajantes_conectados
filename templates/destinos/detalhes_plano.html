@@ -7,6 +7,296 @@
 
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+<style>
+/* ================================================================
+   Componentes exclusivos de detalhe_plano
+   (tokens herdados do pages.css via :root)
+================================================================ */
+
+/* ── Animações ─────────────────────────────────────────── */
+@keyframes dp-fadeUp  { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+@keyframes dp-slideL  { from{opacity:0;transform:translateX(-14px)} to{opacity:1;transform:translateX(0)} }
+@keyframes dp-pulse   { 0%,100%{box-shadow:0 0 0 0 rgba(212,168,71,.4)} 70%{box-shadow:0 0 0 10px rgba(212,168,71,0)} }
+
+/* ── Flag banner ─────────────────────────────────────── */
+.dp-banner {
+  width:100%; height:200px;
+  border-radius:var(--radius) var(--radius) 0 0;
+  overflow:hidden; position:relative;
+  animation:dp-fadeUp .4s var(--ease) both;
+}
+.dp-banner__img {
+  width:100%; height:100%; display:block;
+  object-fit:cover; object-position:center;
+  filter:brightness(.68) saturate(1.1);
+  transition:filter .5s ease;
+}
+.dp-banner:hover .dp-banner__img { filter:brightness(.78) saturate(1.15); }
+.dp-banner__overlay {
+  position:absolute; inset:0;
+  background:linear-gradient(to bottom, transparent 30%, rgba(0,0,0,.5) 100%);
+}
+.dp-banner--fallback {
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 100%);
+  display:flex; align-items:center; justify-content:center;
+}
+.dp-banner--fallback i { font-size:4rem; color:rgba(255,255,255,.15); }
+
+/* ── Hero ─────────────────────────────────────────────── */
+.dp-hero {
+  background:linear-gradient(135deg,var(--primary) 0%,#1a3a6a 60%,#0d2a4a 100%);
+  padding:1.75rem 2rem 3.25rem;
+  position:relative; overflow:hidden;
+  animation:dp-fadeUp .45s .05s var(--ease) both;
+}
+.dp-hero::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 70% 60% at 80% 20%,rgba(212,168,71,.08) 0%,transparent 60%),
+    radial-gradient(ellipse 40% 70% at 5%  90%,rgba(0,0,0,.2) 0%,transparent 55%);
+  pointer-events:none;
+}
+.dp-hero__wave {
+  position:absolute; bottom:-1px; left:0; right:0; height:44px;
+  background:var(--surface-alt);
+  clip-path:ellipse(60% 100% at 50% 100%);
+}
+.dp-hero__flag {
+  width:68px; height:46px; object-fit:cover; border-radius:8px;
+  border:3px solid rgba(255,255,255,.35);
+  box-shadow:0 4px 16px rgba(0,0,0,.3); flex-shrink:0;
+  transition:transform var(--transition);
+}
+.dp-hero__flag:hover { transform:scale(1.06) rotate(-1deg); }
+.dp-hero__flag-ph {
+  width:68px; height:46px; border-radius:8px; flex-shrink:0;
+  background:rgba(255,255,255,.15); border:3px solid rgba(255,255,255,.25);
+  display:flex; align-items:center; justify-content:center;
+}
+.dp-hero__title {
+  font-size:clamp(1.2rem,4vw,1.75rem); font-weight:800;
+  line-height:1.15; color:#fff; letter-spacing:-.02em; margin:0;
+}
+.dp-hero__sub { color:rgba(255,255,255,.68); font-size:.88rem; margin-top:.3rem; }
+.dp-hero__badge {
+  display:inline-flex; align-items:center; gap:.4rem;
+  background:rgba(255,255,255,.14); backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.22); color:#fff;
+  font-size:.7rem; font-weight:700; letter-spacing:.07em; text-transform:uppercase;
+  padding:.3rem .85rem; border-radius:var(--pill);
+  animation:dp-pulse 3s infinite;
+}
+
+/* ── Botões do dono ───────────────────────────────────── */
+.dp-owner { display:flex; gap:.55rem; flex-wrap:wrap; }
+.dp-btn-edit, .dp-btn-del {
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.42rem 1rem; border-radius:var(--radius-sm);
+  font-size:.8rem; font-weight:700; white-space:nowrap;
+  text-decoration:none; cursor:pointer;
+  transition:background var(--transition), transform var(--transition);
+}
+.dp-btn-edit {
+  background:rgba(255,255,255,.15); backdrop-filter:blur(8px);
+  border:1.5px solid rgba(255,255,255,.3); color:#fff;
+}
+.dp-btn-edit:hover { background:rgba(255,255,255,.28); color:#fff; transform:translateY(-1px); }
+.dp-btn-del {
+  background:rgba(192,57,43,.22);
+  border:1.5px solid rgba(192,57,43,.4); color:#fff;
+}
+.dp-btn-del:hover { background:rgba(192,57,43,.42); transform:translateY(-1px); }
+
+/* ── Stats strip ──────────────────────────────────────── */
+.dp-stats {
+  display:grid; grid-template-columns:repeat(3,1fr);
+  gap:1px; background:var(--border);
+  border:1px solid var(--border); border-top:none; border-bottom:none;
+  animation:dp-fadeUp .45s .1s var(--ease) both;
+}
+.dp-stat {
+  background:var(--surface); padding:1.15rem 1rem; text-align:center;
+  transition:background var(--transition);
+}
+.dp-stat:hover { background:var(--surface-alt); }
+.dp-stat__icon  { font-size:1.3rem; display:block; margin-bottom:.3rem; }
+.dp-stat__value { font-size:1.1rem; font-weight:800; display:block; line-height:1.1; color:var(--text-main); }
+.dp-stat__label { font-size:.64rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; opacity:.45; display:block; margin-top:.2rem; }
+
+/* ── Card principal ───────────────────────────────────── */
+.dp-card {
+  background:var(--surface);
+  border:1px solid var(--border); border-top:none;
+  border-radius:0 0 var(--radius) var(--radius);
+  box-shadow:var(--shadow-md); padding:2rem;
+  animation:dp-fadeUp .45s .15s var(--ease) both;
+}
+
+/* ── Section heading ──────────────────────────────────── */
+.dp-heading {
+  display:flex; align-items:center; gap:.6rem;
+  font-size:.7rem; font-weight:800; text-transform:uppercase;
+  letter-spacing:.1em; color:var(--primary); margin-bottom:1.25rem;
+}
+.dp-heading__icon {
+  width:32px; height:32px; border-radius:8px;
+  background:var(--accent-bg); border:1px solid var(--accent-border);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.92rem; color:var(--accent); flex-shrink:0;
+}
+.dp-heading__line {
+  flex:1; height:2px; border-radius:2px;
+  background:linear-gradient(90deg,var(--accent-border) 0%,transparent 100%);
+}
+
+/* ── Date cards ───────────────────────────────────────── */
+.dp-date-card {
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:1rem 1.15rem; height:100%; background:var(--surface);
+  transition:box-shadow var(--transition), transform var(--transition);
+}
+.dp-date-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+.dp-date-icon {
+  width:40px; height:40px; border-radius:10px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1rem; flex-shrink:0;
+}
+.dp-date-label { font-size:.64rem; font-weight:700; text-transform:uppercase; letter-spacing:.08em; opacity:.45; margin-bottom:.3rem; }
+.dp-date-main  { font-size:1.2rem; font-weight:800; line-height:1.1; color:var(--text-main); }
+.dp-date-sub   { font-size:.76rem; opacity:.5; margin-top:.25rem; }
+
+/* ── Duration pill ────────────────────────────────────── */
+.dp-duration {
+  display:inline-flex; align-items:center; gap:.5rem;
+  background:var(--accent-bg); border:1px solid var(--accent-border);
+  color:var(--primary); font-size:.88rem; font-weight:700;
+  padding:.5rem 1.25rem; border-radius:var(--pill);
+}
+
+/* ── Destination chips ────────────────────────────────── */
+.dp-dest-chip {
+  display:flex; align-items:center; gap:.75rem;
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  padding:.85rem 1rem; background:var(--surface-alt); height:100%;
+  transition:box-shadow var(--transition);
+}
+.dp-dest-chip:hover { box-shadow:var(--shadow-sm); }
+.dp-dest-flag { width:36px; height:24px; object-fit:cover; border-radius:4px; flex-shrink:0; }
+.dp-dest-label { font-size:.64rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; opacity:.45; display:block; }
+.dp-dest-value { font-size:.92rem; font-weight:700; color:var(--text-main); }
+
+/* ── Description ──────────────────────────────────────── */
+.dp-desc {
+  background:var(--surface-alt); border-left:4px solid var(--accent);
+  border-radius:0 var(--radius-sm) var(--radius-sm) 0;
+  padding:1.1rem 1.25rem; font-size:.92rem; line-height:1.75;
+  white-space:pre-line; color:var(--text-main);
+}
+
+/* ── Timeline ─────────────────────────────────────────── */
+.dp-timeline { position:relative; padding-left:2rem; }
+.dp-timeline::before {
+  content:''; position:absolute; left:10px; top:0; bottom:0; width:2px;
+  background:linear-gradient(180deg,var(--accent) 0%,rgba(212,168,71,.1) 100%);
+  border-radius:2px;
+}
+.dp-tl-item {
+  position:relative; padding:.95rem 1.1rem;
+  border:1px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--surface); margin-bottom:.85rem;
+  animation:dp-slideL .4s var(--ease) both;
+  transition:box-shadow var(--transition), transform var(--transition);
+}
+.dp-tl-item:nth-child(1){animation-delay:.00s}
+.dp-tl-item:nth-child(2){animation-delay:.07s}
+.dp-tl-item:nth-child(3){animation-delay:.14s}
+.dp-tl-item:nth-child(4){animation-delay:.21s}
+.dp-tl-item:nth-child(5){animation-delay:.28s}
+.dp-tl-item:hover { box-shadow:var(--shadow-sm); transform:translateX(3px); }
+.dp-tl-item:last-child { margin-bottom:0; }
+.dp-dot {
+  position:absolute; left:-1.6rem; top:1rem;
+  width:20px; height:20px; border-radius:50%;
+  background:var(--primary); border:3px solid var(--surface);
+  box-shadow:0 0 0 2px var(--primary);
+  display:flex; align-items:center; justify-content:center;
+}
+.dp-dot i { font-size:.45rem; color:#fff; }
+.dp-tl-name { font-weight:700; font-size:.9rem; margin-bottom:.25rem; color:var(--text-main); }
+.dp-tl-desc { font-size:.82rem; color:var(--text-muted); line-height:1.5; margin-bottom:.4rem; }
+.dp-tl-meta { display:flex; flex-wrap:wrap; gap:.45rem; }
+.dp-badge {
+  display:inline-flex; align-items:center; gap:.3rem;
+  font-size:.72rem; font-weight:700; padding:.22rem .6rem; border-radius:6px;
+  background:var(--accent-bg); border:1px solid var(--accent-border); color:var(--primary);
+}
+.dp-badge.time { background:rgba(45,158,107,.08); border-color:rgba(45,158,107,.2); color:var(--success); }
+
+/* ── Budget & obs ─────────────────────────────────────── */
+.dp-budget {
+  background:linear-gradient(135deg,rgba(45,158,107,.07),rgba(45,158,107,.03));
+  border:1px solid rgba(45,158,107,.2); border-radius:var(--radius-sm); padding:1.15rem;
+}
+.dp-budget-amount { font-size:1.65rem; font-weight:800; color:var(--success); letter-spacing:-.02em; }
+.dp-obs {
+  background:var(--surface-alt); border:1px solid var(--border);
+  border-radius:var(--radius-sm); padding:1rem 1.1rem;
+  font-size:.88rem; line-height:1.7; white-space:pre-line;
+}
+
+/* ── Empty state ──────────────────────────────────────── */
+.dp-empty { text-align:center; padding:2.25rem 1rem; opacity:.4; }
+.dp-empty i { font-size:2.25rem; display:block; margin-bottom:.65rem; }
+
+/* ── Divider ──────────────────────────────────────────── */
+.dp-divider {
+  height:1px; margin:1.75rem 0;
+  background:linear-gradient(90deg,transparent,var(--border) 20%,var(--border) 80%,transparent);
+}
+
+/* ── Action bar ───────────────────────────────────────── */
+.dp-actions {
+  display:flex; justify-content:flex-end; gap:.75rem; flex-wrap:wrap;
+  padding-top:1.5rem; border-top:1px solid var(--border);
+}
+
+/* ── Delete modal ─────────────────────────────────────── */
+.dp-modal-bg {
+  display:none; position:fixed; inset:0; z-index:1055;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+.dp-modal-bg.show { display:flex; }
+.dp-modal-box {
+  background:var(--surface); border-radius:var(--radius);
+  padding:2rem; max-width:400px; width:90%;
+  box-shadow:var(--shadow-lg);
+  animation:dp-fadeUp .25s var(--ease) both; text-align:center;
+}
+.dp-modal-ico {
+  width:56px; height:56px; border-radius:50%;
+  background:rgba(192,57,43,.1); margin:0 auto 1rem;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; color:var(--danger);
+}
+
+/* ── Error card ───────────────────────────────────────── */
+.dp-error {
+  border-radius:var(--radius); border:1px solid var(--border);
+  box-shadow:var(--shadow-md); overflow:hidden;
+  animation:dp-fadeUp .45s var(--ease) both;
+}
+
+/* ── Responsivo ───────────────────────────────────────── */
+@media (max-width:575.98px) {
+  .dp-hero  { padding:1.5rem 1rem 3rem; }
+  .dp-card  { padding:1.25rem 1rem; }
+  .dp-stat__value { font-size:.88rem; }
+  .dp-stat__label { font-size:.58rem; }
+  .dp-date-main   { font-size:1.05rem; }
+  .dp-owner { margin-top:.75rem; }
+}
+</style>
 {% endblock %}
 
 
@@ -317,14 +607,65 @@
       </div>
     {% endif %}
 
+    <!-- ── GALERIA DE IMAGENS ── -->
+    {% if plano.imagens_urls %}
+    <div class="dp-divider"></div>
+    <div class="mb-4">
+      <div class="dp-heading">
+        <div class="dp-heading__icon"><i class="bi bi-images"></i></div>
+        Fotos do Destino
+        <div class="dp-heading__line"></div>
+      </div>
+
+      <div class="row g-2">
+        {% for url in plano.imagens_urls %}
+        <div class="col-6 col-md-4">
+          <div style="height:180px;border-radius:var(--radius-sm);overflow:hidden;cursor:pointer;border:1.5px solid var(--border);"
+               onclick="abrirFoto('{{ url }}')">
+            <img src="{{ url }}"
+                 alt="Foto do destino {{ forloop.counter }}"
+                 style="width:100%;height:100%;object-fit:cover;transition:transform .35s ease;"
+                 onmouseover="this.style.transform='scale(1.05)'"
+                 onmouseout="this.style.transform='scale(1)'"
+                 onerror="this.closest('div').style.display='none'">
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+
     <!-- ── ACTION BAR ── -->
     <div class="dp-actions">
       <a href="{% url 'destinos:buscar' %}" class="btn btn-ghost-navy btn-sm">
         <i class="bi bi-arrow-left me-1"></i>Voltar
       </a>
+      {% if request.user != plano.usuario and e_amigo %}
+      <a href="{% url 'chat:iniciar_conversa_viagem' uuid_usuario=plano.usuario.uuid uuid_plano=plano.uuid %}"
+         class="btn btn-sm fw-bold"
+         style="background:var(--success);color:#fff;border:none;border-radius:var(--radius-sm);
+                padding:.45rem 1rem;display:inline-flex;align-items:center;gap:.4rem;">
+        <i class="bi bi-chat-dots-fill"></i>Conversar sobre esta viagem
+      </a>
+      {% endif %}
     </div>
 
   </div><!-- /dp-card -->
+
+<!-- Modal lightbox para foto -->
+<div id="fotoModal" onclick="fecharFoto()"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);
+            z-index:9999;cursor:pointer;align-items:center;justify-content:center;">
+  <img id="fotoModalImg" src="" alt=""
+       style="max-width:90vw;max-height:88vh;border-radius:var(--radius);
+              box-shadow:0 8px 48px rgba(0,0,0,.5);object-fit:contain;">
+  <button onclick="fecharFoto()"
+          style="position:fixed;top:1rem;right:1.25rem;background:rgba(255,255,255,.15);
+                 border:none;color:#fff;font-size:1.5rem;border-radius:50%;
+                 width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center;">
+    &times;
+  </button>
+</div>
 
 {% else %}
   <div class="dp-error card">
@@ -370,5 +711,24 @@
   </div>
 </div>
 {% endif %}
+
+{% block scripts_extras %}
+<script>
+window.abrirFoto = function(url) {
+  const modal = document.getElementById('fotoModal');
+  const img   = document.getElementById('fotoModalImg');
+  img.src = url;
+  modal.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+};
+window.fecharFoto = function() {
+  document.getElementById('fotoModal').style.display = 'none';
+  document.body.style.overflow = '';
+};
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') window.fecharFoto();
+});
+</script>
+{% endblock %}
 
 {% endblock %}

@@ -224,6 +224,13 @@ class Command(BaseCommand):
             total_removidos = Pais.objects.all().delete()[0]
             self.stdout.write(self.style.WARNING(f"{total_removidos} países removidos."))
 
+        # Se já tem todos os países, pula (evita lentidão no deploy)
+        if not options["limpar"] and Pais.objects.count() >= len(PAISES):
+            self.stdout.write(self.style.SUCCESS(
+                f"Banco já possui {Pais.objects.count()} países. Nenhuma ação necessária."
+            ))
+            return
+
         criados = 0
         atualizados = 0
         ignorados = 0

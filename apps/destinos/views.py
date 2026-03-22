@@ -150,82 +150,36 @@ def view_criar_plano_viagem(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def view_editar_plano(request, uuid):
-    """View para editar um plano de viagem existente."""
     plano = get_object_or_404(PlanoViagem, uuid=uuid)
 
     if plano.usuario != request.user:
         messages.error(request, _('Você não pode editar este plano.'))
         return redirect('destinos:meus_planos')
 
-    if request.method == 'POST':
-        pais_nome       = request.POST.get('pais_nome', '').strip()
-        pais_codigo_iso = request.POST.get('pais_codigo_iso', '').strip()
-        cidade          = request.POST.get('cidade_destino', '').strip()
-        regiao          = request.POST.get('regiao_destino', '').strip()
-        latitude        = request.POST.get('latitude', '').strip()
-        longitude       = request.POST.get('longitude', '').strip()
+    form = FormularioPlanoViagem(request.POST or None, instance=plano)
 
-        pais = plano.pais_destino
+    if request.method == 'POST' and form.is_valid():
+        plano = form.save(commit=False)
+        plano.save()
 
-        if pais_nome:
-            if pais_codigo_iso:
-                pais = Pais.objects.filter(codigo_iso__iexact=pais_codigo_iso).first() or pais
+        # Atualiza ou cria endereço
+        EnderecoPlano.objects.update_or_create(
+            plano=plano,
+            defaults={
+                'cidade': form.cleaned_data.get('cidade_destino', ''),
+                'estado': form.cleaned_data.get('regiao_destino', ''),
+                'pais_texto': plano.pais_destino.nome,
+            }
+        )
 
-            if not pais or pais.nome.lower() != pais_nome.lower():
-                pais = Pais.objects.filter(nome__iexact=pais_nome).first() or pais
-
-            if not pais:
-                logger.info('Criando novo país para edição: %s (%s)', pais_nome, pais_codigo_iso)
-                lat = float(latitude) if latitude else 0.0
-                lng = float(longitude) if longitude else 0.0
-                pais = Pais.objects.create(
-                    codigo_iso=pais_codigo_iso or 'XX',
-                    nome=pais_nome,
-                    nome_completo=pais_nome,
-                    continente='Não especificado',
-                    latitude=lat,
-                    longitude=lng,
-                    ativo=True,
-                )
-
-        dados_post = request.POST.copy()
-        dados_post['pais_destino']   = pais.id
-        dados_post['cidade_destino'] = cidade
-        dados_post['regiao_destino'] = regiao
-
-        form = FormularioPlanoViagem(dados_post, instance=plano)
-
-        if form.is_valid():
-            plano = form.save(commit=False)
-            plano.pais_destino = pais
-            plano.save()
-
-            if latitude and longitude:
-                EnderecoPlano.objects.update_or_create(
-                    plano=plano,
-                    defaults={
-                        'cidade': cidade,
-                        'estado': regiao,
-                        'pais_texto': pais_nome or plano.pais_destino.nome,
-                        'latitude': float(latitude),
-                        'longitude': float(longitude),
-                    },
-                )
-
-            messages.success(request, _('Plano de viagem atualizado com sucesso!'))
-            return redirect('destinos:detalhes_plano', uuid=plano.uuid)
-        else:
-            messages.error(request, _('Corrija os erros no formulário.'))
-            logger.error('Erros no formulário de edição: %s', form.errors)
-    else:
-        form = FormularioPlanoViagem(instance=plano)
+        messages.success(request, _('Plano de viagem atualizado com sucesso!'))
+        return redirect('destinos:detalhes_plano', uuid=plano.uuid)
 
     return render(request, 'destinos/criar_plano.html', {
         'titulo': _('Editar Plano de Viagem'),
         'formulario': form,
         'MAPBOX_TOKEN': settings.MAPBOX_TOKEN,
     })
-
 
 # =========================
 # BUSCAR VIAGENS

@@ -1,43 +1,33 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import RedirectView
 from django.shortcuts import render
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-
+from django.views.static import serve  
 
 def view_home(request):
-    """View para a página inicial."""
     return render(request, 'home.html')
 
-
 def view_pagina_404(request, exception):
-    """View customizada para erro 404."""
     return render(request, 'erros/404.html', status=404)
 
-
 def view_pagina_500(request):
-    """View customizada para erro 500."""
     return render(request, 'erros/500.html', status=500)
 
-
 def view_pagina_403(request, exception):
-    """View customizada para erro 403."""
     return render(request, 'erros/403.html', status=403)
 
-
+# URLs principais
 urlpatterns = [
-    # Admin
     path('admin/', admin.site.urls),
-    
-    # Página inicial
     path('', view_home, name='home'),
-    
-    # Autenticação JWT
+
+    # JWT
     path('api-token-auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api-token-auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    
+
     # Apps
     path('usuarios/', include('apps.usuarios.urls')),
     path('destinos/', include('apps.destinos.urls')),
@@ -45,14 +35,19 @@ urlpatterns = [
     path('chat/', include('apps.chat.urls')),
 ]
 
-# Servir arquivos de mídia em desenvolvimento
+# Servir arquivos estáticos e mídia
 if settings.DEBUG:
+    # Desenvolvimento
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0] if settings.STATICFILES_DIRS else None)
+    if settings.STATICFILES_DIRS:
+        urlpatterns += static(settings.STATIC_URL, document_root=settings.STATICFILES_DIRS[0])
+else:
+    # Produção: serve mídia manualmente via Django (Railway não serve automaticamente)
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
 
-    
-
-# Handlers de erro customizados
+# Handlers de erro
 handler404 = view_pagina_404
 handler500 = view_pagina_500
 handler403 = view_pagina_403

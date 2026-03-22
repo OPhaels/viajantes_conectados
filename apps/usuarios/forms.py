@@ -139,6 +139,7 @@ class FormularioEditarPerfil(forms.ModelForm):
             'foto_perfil', 'perfil_publico', 'mostrar_email', 'mostrar_telefone'
         ]
         widgets = {
+            'pais_destino': forms.Select(attrs={'class': 'form-select'}),
             'nome_completo': forms.TextInput(attrs={'class': 'form-control'}),
             'data_nascimento': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
             'telefone': forms.TextInput(attrs={'class': 'form-control'}),

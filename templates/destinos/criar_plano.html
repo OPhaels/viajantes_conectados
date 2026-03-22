@@ -7,7 +7,6 @@
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
 {% endblock %}
 
-
 {% block conteudo %}
 <div class="container mt-4 mb-5">
   <div class="secao-form">
@@ -19,27 +18,23 @@
         {{ titulo }}
       </h3>
       {% if formulario.instance.pk %}
-        <span class="badge rounded-pill px-3 py-2"
-              style="background:var(--accent-bg);color:var(--primary);border:1px solid var(--accent-border);font-size:.75rem;font-weight:700;">
-          <i class="bi bi-pencil me-1"></i>Modo edição
-        </span>
+      <span class="badge rounded-pill px-3 py-2"
+        style="background:var(--accent-bg);color:var(--primary);border:1px solid var(--accent-border);font-size:.75rem;font-weight:700;">
+        <i class="bi bi-pencil me-1"></i>Modo edição
+      </span>
       {% endif %}
     </div>
 
     <form method="post" class="needs-validation" novalidate id="form-plano">
       {% csrf_token %}
 
-      <!-- Hiddens de localização -->
-      {% with end=formulario.instance.endereco_plano %}
-      <input type="hidden" name="latitude"         id="id_latitude"        value="{{ end.latitude|default:'' }}">
-      <input type="hidden" name="longitude"        id="id_longitude"       value="{{ end.longitude|default:'' }}">
-      {% endwith %}
-      <input type="hidden" name="pais_nome"        id="id_pais_nome"       value="{{ formulario.instance.pais_destino.nome|default:'' }}">
-      <input type="hidden" name="pais_codigo_iso"  id="id_pais_codigo_iso" value="{{ formulario.instance.pais_destino.codigo_iso|default:'' }}">
+      <input type="hidden" name="latitude"       id="id_latitude"       value="{{ formulario.instance.endereco_plano.latitude|default:'' }}">
+      <input type="hidden" name="longitude"      id="id_longitude"      value="{{ formulario.instance.endereco_plano.longitude|default:'' }}">
+      <input type="hidden" name="pais_nome"      id="id_pais_nome"      value="{{ formulario.instance.pais_destino.nome|default:'' }}">
+      <input type="hidden" name="pais_codigo_iso" id="id_pais_codigo_iso" value="{{ formulario.instance.pais_destino.codigo_iso|default:'' }}">
 
-      <!-- ══════════════════════════════════════
-           SEÇÃO 1 — MAPA (full width)
-      ══════════════════════════════════════ -->
+
+      <!-- ═════════ SEÇÃO 1 — MAPA ═════════ -->
       <div class="mb-4">
         <label class="form-label fw-bold mb-2">
           <i class="bi bi-map me-1" style="color:var(--accent);"></i>Localização no Mapa
@@ -47,8 +42,8 @@
 
         <div class="input-map mb-2">
           <input id="consulta_local" type="text" class="form-control form-control-custom"
-                 placeholder="CEP ou endereço (ex: 01311-000)"
-                 value="{% if formulario.instance.pk and formulario.instance.cidade_destino %}{{ formulario.instance.cidade_destino }}{% if formulario.instance.pais_destino %}, {{ formulario.instance.pais_destino.nome }}{% endif %}{% endif %}">
+            placeholder="CEP ou endereço (ex: 01311-000)"
+            value="{% if formulario.instance.pk and formulario.instance.cidade_destino %}{{ formulario.instance.cidade_destino }}{% if formulario.instance.pais_destino %}, {{ formulario.instance.pais_destino.nome }}{% endif %}{% endif %}">
           <button id="btn_buscar" type="button" class="btn btn-primary">
             <i class="bi bi-search"></i> Buscar
           </button>
@@ -58,7 +53,7 @@
         </div>
 
         <div id="mapa" role="region" aria-label="Mapa para seleção de local"
-             style="border-radius:var(--radius);border:1.5px solid var(--border);height:340px;width:100%;"></div>
+          style="border-radius:var(--radius);border:1.5px solid var(--border);height:340px;width:100%;"></div>
 
         <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mt-2">
           <small class="small-muted">
@@ -67,25 +62,22 @@
           </small>
 
           <!-- Resumo da localização -->
-          <div id="loc-summary"
-               class="d-flex align-items-center gap-2 px-3 py-2 rounded-3"
-               style="background:var(--accent-bg);border:1px solid var(--accent-border);
+          <div id="loc-summary" class="d-flex align-items-center gap-2 px-3 py-2 rounded-3"
+            style="background:var(--accent-bg);border:1px solid var(--accent-border);
                       {% if not formulario.instance.pk or not formulario.instance.pais_destino %}display:none!important;{% endif %}">
             <i class="bi bi-geo-alt-fill" style="color:var(--accent);"></i>
             <span id="loc-summary-text" style="font-size:.85rem;font-weight:600;color:var(--primary);">
               {% if formulario.instance.pk and formulario.instance.pais_destino %}
-                {% if formulario.instance.cidade_destino %}{{ formulario.instance.cidade_destino }}, {% endif %}
-                {% if formulario.instance.regiao_destino %}{{ formulario.instance.regiao_destino }}, {% endif %}
-                {{ formulario.instance.pais_destino.nome }}
+              {% if formulario.instance.cidade_destino %}{{ formulario.instance.cidade_destino }}, {% endif %}
+              {% if formulario.instance.regiao_destino %}{{ formulario.instance.regiao_destino }}, {% endif %}
+              {{ formulario.instance.pais_destino.nome }}
               {% endif %}
             </span>
           </div>
         </div>
       </div>
 
-      <!-- ══════════════════════════════════════
-           SEÇÃO 2 — CAMPOS (3 colunas)
-      ══════════════════════════════════════ -->
+      <!-- ═════════ SEÇÃO 2 — CAMPOS ═════════ -->
       <hr class="mb-4">
 
       {% if formulario.instance.pk %}
@@ -104,106 +96,93 @@
 
       <div class="row g-3">
 
-        <!-- País (readonly) -->
-        <div class="col-12 col-md-4">
-          <label class="form-label fw-bold">
-            País de destino
-            <span class="badge bg-success badge-auto ms-1">Auto</span>
-          </label>
-          <input type="text" id="id_pais_destino_display" class="form-control form-control-custom campo-readonly" readonly
-                 placeholder="Detectado pelo mapa"
-                 value="{{ formulario.instance.pais_destino.nome|default:'' }}">
+        <!-- País de destino -->
+        <div class="mb-3">
+          <label for="id_pais_destino">País de Destino</label>
+          <select name="pais_destino" id="id_pais_destino" class="form-select">
+            {% for pais in formulario.pais_destino.field.queryset %}
+              <option value="{{ pais.id }}"
+                data-nome="{{ pais.nome }}"
+                {% if formulario.instance.pais_destino and formulario.instance.pais_destino.id == pais.id %}
+                  selected
+                {% endif %}>
+                {{ pais.nome }}
+              </option>
+            {% endfor %}
+          </select>
         </div>
-
-        <!-- Cidade (auto + editável) -->
-        <div class="col-12 col-md-4">
-          <label class="form-label fw-bold" for="{{ formulario.cidade_destino.id_for_label }}">
-            Cidade de destino
-            <span class="badge bg-secondary badge-auto ms-1">Auto</span>
-          </label>
-          {{ formulario.cidade_destino }}
-          {% for err in formulario.cidade_destino.errors %}
-            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+        <div class="bandeiras mt-2 d-flex flex-wrap">
+          {% for pais in formulario.pais_destino.field.queryset %}
+          {% if pais.imagem %}
+          <img src="{{ pais.imagem.url }}" alt="{{ pais.nome }}" title="{{ pais.nome }}"
+            style="width:30px; height:20px; margin:2px; object-fit:cover; border:1px solid #ccc; border-radius:2px;">
+          {% endif %}
           {% endfor %}
         </div>
 
-        <!-- Região/Estado (auto + editável) -->
-        <div class="col-12 col-md-4">
-          <label class="form-label fw-bold" for="{{ formulario.regiao_destino.id_for_label }}">
-            Região / Estado
-            <span class="badge bg-secondary badge-auto ms-1">Auto</span>
-          </label>
-          {{ formulario.regiao_destino }}
-          {% for err in formulario.regiao_destino.errors %}
-            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
-          {% endfor %}
-        </div>
-
-        <!-- ── Datas renderizadas manualmente para garantir value correto ── -->
+        <!-- Datas -->
         <div class="col-12 col-md-4">
           <label class="form-label fw-bold" for="id_data_inicio">
             Data de início <span style="color:var(--danger);">*</span>
           </label>
-          <input
-            type="date"
-            name="data_inicio"
-            id="id_data_inicio"
+          <input type="date" name="data_inicio" id="id_data_inicio"
             class="form-control form-control-custom{% if formulario.data_inicio.errors %} is-invalid{% endif %}"
             value="{{ formulario.instance.data_inicio|date:'Y-m-d'|default:'' }}"
-            {% if formulario.data_inicio.field.required %}required{% endif %}
-          >
+            {% if formulario.data_inicio.field.required %}required{% endif %}>
           {% for err in formulario.data_inicio.errors %}
-            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+          <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
           {% endfor %}
         </div>
 
         <div class="col-12 col-md-4">
           <label class="form-label fw-bold" for="id_data_fim">Data de término</label>
-          <input
-            type="date"
-            name="data_fim"
-            id="id_data_fim"
+          <input type="date" name="data_fim" id="id_data_fim"
             class="form-control{% if formulario.data_fim.errors %} is-invalid{% endif %}"
-            value="{{ formulario.instance.data_fim|date:'Y-m-d'|default:'' }}"
-          >
-          <div class="form-text"></div>
+            value="{{ formulario.instance.data_fim|date:'Y-m-d'|default:'' }}">
           {% for err in formulario.data_fim.errors %}
-            <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+          <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
           {% endfor %}
         </div>
 
-        <!-- Datas flexíveis (checkbox) -->
         <div class="col-12 col-md-4 d-flex align-items-center pt-md-4">
           <div class="form-check mt-md-2">
-            <input type="checkbox"
-                   name="datas_flexiveis"
-                   id="id_datas_flexiveis"
-                   class="form-check-input"
-                   {% if formulario.instance.datas_flexiveis %}checked{% endif %}>
-            <label class="form-check-label" for="id_datas_flexiveis">
-              Datas flexíveis
-            </label>
+            <input type="checkbox" name="datas_flexiveis" id="id_datas_flexiveis"
+              class="form-check-input" {% if formulario.instance.datas_flexiveis %}checked{% endif %}>
+            <label class="form-check-label" for="id_datas_flexiveis">Datas flexíveis</label>
           </div>
         </div>
 
-        <!-- Demais campos do formulário (exceto os já renderizados) -->
+        <!-- Outros campos do formulário -->
         {% for field in formulario.visible_fields %}
-          {% if field.name not in "pais_destino,cidade_destino,regiao_destino,data_inicio,data_fim,datas_flexiveis" %}
-          <div class="col-12 {% if field.field.widget.attrs.rows %}{% else %}col-md-6{% endif %}">
-            <label class="form-label fw-bold" for="{{ field.id_for_label }}">
-              {{ field.label }}
-              {% if field.field.required %}<span style="color:var(--danger);">*</span>{% endif %}
-            </label>
-            {{ field }}
-            {% if field.help_text %}
-              <div class="form-text">{{ field.help_text }}</div>
-            {% endif %}
-            {% for err in field.errors %}
-              <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
-            {% endfor %}
-          </div>
-          {% endif %}
+        {% if field.name not in "pais_destino,cidade_destino,regiao_destino,data_inicio,data_fim,datas_flexiveis" %}
+        <div class="col-12 {% if field.field.widget.attrs.rows %}{% else %}col-md-6{% endif %}">
+          <label class="form-label fw-bold" for="{{ field.id_for_label }}">
+            {{ field.label }}{% if field.field.required %}<span style="color:var(--danger);">*</span>{% endif %}
+          </label>
+          {{ field }}
+          {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+          {% for err in field.errors %}
+          <div class="text-danger small"><i class="bi bi-exclamation-circle me-1"></i>{{ err }}</div>
+          {% endfor %}
+        </div>
+        {% endif %}
         {% endfor %}
+
+        <!--
+          CORREÇÃO 3: cidade_destino e regiao_destino precisam existir no DOM
+          com os IDs corretos para o JS popular. Se o form Django não os inclui
+          no loop visible_fields, garantimos aqui como campos hidden que o
+          servidor recebe normalmente no POST.
+          Se você já os renderiza pelo loop, remova estes dois inputs.
+        -->
+        {% if 'cidade_destino' not in formulario.fields %}
+        <input type="hidden" name="cidade_destino" id="id_cidade_destino"
+          value="{{ formulario.instance.cidade_destino|default:'' }}">
+        {% endif %}
+        {% if 'regiao_destino' not in formulario.fields %}
+        <input type="hidden" name="regiao_destino" id="id_regiao_destino"
+          value="{{ formulario.instance.regiao_destino|default:'' }}">
+        {% endif %}
 
         <!-- Submit -->
         <div class="col-12 mt-2">
@@ -213,10 +192,10 @@
               {% if formulario.instance.pk %}Salvar Alterações{% else %}Criar Plano de Viagem{% endif %}
             </button>
             {% if formulario.instance.pk %}
-              <a href="{% url 'destinos:detalhes_plano' formulario.instance.uuid %}"
-                 class="btn btn-outline-danger p-3 flex-grow-1 mt-3">
-                <i class="bi bi-x-circle me-1"></i>Cancelar
-              </a>
+            <a href="{% url 'destinos:detalhes_plano' formulario.instance.uuid %}"
+              class="btn btn-outline-danger p-3 flex-grow-1 mt-3">
+              <i class="bi bi-x-circle me-1"></i>Cancelar
+            </a>
             {% endif %}
           </div>
         </div>
@@ -227,15 +206,34 @@
 </div>
 {% endblock %}
 
-
 {% block scripts_extras %}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
 
   const TOKEN = "{{ MAPBOX_TOKEN|default:'' }}";
-  if (!TOKEN || TOKEN.length < 10) { console.warn("[Mapa] Token não configurado."); return; }
+  if (!TOKEN || TOKEN.length < 10) {
+    console.warn("[Mapa] Token Mapbox não configurado.");
+    return;
+  }
 
-  /* ── Dados da instância para edição ─────────────────────── */
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const q$ = id => document.getElementById(id);
+
+  // Referências aos campos — todos com guard null-safe
+  const inputConsulta   = q$('consulta_local');
+  const btnBuscar       = q$('btn_buscar');
+  const btnLimpar       = q$('btn_limpar');
+  const inputCidade     = q$('id_cidade_destino');   // pode ser visible ou hidden
+  const inputRegiao     = q$('id_regiao_destino');   // idem
+  const inputLatitude   = q$('id_latitude');
+  const inputLongitude  = q$('id_longitude');
+  const inputPaisNome   = q$('id_pais_nome');
+  const inputPaisCodigo = q$('id_pais_codigo_iso');
+  const selectPais      = q$('id_pais_destino');
+  const locSummary      = q$('loc-summary');
+  const locSummaryText  = q$('loc-summary-text');
+
+  // Dados da instância (modo edição)
   const INST = {
     pk:      "{{ formulario.instance.pk|default:'' }}",
     lat:     "{{ formulario.instance.endereco_plano.latitude|default:'' }}",
@@ -243,137 +241,67 @@ document.addEventListener('DOMContentLoaded', () => {
     cidade:  "{{ formulario.instance.cidade_destino|default:''|escapejs }}",
     regiao:  "{{ formulario.instance.regiao_destino|default:''|escapejs }}",
     pais:    "{{ formulario.instance.pais_destino.nome|default:''|escapejs }}",
-    paisCod: "{{ formulario.instance.pais_destino.codigo_iso|default:''|escapejs }}",
+    paisCod: "{{ formulario.instance.pais_destino.codigo_iso|default:''|escapejs }}"
   };
 
   const isEditing = !!INST.pk;
   const hasCoords = INST.lat !== '' && INST.lng !== '';
 
-  /* ── Elementos ───────────────────────────────────────────── */
-  const q$           = id => document.getElementById(id);
-  const inputConsulta    = q$('consulta_local');
-  const btnBuscar        = q$('btn_buscar');
-  const btnLimpar        = q$('btn_limpar');
-  const inputCidade      = q$('id_cidade_destino');
-  const inputRegiao      = q$('id_regiao_destino');
-  const inputPaisDisplay = q$('id_pais_destino_display');
-  const inputLatitude    = q$('id_latitude');
-  const inputLongitude   = q$('id_longitude');
-  const inputPaisNome    = q$('id_pais_nome');
-  const inputPaisCodigo  = q$('id_pais_codigo_iso');
-  const locSummary       = q$('loc-summary');
-  const locSummaryText   = q$('loc-summary-text');
-
-  /* ── Mapa ─────────────────────────────────────────────────── */
+  // ── Mapa ───────────────────────────────────────────────────────────────────
   mapboxgl.accessToken = TOKEN;
-
-  const initCenter = hasCoords
-    ? [parseFloat(INST.lng), parseFloat(INST.lat)]
-    : [-46.6333, -23.5505];
-
   const mapa = new mapboxgl.Map({
     container: 'mapa',
-    style:     'mapbox://styles/mapbox/streets-v12',
-    center:    initCenter,
-    zoom:      hasCoords ? 13 : 10,
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: hasCoords ? [parseFloat(INST.lng), parseFloat(INST.lat)] : [-46.6333, -23.5505],
+    zoom: hasCoords ? 13 : 10
   });
   mapa.addControl(new mapboxgl.NavigationControl());
 
-  /* ── Marcador ─────────────────────────────────────────────── */
   let marcador = null;
-  const setMarker  = (lng, lat) => {
-    if (marcador) marcador.remove();
-    marcador = new mapboxgl.Marker({ color: '#1a3a5c' }).setLngLat([lng, lat]).addTo(mapa);
-  };
-  const clearMarker = () => { if (marcador) { marcador.remove(); marcador = null; } };
 
-  /* ── Summary ─────────────────────────────────────────────── */
+  const setMarker = (lng, lat) => {
+    if (marcador) marcador.remove();
+    marcador = new mapboxgl.Marker({ color: '#1a3a5c' })
+      .setLngLat([lng, lat])
+      .addTo(mapa);
+  };
+
+  const clearMarker = () => {
+    if (marcador) { marcador.remove(); marcador = null; }
+  };
+
+  // ── Summary ────────────────────────────────────────────────────────────────
   const showSummary = (cidade, regiao, pais) => {
     const parts = [cidade, regiao, pais].filter(Boolean);
-    if (parts.length) {
+    if (parts.length && locSummary && locSummaryText) {
       locSummaryText.textContent = parts.join(', ');
-      locSummary.style.display = '';
+      locSummary.style.removeProperty('display'); // remove o display:none sem usar ''
     }
   };
+
   const hideSummary = () => {
-    locSummary.style.display = 'none';
-    locSummaryText.textContent = '';
+    if (locSummary) locSummary.style.display = 'none';
+    if (locSummaryText) locSummaryText.textContent = '';
   };
 
-  /* ── Pré-preencher na edição ─────────────────────────────── */
-  if (isEditing) {
-    if (inputPaisDisplay && INST.pais) inputPaisDisplay.value = INST.pais;
-    if (inputPaisNome)   inputPaisNome.value   = INST.pais;
-    if (inputPaisCodigo) inputPaisCodigo.value = INST.paisCod;
+  // ── CORREÇÃO 4: Normalização para comparação de país ──────────────────────
+  // Remove acentos e converte pra minúsculo para comparar "Brasil" == "brasil"
+  const normalize = str =>
+    (str || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
 
-    // Marca como válidos os que já têm valor
-    [inputCidade, inputRegiao, inputPaisDisplay].forEach(el => {
-      if (el?.value) el.classList.add('is-valid');
-    });
-
-    showSummary(INST.cidade, INST.regiao, INST.pais);
-
-    if (hasCoords) {
-      const lat = parseFloat(INST.lat), lng = parseFloat(INST.lng);
-      setMarker(lng, lat);
-      inputLatitude.value  = lat;
-      inputLongitude.value = lng;
-    } else if (INST.cidade || INST.pais) {
-      // Sem coords salvas → geocoding do endereço ao carregar
-      mapa.on('load', async () => {
-        if (isEditing) {
-
-          if (inputPaisDisplay && INST.pais) inputPaisDisplay.value = INST.pais;
-          if (inputPaisNome)   inputPaisNome.value   = INST.pais;
-          if (inputPaisCodigo) inputPaisCodigo.value = INST.paisCod;
-
-          [inputCidade, inputRegiao, inputPaisDisplay].forEach(el => {
-            if (el && el.value) el.classList.add('is-valid');
-          });
-
-          showSummary(INST.cidade, INST.regiao, INST.pais);
-
-          if (hasCoords) {
-            const lat = parseFloat(INST.lat);
-            const lng = parseFloat(INST.lng);
-
-            setMarker(lng, lat);
-            mapa.flyTo({ center: [lng, lat], zoom: 13 });
-
-            inputLatitude.value  = lat;
-            inputLongitude.value = lng;
-
-          } else if (INST.cidade || INST.pais) {
-
-            const q = [INST.cidade, INST.regiao, INST.pais].filter(Boolean).join(', ');
-            const feats = await forwardGeocode(q, 1);
-
-            if (feats?.[0]) {
-              const [lng, lat] = feats[0].center;
-
-              setMarker(lng, lat);
-              mapa.flyTo({ center: [lng, lat], zoom: 12 });
-
-              inputLatitude.value  = lat;
-              inputLongitude.value = lng;
-            }
-          }
-        }
-
-      });
-    }}
-
-  /* ── Geocoding ───────────────────────────────────────────── */
+  // ── Geocoding ──────────────────────────────────────────────────────────────
   function extractLocation(feature) {
     const out = { cidade: '', estado: '', pais: '', paisCodigo: '' };
     if (!feature) return out;
+
     [feature, ...(feature.context || [])].forEach(c => {
       if (!c?.id) return;
-      const id = String(c.id), txt = c.text || '';
+      const id  = String(c.id);
+      const txt = c.text || '';
       if (/^(place|locality|district|neighborhood)/.test(id)) out.cidade   ||= txt;
-      if (/^region/.test(id))  out.estado   ||= txt;
+      if (/^region/.test(id))  out.estado    ||= txt;
       if (/^country/.test(id)) {
-        out.pais       ||= txt;
+        out.pais      ||= txt;
         out.paisCodigo ||= (c.properties?.short_code || '').toUpperCase();
       }
     });
@@ -383,102 +311,167 @@ document.addEventListener('DOMContentLoaded', () => {
   async function reverseGeocode(lng, lat) {
     try {
       const r = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${TOKEN}&language=pt&limit=1`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json` +
+        `?access_token=${TOKEN}&language=pt&limit=1`
       );
       const d = await r.json();
       return d?.features?.[0] ? extractLocation(d.features[0]) : null;
-    } catch { return null; }
+    } catch (e) {
+      console.error('[Mapa] reverseGeocode error:', e);
+      return null;
+    }
   }
 
   async function forwardGeocode(q, limit = 5) {
     try {
       const r = await fetch(
-        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json?access_token=${TOKEN}&language=pt&limit=${limit}`
+        `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(q)}.json` +
+        `?access_token=${TOKEN}&language=pt&limit=${limit}`
       );
       const d = await r.json();
       return d?.features || [];
-    } catch { return []; }
+    } catch (e) {
+      console.error('[Mapa] forwardGeocode error:', e);
+      return [];
+    }
   }
 
+  // ── CORREÇÃO PRINCIPAL: fillInputs robusto ────────────────────────────────
+  // 1. Cada campo tem guard (só escreve se o elemento existir no DOM)
+  // 2. Comparação de país normalizada (sem acento, sem caixa)
+  // 3. Fallback por data-nome caso o texto do option tenha espaço extra
   function fillInputs(loc, coords) {
     if (!loc) return;
-    if (loc.cidade) { inputCidade.value = loc.cidade; inputCidade.classList.add('is-valid'); }
-    if (loc.estado) { inputRegiao.value = loc.estado; inputRegiao.classList.add('is-valid'); }
-    if (loc.pais)   {
-      inputPaisDisplay.value = loc.pais;
-      inputPaisDisplay.classList.add('is-valid');
-      inputPaisNome.value    = loc.pais;
-      inputPaisCodigo.value  = loc.paisCodigo || '';
+
+    // Campos de texto — null-safe
+    if (inputCidade)    inputCidade.value    = loc.cidade     || '';
+    if (inputRegiao)    inputRegiao.value    = loc.estado     || '';
+    if (inputPaisNome)  inputPaisNome.value  = loc.pais       || '';
+    if (inputPaisCodigo)inputPaisCodigo.value= loc.paisCodigo || '';
+
+    // Coordenadas — null-safe
+    if (inputLatitude)  inputLatitude.value  = coords?.lat ?? '';
+    if (inputLongitude) inputLongitude.value = coords?.lng ?? '';
+
+    // CORREÇÃO: match por data-nome (mais confiável) ou normalize do texto
+    if (loc.pais && selectPais) {
+      const target = normalize(loc.pais);
+      let matched = null;
+
+      for (const opt of selectPais.options) {
+        // Tenta primeiro pelo atributo data-nome que adicionamos no template
+        const dataNome = normalize(opt.dataset.nome || '');
+        const optText  = normalize(opt.text);
+        if (dataNome === target || optText === target) {
+          matched = opt;
+          break;
+        }
+      }
+
+      if (matched) {
+        selectPais.value = matched.value;
+      } else {
+        console.warn(`[Mapa] País não encontrado no select: "${loc.pais}"`);
+      }
     }
-    if (coords) { inputLatitude.value = coords.lat; inputLongitude.value = coords.lng; }
+
     showSummary(loc.cidade, loc.estado, loc.pais);
   }
 
-  /* ── Clique no mapa ──────────────────────────────────────── */
+  // ── Inicialização em modo edição ───────────────────────────────────────────
+  if (isEditing && hasCoords) {
+    setMarker(parseFloat(INST.lng), parseFloat(INST.lat));
+    showSummary(INST.cidade, INST.regiao, INST.pais);
+  }
+
+  // ── Clique no mapa ────────────────────────────────────────────────────────
+  // CORREÇÃO 5: flyTo acontece imediatamente com o clique; o geocoding é async
+  // mas fillInputs só é chamado depois que a resposta chega — sem race condition.
   mapa.on('click', async e => {
     const { lng, lat } = e.lngLat;
     setMarker(lng, lat);
     mapa.flyTo({ center: [lng, lat], zoom: 14 });
+
     const loc = await reverseGeocode(lng, lat);
-    if (loc) fillInputs(loc, { lng, lat });
+    if (loc) {
+      fillInputs(loc, { lng, lat });
+    } else {
+      console.warn('[Mapa] Geocoding reverso não retornou resultado.');
+    }
   });
 
-  /* ── Buscar ──────────────────────────────────────────────── */
+  // ── Busca por CEP ou endereço ─────────────────────────────────────────────
   const doBuscar = async () => {
-    const q = inputConsulta.value.trim();
-    if (!q) { inputConsulta.focus(); return; }
+    const q = (inputConsulta?.value || '').trim();
+    if (!q) { inputConsulta?.focus(); return; }
+
     const digits = q.replace(/\D/g, '');
 
+    // CEP brasileiro (8 dígitos)
     if (digits.length === 8) {
       try {
         const r = await fetch(`https://viacep.com.br/ws/${digits}/json/`);
         const j = await r.json();
-        if (j.erro) { alert('CEP não encontrado'); return; }
-        const endereco = [j.logradouro, j.bairro, j.localidade, j.uf].filter(Boolean).join(', ');
+        if (j.erro) { alert('CEP não encontrado.'); return; }
+
+        const endereco = [j.logradouro, j.bairro, j.localidade, j.uf]
+          .filter(Boolean).join(', ');
+
         const feats = await forwardGeocode(endereco, 1);
         if (feats?.[0]) {
           const [lng, lat] = feats[0].center;
-          setMarker(lng, lat); mapa.flyTo({ center: [lng, lat], zoom: 14 });
+          setMarker(lng, lat);
+          mapa.flyTo({ center: [lng, lat], zoom: 14 });
           const loc = extractLocation(feats[0]);
-          loc.cidade ||= j.localidade; loc.estado ||= j.uf;
-          loc.pais   ||= 'Brasil'; loc.paisCodigo ||= 'BR';
+          // Garante cidade e estado mesmo se o geocoding não retornar
+          loc.cidade ||= j.localidade;
+          loc.estado ||= j.uf;
           fillInputs(loc, { lng, lat });
         } else {
+          // Sem coordenadas mas preenche campos de texto
           fillInputs({ cidade: j.localidade, estado: j.uf, pais: 'Brasil', paisCodigo: 'BR' }, null);
         }
-      } catch { alert('Erro ao consultar CEP'); }
+      } catch (e) {
+        console.error('[Mapa] Erro ao consultar CEP:', e);
+        alert('Erro ao consultar o CEP. Tente novamente.');
+      }
       return;
     }
 
+    // Endereço livre
     const feats = await forwardGeocode(q, 5);
-    if (!feats.length) { alert('Local não encontrado'); return; }
-    const chosen = feats.find(f => f.place_type.includes('address'))
-                || feats.find(f => f.place_type.includes('place'))
-                || feats[0];
+    if (!feats.length) { alert('Local não encontrado. Tente um endereço diferente.'); return; }
+
+    const chosen =
+      feats.find(f => f.place_type.includes('address')) ||
+      feats.find(f => f.place_type.includes('place'))   ||
+      feats[0];
+
     const [lng, lat] = chosen.center;
-    setMarker(lng, lat); mapa.flyTo({ center: [lng, lat], zoom: 14 });
+    setMarker(lng, lat);
+    mapa.flyTo({ center: [lng, lat], zoom: 14 });
     fillInputs(extractLocation(chosen), { lng, lat });
   };
 
-  btnBuscar.addEventListener('click', doBuscar);
-  inputConsulta.addEventListener('keypress', e => { if (e.key === 'Enter') { e.preventDefault(); doBuscar(); } });
-
-  /* ── Limpar ──────────────────────────────────────────────── */
-  btnLimpar.addEventListener('click', () => {
-    clearMarker(); hideSummary(); inputConsulta.value = '';
-    [inputCidade, inputRegiao, inputPaisDisplay].forEach(el => {
-      el.value = ''; el.classList.remove('is-valid', 'is-invalid');
-    });
-    [inputLatitude, inputLongitude, inputPaisNome, inputPaisCodigo].forEach(el => el.value = '');
+  btnBuscar?.addEventListener('click', doBuscar);
+  inputConsulta?.addEventListener('keypress', e => {
+    if (e.key === 'Enter') { e.preventDefault(); doBuscar(); }
   });
 
-  /* ── Validação submit ────────────────────────────────────── */
-  document.getElementById('form-plano').addEventListener('submit', function (e) {
-    if (!inputPaisNome.value) {
-      e.preventDefault();
-      alert('Por favor, selecione uma localização no mapa antes de salvar.');
-      document.getElementById('mapa').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+  // ── Limpar ────────────────────────────────────────────────────────────────
+  // CORREÇÃO 6: não zera selectPais com '' (valor inválido); volta ao primeiro option
+  btnLimpar?.addEventListener('click', () => {
+    if (inputConsulta)    inputConsulta.value    = '';
+    if (inputCidade)      inputCidade.value      = '';
+    if (inputRegiao)      inputRegiao.value      = '';
+    if (inputPaisNome)    inputPaisNome.value    = '';
+    if (inputPaisCodigo)  inputPaisCodigo.value  = '';
+    if (inputLatitude)    inputLatitude.value    = '';
+    if (inputLongitude)   inputLongitude.value   = '';
+    // Volta pro primeiro option em vez de setar '' (que deixa select inválido)
+    if (selectPais && selectPais.options.length) selectPais.selectedIndex = 0;
+    clearMarker();
+    hideSummary();
   });
 
 });

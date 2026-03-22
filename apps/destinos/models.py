@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 from apps.usuarios.models import Usuario
+from django import forms
 import uuid
 
 
@@ -205,6 +206,23 @@ class EnderecoPlano(models.Model):
     def __str__(self):
         return f"{self.endereco} — {self.cidade} / {self.estado}"
 
+
+class PlanoViagemForm(forms.ModelForm):
+    class Meta:
+        model = PlanoViagem
+        fields = [
+            'pais_destino',
+            'cidade_destino',
+            'regiao_destino',
+            'data_inicio',
+            'data_fim',
+            'motivo_viagem',
+            'nivel_privacidade',
+            'orcamento_mensal_minimo',
+        ]
+        widgets = {
+            'pais_destino': forms.Select(attrs={'class': 'form-select'}),
+        }
 
 class OfertaResidencia(models.Model):
     """

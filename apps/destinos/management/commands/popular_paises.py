@@ -1,0 +1,252 @@
+"""
+Management command para popular ou atualizar países no banco de dados.
+
+Uso:
+    python manage.py popular_paises           # Upsert seguro (não apaga nada)
+    python manage.py popular_paises --limpar  # Apaga tudo e repopula
+
+Coloque este arquivo em:
+    apps/destinos/management/commands/popular_paises.py
+
+Crie os __init__.py se não existirem:
+    touch apps/destinos/management/__init__.py
+    touch apps/destinos/management/commands/__init__.py
+"""
+
+from django.core.management.base import BaseCommand
+from apps.destinos.models import Pais
+
+PAISES = [
+    {"codigo_iso": "AF", "nome": "Afeganistão",              "nome_completo": "República Islâmica do Afeganistão",             "continente": "Ásia",            "latitude": "33.939110",  "longitude": "67.709953"},
+    {"codigo_iso": "ZA", "nome": "África do Sul",            "nome_completo": "República da África do Sul",                   "continente": "África",          "latitude": "-30.559482", "longitude": "22.937506"},
+    {"codigo_iso": "AL", "nome": "Albânia",                  "nome_completo": "República da Albânia",                         "continente": "Europa",          "latitude": "41.153332",  "longitude": "20.168331"},
+    {"codigo_iso": "DE", "nome": "Alemanha",                 "nome_completo": "República Federal da Alemanha",                "continente": "Europa",          "latitude": "51.165691",  "longitude": "10.451526"},
+    {"codigo_iso": "AD", "nome": "Andorra",                  "nome_completo": "Principado de Andorra",                        "continente": "Europa",          "latitude": "42.546245",  "longitude": "1.601554"},
+    {"codigo_iso": "AO", "nome": "Angola",                   "nome_completo": "República de Angola",                          "continente": "África",          "latitude": "-11.202692", "longitude": "17.873887"},
+    {"codigo_iso": "AG", "nome": "Antígua e Barbuda",        "nome_completo": "Antígua e Barbuda",                            "continente": "América do Norte","latitude": "17.060816",  "longitude": "-61.796428"},
+    {"codigo_iso": "SA", "nome": "Arábia Saudita",           "nome_completo": "Reino da Arábia Saudita",                      "continente": "Ásia",            "latitude": "23.885942",  "longitude": "45.079162"},
+    {"codigo_iso": "DZ", "nome": "Argélia",                  "nome_completo": "República Democrática Popular da Argélia",     "continente": "África",          "latitude": "28.033886",  "longitude": "1.659626"},
+    {"codigo_iso": "AR", "nome": "Argentina",                "nome_completo": "República Argentina",                          "continente": "América do Sul",  "latitude": "-38.416097", "longitude": "-63.616672"},
+    {"codigo_iso": "AM", "nome": "Armênia",                  "nome_completo": "República da Armênia",                         "continente": "Ásia",            "latitude": "40.069099",  "longitude": "45.038189"},
+    {"codigo_iso": "AU", "nome": "Austrália",                "nome_completo": "Comunidade da Austrália",                      "continente": "Oceania",         "latitude": "-25.274398", "longitude": "133.775136"},
+    {"codigo_iso": "AT", "nome": "Áustria",                  "nome_completo": "República da Áustria",                         "continente": "Europa",          "latitude": "47.516231",  "longitude": "14.550072"},
+    {"codigo_iso": "AZ", "nome": "Azerbaijão",               "nome_completo": "República do Azerbaijão",                      "continente": "Ásia",            "latitude": "40.143105",  "longitude": "47.576927"},
+    {"codigo_iso": "BS", "nome": "Bahamas",                  "nome_completo": "Comunidade das Bahamas",                       "continente": "América do Norte","latitude": "25.034280",  "longitude": "-77.396280"},
+    {"codigo_iso": "BD", "nome": "Bangladesh",               "nome_completo": "República Popular de Bangladesh",              "continente": "Ásia",            "latitude": "23.684994",  "longitude": "90.356331"},
+    {"codigo_iso": "BB", "nome": "Barbados",                 "nome_completo": "Barbados",                                     "continente": "América do Norte","latitude": "13.193887",  "longitude": "-59.543198"},
+    {"codigo_iso": "BH", "nome": "Barein",                   "nome_completo": "Reino do Barein",                              "continente": "Ásia",            "latitude": "25.930414",  "longitude": "50.637772"},
+    {"codigo_iso": "BE", "nome": "Bélgica",                  "nome_completo": "Reino da Bélgica",                             "continente": "Europa",          "latitude": "50.503887",  "longitude": "4.469936"},
+    {"codigo_iso": "BZ", "nome": "Belize",                   "nome_completo": "Belize",                                       "continente": "América do Norte","latitude": "17.189877",  "longitude": "-88.497650"},
+    {"codigo_iso": "BJ", "nome": "Benin",                    "nome_completo": "República do Benin",                           "continente": "África",          "latitude": "9.307690",   "longitude": "2.315834"},
+    {"codigo_iso": "BY", "nome": "Bielorrússia",             "nome_completo": "República da Bielorrússia",                    "continente": "Europa",          "latitude": "53.709807",  "longitude": "27.953389"},
+    {"codigo_iso": "BO", "nome": "Bolívia",                  "nome_completo": "Estado Plurinacional da Bolívia",              "continente": "América do Sul",  "latitude": "-16.290154", "longitude": "-63.588653"},
+    {"codigo_iso": "BA", "nome": "Bósnia e Herzegovina",     "nome_completo": "Bósnia e Herzegovina",                         "continente": "Europa",          "latitude": "43.915886",  "longitude": "17.679076"},
+    {"codigo_iso": "BW", "nome": "Botswana",                 "nome_completo": "República do Botswana",                        "continente": "África",          "latitude": "-22.328474", "longitude": "24.684866"},
+    {"codigo_iso": "BR", "nome": "Brasil",                   "nome_completo": "República Federativa do Brasil",               "continente": "América do Sul",  "latitude": "-14.235004", "longitude": "-51.925280"},
+    {"codigo_iso": "BN", "nome": "Brunei",                   "nome_completo": "Estado do Brunei Darussalam",                  "continente": "Ásia",            "latitude": "4.535277",   "longitude": "114.727669"},
+    {"codigo_iso": "BG", "nome": "Bulgária",                 "nome_completo": "República da Bulgária",                        "continente": "Europa",          "latitude": "42.733883",  "longitude": "25.485830"},
+    {"codigo_iso": "BF", "nome": "Burkina Faso",             "nome_completo": "Burkina Faso",                                 "continente": "África",          "latitude": "12.364566",  "longitude": "-1.561593"},
+    {"codigo_iso": "BI", "nome": "Burundi",                  "nome_completo": "República do Burundi",                         "continente": "África",          "latitude": "-3.373056",  "longitude": "29.918886"},
+    {"codigo_iso": "BT", "nome": "Butão",                    "nome_completo": "Reino do Butão",                               "continente": "Ásia",            "latitude": "27.514162",  "longitude": "90.433601"},
+    {"codigo_iso": "CV", "nome": "Cabo Verde",               "nome_completo": "República de Cabo Verde",                      "continente": "África",          "latitude": "16.002082",  "longitude": "-24.013197"},
+    {"codigo_iso": "CM", "nome": "Camarões",                 "nome_completo": "República dos Camarões",                       "continente": "África",          "latitude": "3.848000",   "longitude": "11.502075"},
+    {"codigo_iso": "KH", "nome": "Camboja",                  "nome_completo": "Reino do Camboja",                             "continente": "Ásia",            "latitude": "12.565679",  "longitude": "104.990963"},
+    {"codigo_iso": "CA", "nome": "Canadá",                   "nome_completo": "Canadá",                                       "continente": "América do Norte","latitude": "56.130366",  "longitude": "-106.346771"},
+    {"codigo_iso": "QA", "nome": "Catar",                    "nome_completo": "Estado do Catar",                              "continente": "Ásia",            "latitude": "25.354826",  "longitude": "51.183884"},
+    {"codigo_iso": "KZ", "nome": "Cazaquistão",              "nome_completo": "República do Cazaquistão",                     "continente": "Ásia",            "latitude": "48.019573",  "longitude": "66.923684"},
+    {"codigo_iso": "TD", "nome": "Chade",                    "nome_completo": "República do Chade",                           "continente": "África",          "latitude": "15.454166",  "longitude": "18.732207"},
+    {"codigo_iso": "CL", "nome": "Chile",                    "nome_completo": "República do Chile",                           "continente": "América do Sul",  "latitude": "-35.675147", "longitude": "-71.542969"},
+    {"codigo_iso": "CN", "nome": "China",                    "nome_completo": "República Popular da China",                   "continente": "Ásia",            "latitude": "35.861660",  "longitude": "104.195397"},
+    {"codigo_iso": "CY", "nome": "Chipre",                   "nome_completo": "República de Chipre",                          "continente": "Europa",          "latitude": "35.126413",  "longitude": "33.429859"},
+    {"codigo_iso": "CO", "nome": "Colômbia",                 "nome_completo": "República da Colômbia",                        "continente": "América do Sul",  "latitude": "4.570868",   "longitude": "-74.297333"},
+    {"codigo_iso": "KM", "nome": "Comores",                  "nome_completo": "União das Comores",                            "continente": "África",          "latitude": "-11.875001", "longitude": "43.872219"},
+    {"codigo_iso": "CG", "nome": "Congo",                    "nome_completo": "República do Congo",                           "continente": "África",          "latitude": "-0.228021",  "longitude": "15.827659"},
+    {"codigo_iso": "KP", "nome": "Coreia do Norte",          "nome_completo": "República Popular Democrática da Coreia",      "continente": "Ásia",            "latitude": "40.339852",  "longitude": "127.510093"},
+    {"codigo_iso": "KR", "nome": "Coreia do Sul",            "nome_completo": "República da Coreia",                          "continente": "Ásia",            "latitude": "35.907757",  "longitude": "127.766922"},
+    {"codigo_iso": "CR", "nome": "Costa Rica",               "nome_completo": "República da Costa Rica",                      "continente": "América do Norte","latitude": "9.748917",   "longitude": "-83.753428"},
+    {"codigo_iso": "CI", "nome": "Costa do Marfim",          "nome_completo": "República da Costa do Marfim",                 "continente": "África",          "latitude": "7.539989",   "longitude": "-5.547080"},
+    {"codigo_iso": "HR", "nome": "Croácia",                  "nome_completo": "República da Croácia",                         "continente": "Europa",          "latitude": "45.100000",  "longitude": "15.200000"},
+    {"codigo_iso": "CU", "nome": "Cuba",                     "nome_completo": "República de Cuba",                            "continente": "América do Norte","latitude": "21.521757",  "longitude": "-77.781167"},
+    {"codigo_iso": "DK", "nome": "Dinamarca",                "nome_completo": "Reino da Dinamarca",                           "continente": "Europa",          "latitude": "56.263920",  "longitude": "9.501785"},
+    {"codigo_iso": "DJ", "nome": "Djibuti",                  "nome_completo": "República do Djibuti",                         "continente": "África",          "latitude": "11.825138",  "longitude": "42.590275"},
+    {"codigo_iso": "DM", "nome": "Dominica",                 "nome_completo": "Comunidade da Dominica",                       "continente": "América do Norte","latitude": "15.414999",  "longitude": "-61.370976"},
+    {"codigo_iso": "EG", "nome": "Egito",                    "nome_completo": "República Árabe do Egito",                     "continente": "África",          "latitude": "26.820553",  "longitude": "30.802498"},
+    {"codigo_iso": "SV", "nome": "El Salvador",              "nome_completo": "República de El Salvador",                     "continente": "América do Norte","latitude": "13.794185",  "longitude": "-88.896530"},
+    {"codigo_iso": "AE", "nome": "Emirados Árabes Unidos",   "nome_completo": "Emirados Árabes Unidos",                       "continente": "Ásia",            "latitude": "23.424076",  "longitude": "53.847818"},
+    {"codigo_iso": "EC", "nome": "Equador",                  "nome_completo": "República do Equador",                         "continente": "América do Sul",  "latitude": "-1.831239",  "longitude": "-78.183406"},
+    {"codigo_iso": "ER", "nome": "Eritreia",                 "nome_completo": "Estado da Eritreia",                           "continente": "África",          "latitude": "15.179384",  "longitude": "39.782334"},
+    {"codigo_iso": "SK", "nome": "Eslováquia",               "nome_completo": "República Eslovaca",                           "continente": "Europa",          "latitude": "48.669026",  "longitude": "19.699024"},
+    {"codigo_iso": "SI", "nome": "Eslovênia",                "nome_completo": "República da Eslovênia",                       "continente": "Europa",          "latitude": "46.151241",  "longitude": "14.995463"},
+    {"codigo_iso": "ES", "nome": "Espanha",                  "nome_completo": "Reino da Espanha",                             "continente": "Europa",          "latitude": "40.463667",  "longitude": "-3.749220"},
+    {"codigo_iso": "US", "nome": "Estados Unidos",           "nome_completo": "Estados Unidos da América",                    "continente": "América do Norte","latitude": "37.090240",  "longitude": "-95.712891"},
+    {"codigo_iso": "EE", "nome": "Estônia",                  "nome_completo": "República da Estônia",                         "continente": "Europa",          "latitude": "58.595272",  "longitude": "25.013607"},
+    {"codigo_iso": "SZ", "nome": "Essuatíni",                "nome_completo": "Reino da Essuatíni",                           "continente": "África",          "latitude": "-26.522503", "longitude": "31.465866"},
+    {"codigo_iso": "ET", "nome": "Etiópia",                  "nome_completo": "República Democrática Federal da Etiópia",     "continente": "África",          "latitude": "9.145000",   "longitude": "40.489673"},
+    {"codigo_iso": "FJ", "nome": "Fiji",                     "nome_completo": "República de Fiji",                            "continente": "Oceania",         "latitude": "-16.578193", "longitude": "179.414413"},
+    {"codigo_iso": "PH", "nome": "Filipinas",                "nome_completo": "República das Filipinas",                      "continente": "Ásia",            "latitude": "12.879721",  "longitude": "121.774017"},
+    {"codigo_iso": "FI", "nome": "Finlândia",                "nome_completo": "República da Finlândia",                       "continente": "Europa",          "latitude": "61.924110",  "longitude": "25.748151"},
+    {"codigo_iso": "FR", "nome": "França",                   "nome_completo": "República Francesa",                           "continente": "Europa",          "latitude": "46.227638",  "longitude": "2.213749"},
+    {"codigo_iso": "GA", "nome": "Gabão",                    "nome_completo": "República do Gabão",                           "continente": "África",          "latitude": "-0.803689",  "longitude": "11.609444"},
+    {"codigo_iso": "GM", "nome": "Gâmbia",                   "nome_completo": "República da Gâmbia",                          "continente": "África",          "latitude": "13.443182",  "longitude": "-15.310139"},
+    {"codigo_iso": "GH", "nome": "Gana",                     "nome_completo": "República do Gana",                            "continente": "África",          "latitude": "7.946527",   "longitude": "-1.023194"},
+    {"codigo_iso": "GE", "nome": "Geórgia",                  "nome_completo": "Geórgia",                                      "continente": "Ásia",            "latitude": "42.315407",  "longitude": "43.356892"},
+    {"codigo_iso": "GD", "nome": "Granada",                  "nome_completo": "Granada",                                      "continente": "América do Norte","latitude": "12.262776",  "longitude": "-61.604171"},
+    {"codigo_iso": "GR", "nome": "Grécia",                   "nome_completo": "República Helénica",                           "continente": "Europa",          "latitude": "39.074208",  "longitude": "21.824312"},
+    {"codigo_iso": "GT", "nome": "Guatemala",                "nome_completo": "República da Guatemala",                       "continente": "América do Norte","latitude": "15.783471",  "longitude": "-90.230759"},
+    {"codigo_iso": "GN", "nome": "Guiné",                    "nome_completo": "República da Guiné",                           "continente": "África",          "latitude": "9.945587",   "longitude": "-9.696645"},
+    {"codigo_iso": "GW", "nome": "Guiné-Bissau",             "nome_completo": "República da Guiné-Bissau",                    "continente": "África",          "latitude": "11.803749",  "longitude": "-15.180413"},
+    {"codigo_iso": "GQ", "nome": "Guiné Equatorial",         "nome_completo": "República da Guiné Equatorial",                "continente": "África",          "latitude": "1.650801",   "longitude": "10.267895"},
+    {"codigo_iso": "GY", "nome": "Guiana",                   "nome_completo": "República Cooperativa da Guiana",              "continente": "América do Sul",  "latitude": "4.860416",   "longitude": "-58.930180"},
+    {"codigo_iso": "HT", "nome": "Haiti",                    "nome_completo": "República do Haiti",                           "continente": "América do Norte","latitude": "18.971187",  "longitude": "-72.285215"},
+    {"codigo_iso": "HN", "nome": "Honduras",                 "nome_completo": "República de Honduras",                        "continente": "América do Norte","latitude": "15.199999",  "longitude": "-86.241905"},
+    {"codigo_iso": "HU", "nome": "Hungria",                  "nome_completo": "Hungria",                                      "continente": "Europa",          "latitude": "47.162494",  "longitude": "19.503304"},
+    {"codigo_iso": "YE", "nome": "Iêmen",                    "nome_completo": "República do Iêmen",                           "continente": "Ásia",            "latitude": "15.552727",  "longitude": "48.516388"},
+    {"codigo_iso": "IN", "nome": "Índia",                    "nome_completo": "República da Índia",                           "continente": "Ásia",            "latitude": "20.593684",  "longitude": "78.962880"},
+    {"codigo_iso": "ID", "nome": "Indonésia",                "nome_completo": "República da Indonésia",                       "continente": "Ásia",            "latitude": "-0.789275",  "longitude": "113.921327"},
+    {"codigo_iso": "IQ", "nome": "Iraque",                   "nome_completo": "República do Iraque",                          "continente": "Ásia",            "latitude": "33.223191",  "longitude": "43.679291"},
+    {"codigo_iso": "IR", "nome": "Irã",                      "nome_completo": "República Islâmica do Irã",                    "continente": "Ásia",            "latitude": "32.427908",  "longitude": "53.688046"},
+    {"codigo_iso": "IE", "nome": "Irlanda",                  "nome_completo": "Irlanda",                                      "continente": "Europa",          "latitude": "53.142367",  "longitude": "-7.692054"},
+    {"codigo_iso": "IS", "nome": "Islândia",                 "nome_completo": "República da Islândia",                        "continente": "Europa",          "latitude": "64.963051",  "longitude": "-19.020835"},
+    {"codigo_iso": "IL", "nome": "Israel",                   "nome_completo": "Estado de Israel",                             "continente": "Ásia",            "latitude": "31.046051",  "longitude": "34.851612"},
+    {"codigo_iso": "IT", "nome": "Itália",                   "nome_completo": "República Italiana",                           "continente": "Europa",          "latitude": "41.871940",  "longitude": "12.567380"},
+    {"codigo_iso": "JM", "nome": "Jamaica",                  "nome_completo": "Jamaica",                                      "continente": "América do Norte","latitude": "18.109581",  "longitude": "-77.297508"},
+    {"codigo_iso": "JP", "nome": "Japão",                    "nome_completo": "Japão",                                        "continente": "Ásia",            "latitude": "36.204824",  "longitude": "138.252924"},
+    {"codigo_iso": "JO", "nome": "Jordânia",                 "nome_completo": "Reino Hachemita da Jordânia",                  "continente": "Ásia",            "latitude": "30.585164",  "longitude": "36.238414"},
+    {"codigo_iso": "KW", "nome": "Kuwait",                   "nome_completo": "Estado do Kuwait",                             "continente": "Ásia",            "latitude": "29.311660",  "longitude": "47.481766"},
+    {"codigo_iso": "LA", "nome": "Laos",                     "nome_completo": "República Democrática Popular do Laos",        "continente": "Ásia",            "latitude": "19.856270",  "longitude": "102.495496"},
+    {"codigo_iso": "LS", "nome": "Lesoto",                   "nome_completo": "Reino do Lesoto",                              "continente": "África",          "latitude": "-29.609988", "longitude": "28.233608"},
+    {"codigo_iso": "LV", "nome": "Letônia",                  "nome_completo": "República da Letônia",                         "continente": "Europa",          "latitude": "56.879635",  "longitude": "24.603189"},
+    {"codigo_iso": "LB", "nome": "Líbano",                   "nome_completo": "República Libanesa",                           "continente": "Ásia",            "latitude": "33.854721",  "longitude": "35.862285"},
+    {"codigo_iso": "LR", "nome": "Libéria",                  "nome_completo": "República da Libéria",                         "continente": "África",          "latitude": "6.428055",   "longitude": "-9.429499"},
+    {"codigo_iso": "LY", "nome": "Líbia",                    "nome_completo": "Estado da Líbia",                              "continente": "África",          "latitude": "26.335100",  "longitude": "17.228331"},
+    {"codigo_iso": "LI", "nome": "Liechtenstein",            "nome_completo": "Principado de Liechtenstein",                  "continente": "Europa",          "latitude": "47.166000",  "longitude": "9.555373"},
+    {"codigo_iso": "LT", "nome": "Lituânia",                 "nome_completo": "República da Lituânia",                        "continente": "Europa",          "latitude": "55.169438",  "longitude": "23.881275"},
+    {"codigo_iso": "LU", "nome": "Luxemburgo",               "nome_completo": "Grão-Ducado do Luxemburgo",                    "continente": "Europa",          "latitude": "49.815273",  "longitude": "6.129583"},
+    {"codigo_iso": "MK", "nome": "Macedônia do Norte",       "nome_completo": "República da Macedônia do Norte",              "continente": "Europa",          "latitude": "41.608635",  "longitude": "21.745275"},
+    {"codigo_iso": "MG", "nome": "Madagascar",               "nome_completo": "República de Madagascar",                      "continente": "África",          "latitude": "-18.766947", "longitude": "46.869107"},
+    {"codigo_iso": "MY", "nome": "Malásia",                  "nome_completo": "Malásia",                                      "continente": "Ásia",            "latitude": "4.210484",   "longitude": "101.975766"},
+    {"codigo_iso": "MW", "nome": "Malawi",                   "nome_completo": "República do Malawi",                          "continente": "África",          "latitude": "-13.254308", "longitude": "34.301525"},
+    {"codigo_iso": "MV", "nome": "Maldivas",                 "nome_completo": "República das Maldivas",                       "continente": "Ásia",            "latitude": "3.202778",   "longitude": "73.220680"},
+    {"codigo_iso": "ML", "nome": "Mali",                     "nome_completo": "República do Mali",                            "continente": "África",          "latitude": "17.570692",  "longitude": "-3.996166"},
+    {"codigo_iso": "MT", "nome": "Malta",                    "nome_completo": "República de Malta",                           "continente": "Europa",          "latitude": "35.937496",  "longitude": "14.375416"},
+    {"codigo_iso": "MA", "nome": "Marrocos",                 "nome_completo": "Reino de Marrocos",                            "continente": "África",          "latitude": "31.791702",  "longitude": "-7.092620"},
+    {"codigo_iso": "MU", "nome": "Maurício",                 "nome_completo": "República de Maurício",                        "continente": "África",          "latitude": "-20.348404", "longitude": "57.552152"},
+    {"codigo_iso": "MR", "nome": "Mauritânia",               "nome_completo": "República Islâmica da Mauritânia",             "continente": "África",          "latitude": "21.007890",  "longitude": "-10.940835"},
+    {"codigo_iso": "MX", "nome": "México",                   "nome_completo": "Estados Unidos Mexicanos",                     "continente": "América do Norte","latitude": "23.634501",  "longitude": "-102.552784"},
+    {"codigo_iso": "MM", "nome": "Mianmar",                  "nome_completo": "República da União de Mianmar",                "continente": "Ásia",            "latitude": "21.913965",  "longitude": "95.956223"},
+    {"codigo_iso": "FM", "nome": "Micronésia",               "nome_completo": "Estados Federados da Micronésia",              "continente": "Oceania",         "latitude": "7.425554",   "longitude": "150.550812"},
+    {"codigo_iso": "MZ", "nome": "Moçambique",               "nome_completo": "República de Moçambique",                      "continente": "África",          "latitude": "-18.665695", "longitude": "35.529562"},
+    {"codigo_iso": "MD", "nome": "Moldávia",                 "nome_completo": "República da Moldávia",                        "continente": "Europa",          "latitude": "47.411631",  "longitude": "28.369885"},
+    {"codigo_iso": "MC", "nome": "Mônaco",                   "nome_completo": "Principado do Mônaco",                         "continente": "Europa",          "latitude": "43.750298",  "longitude": "7.412841"},
+    {"codigo_iso": "MN", "nome": "Mongólia",                 "nome_completo": "Mongólia",                                     "continente": "Ásia",            "latitude": "46.862496",  "longitude": "103.846656"},
+    {"codigo_iso": "ME", "nome": "Montenegro",               "nome_completo": "Montenegro",                                   "continente": "Europa",          "latitude": "42.708678",  "longitude": "19.374390"},
+    {"codigo_iso": "NA", "nome": "Namíbia",                  "nome_completo": "República da Namíbia",                         "continente": "África",          "latitude": "-22.957640", "longitude": "18.490410"},
+    {"codigo_iso": "NR", "nome": "Nauru",                    "nome_completo": "República de Nauru",                           "continente": "Oceania",         "latitude": "-0.522778",  "longitude": "166.931503"},
+    {"codigo_iso": "NP", "nome": "Nepal",                    "nome_completo": "República Democrática Federal do Nepal",       "continente": "Ásia",            "latitude": "28.394857",  "longitude": "84.124008"},
+    {"codigo_iso": "NI", "nome": "Nicarágua",                "nome_completo": "República da Nicarágua",                       "continente": "América do Norte","latitude": "12.865416",  "longitude": "-85.207229"},
+    {"codigo_iso": "NE", "nome": "Níger",                    "nome_completo": "República do Níger",                           "continente": "África",          "latitude": "17.607789",  "longitude": "8.081666"},
+    {"codigo_iso": "NG", "nome": "Nigéria",                  "nome_completo": "República Federal da Nigéria",                 "continente": "África",          "latitude": "9.081999",   "longitude": "8.675277"},
+    {"codigo_iso": "NO", "nome": "Noruega",                  "nome_completo": "Reino da Noruega",                             "continente": "Europa",          "latitude": "60.472024",  "longitude": "8.468946"},
+    {"codigo_iso": "NZ", "nome": "Nova Zelândia",            "nome_completo": "Nova Zelândia",                                "continente": "Oceania",         "latitude": "-40.900557", "longitude": "174.885971"},
+    {"codigo_iso": "OM", "nome": "Omã",                      "nome_completo": "Sultanato de Omã",                             "continente": "Ásia",            "latitude": "21.512583",  "longitude": "55.923255"},
+    {"codigo_iso": "PW", "nome": "Palau",                    "nome_completo": "República de Palau",                           "continente": "Oceania",         "latitude": "7.514980",   "longitude": "134.582520"},
+    {"codigo_iso": "PA", "nome": "Panamá",                   "nome_completo": "República do Panamá",                          "continente": "América do Norte","latitude": "8.537981",   "longitude": "-80.782127"},
+    {"codigo_iso": "PG", "nome": "Papua Nova Guiné",         "nome_completo": "Estado Independente da Papua Nova Guiné",      "continente": "Oceania",         "latitude": "-6.314993",  "longitude": "143.955550"},
+    {"codigo_iso": "PK", "nome": "Paquistão",                "nome_completo": "República Islâmica do Paquistão",              "continente": "Ásia",            "latitude": "30.375321",  "longitude": "69.345116"},
+    {"codigo_iso": "PY", "nome": "Paraguai",                 "nome_completo": "República do Paraguai",                        "continente": "América do Sul",  "latitude": "-23.442503", "longitude": "-58.443832"},
+    {"codigo_iso": "PE", "nome": "Peru",                     "nome_completo": "República do Peru",                            "continente": "América do Sul",  "latitude": "-9.189967",  "longitude": "-75.015152"},
+    {"codigo_iso": "PL", "nome": "Polônia",                  "nome_completo": "República da Polônia",                         "continente": "Europa",          "latitude": "51.919438",  "longitude": "19.145136"},
+    {"codigo_iso": "PT", "nome": "Portugal",                 "nome_completo": "República Portuguesa",                         "continente": "Europa",          "latitude": "39.399872",  "longitude": "-8.224454"},
+    {"codigo_iso": "KE", "nome": "Quênia",                   "nome_completo": "República do Quênia",                          "continente": "África",          "latitude": "-0.023559",  "longitude": "37.906193"},
+    {"codigo_iso": "KG", "nome": "Quirguistão",              "nome_completo": "República Quirguiz",                           "continente": "Ásia",            "latitude": "41.204380",  "longitude": "74.766098"},
+    {"codigo_iso": "GB", "nome": "Reino Unido",              "nome_completo": "Reino Unido da Grã-Bretanha e Irlanda do Norte","continente": "Europa",         "latitude": "55.378051",  "longitude": "-3.435973"},
+    {"codigo_iso": "CF", "nome": "República Centro-Africana","nome_completo": "República Centro-Africana",                    "continente": "África",          "latitude": "6.611111",   "longitude": "20.939444"},
+    {"codigo_iso": "CZ", "nome": "República Tcheca",         "nome_completo": "República Tcheca",                             "continente": "Europa",          "latitude": "49.817492",  "longitude": "15.472962"},
+    {"codigo_iso": "CD", "nome": "República Democrática do Congo","nome_completo": "República Democrática do Congo",          "continente": "África",          "latitude": "-4.038333",  "longitude": "21.758664"},
+    {"codigo_iso": "DO", "nome": "República Dominicana",     "nome_completo": "República Dominicana",                         "continente": "América do Norte","latitude": "18.735693",  "longitude": "-70.162651"},
+    {"codigo_iso": "RO", "nome": "Romênia",                  "nome_completo": "Romênia",                                      "continente": "Europa",          "latitude": "45.943161",  "longitude": "24.966760"},
+    {"codigo_iso": "RW", "nome": "Ruanda",                   "nome_completo": "República de Ruanda",                          "continente": "África",          "latitude": "-1.940278",  "longitude": "29.873888"},
+    {"codigo_iso": "RU", "nome": "Rússia",                   "nome_completo": "Federação Russa",                              "continente": "Europa",          "latitude": "61.524010",  "longitude": "105.318756"},
+    {"codigo_iso": "WS", "nome": "Samoa",                    "nome_completo": "Estado Independente de Samoa",                 "continente": "Oceania",         "latitude": "-13.759029", "longitude": "-172.104629"},
+    {"codigo_iso": "SM", "nome": "San Marino",               "nome_completo": "República de San Marino",                     "continente": "Europa",          "latitude": "43.942360",  "longitude": "12.457777"},
+    {"codigo_iso": "LC", "nome": "Santa Lúcia",              "nome_completo": "Santa Lúcia",                                  "continente": "América do Norte","latitude": "13.909444",  "longitude": "-60.978893"},
+    {"codigo_iso": "KN", "nome": "São Cristóvão e Nevis",    "nome_completo": "Federação de São Cristóvão e Nevis",           "continente": "América do Norte","latitude": "17.357822",  "longitude": "-62.782998"},
+    {"codigo_iso": "ST", "nome": "São Tomé e Príncipe",      "nome_completo": "República Democrática de São Tomé e Príncipe", "continente": "África",          "latitude": "0.186360",   "longitude": "6.613081"},
+    {"codigo_iso": "VC", "nome": "São Vicente e Granadinas", "nome_completo": "São Vicente e Granadinas",                     "continente": "América do Norte","latitude": "12.984305",  "longitude": "-61.287228"},
+    {"codigo_iso": "SN", "nome": "Senegal",                  "nome_completo": "República do Senegal",                         "continente": "África",          "latitude": "14.497401",  "longitude": "-14.452362"},
+    {"codigo_iso": "SL", "nome": "Serra Leoa",               "nome_completo": "República da Serra Leoa",                      "continente": "África",          "latitude": "8.460555",   "longitude": "-11.779889"},
+    {"codigo_iso": "RS", "nome": "Sérvia",                   "nome_completo": "República da Sérvia",                          "continente": "Europa",          "latitude": "44.016521",  "longitude": "21.005859"},
+    {"codigo_iso": "SC", "nome": "Seychelles",               "nome_completo": "República das Seychelles",                     "continente": "África",          "latitude": "-4.679574",  "longitude": "55.491977"},
+    {"codigo_iso": "SO", "nome": "Somália",                  "nome_completo": "República Federal da Somália",                 "continente": "África",          "latitude": "5.152149",   "longitude": "46.199616"},
+    {"codigo_iso": "LK", "nome": "Sri Lanka",                "nome_completo": "República Democrática Socialista do Sri Lanka","continente": "Ásia",            "latitude": "7.873054",   "longitude": "80.771797"},
+    {"codigo_iso": "SD", "nome": "Sudão",                    "nome_completo": "República do Sudão",                           "continente": "África",          "latitude": "12.862807",  "longitude": "30.217636"},
+    {"codigo_iso": "SS", "nome": "Sudão do Sul",             "nome_completo": "República do Sudão do Sul",                    "continente": "África",          "latitude": "6.876991",   "longitude": "31.306978"},
+    {"codigo_iso": "SE", "nome": "Suécia",                   "nome_completo": "Reino da Suécia",                              "continente": "Europa",          "latitude": "60.128161",  "longitude": "18.643501"},
+    {"codigo_iso": "CH", "nome": "Suíça",                    "nome_completo": "Confederação Suíça",                           "continente": "Europa",          "latitude": "46.818188",  "longitude": "8.227512"},
+    {"codigo_iso": "SR", "nome": "Suriname",                 "nome_completo": "República do Suriname",                        "continente": "América do Sul",  "latitude": "3.919305",   "longitude": "-56.027783"},
+    {"codigo_iso": "TH", "nome": "Tailândia",                "nome_completo": "Reino da Tailândia",                           "continente": "Ásia",            "latitude": "15.870032",  "longitude": "100.992541"},
+    {"codigo_iso": "TW", "nome": "Taiwan",                   "nome_completo": "República da China (Taiwan)",                  "continente": "Ásia",            "latitude": "23.697810",  "longitude": "120.960515"},
+    {"codigo_iso": "TJ", "nome": "Tajiquistão",              "nome_completo": "República do Tajiquistão",                     "continente": "Ásia",            "latitude": "38.861034",  "longitude": "71.276093"},
+    {"codigo_iso": "TZ", "nome": "Tanzânia",                 "nome_completo": "República Unida da Tanzânia",                  "continente": "África",          "latitude": "-6.369028",  "longitude": "34.888822"},
+    {"codigo_iso": "TL", "nome": "Timor-Leste",              "nome_completo": "República Democrática de Timor-Leste",         "continente": "Ásia",            "latitude": "-8.874217",  "longitude": "125.727539"},
+    {"codigo_iso": "TG", "nome": "Togo",                     "nome_completo": "República Togolesa",                           "continente": "África",          "latitude": "8.619543",   "longitude": "0.824782"},
+    {"codigo_iso": "TO", "nome": "Tonga",                    "nome_completo": "Reino de Tonga",                               "continente": "Oceania",         "latitude": "-21.178986", "longitude": "-175.198242"},
+    {"codigo_iso": "TT", "nome": "Trinidad e Tobago",        "nome_completo": "República de Trinidad e Tobago",               "continente": "América do Norte","latitude": "10.691803",  "longitude": "-61.222503"},
+    {"codigo_iso": "TN", "nome": "Tunísia",                  "nome_completo": "República Tunisina",                           "continente": "África",          "latitude": "33.886917",  "longitude": "9.537499"},
+    {"codigo_iso": "TM", "nome": "Turcomenistão",            "nome_completo": "Turcomenistão",                                "continente": "Ásia",            "latitude": "38.969719",  "longitude": "59.556278"},
+    {"codigo_iso": "TR", "nome": "Turquia",                  "nome_completo": "República da Turquia",                         "continente": "Ásia",            "latitude": "38.963745",  "longitude": "35.243322"},
+    {"codigo_iso": "TV", "nome": "Tuvalu",                   "nome_completo": "Tuvalu",                                       "continente": "Oceania",         "latitude": "-7.109535",  "longitude": "177.649512"},
+    {"codigo_iso": "UA", "nome": "Ucrânia",                  "nome_completo": "Ucrânia",                                      "continente": "Europa",          "latitude": "48.379433",  "longitude": "31.165580"},
+    {"codigo_iso": "UG", "nome": "Uganda",                   "nome_completo": "República de Uganda",                          "continente": "África",          "latitude": "1.373333",   "longitude": "32.290275"},
+    {"codigo_iso": "UY", "nome": "Uruguai",                  "nome_completo": "República Oriental do Uruguai",                "continente": "América do Sul",  "latitude": "-32.522779", "longitude": "-55.765835"},
+    {"codigo_iso": "UZ", "nome": "Uzbequistão",              "nome_completo": "República do Uzbequistão",                     "continente": "Ásia",            "latitude": "41.377491",  "longitude": "64.585262"},
+    {"codigo_iso": "VU", "nome": "Vanuatu",                  "nome_completo": "República de Vanuatu",                         "continente": "Oceania",         "latitude": "-15.376706", "longitude": "166.959158"},
+    {"codigo_iso": "VA", "nome": "Vaticano",                 "nome_completo": "Estado da Cidade do Vaticano",                 "continente": "Europa",          "latitude": "41.902916",  "longitude": "12.453389"},
+    {"codigo_iso": "VE", "nome": "Venezuela",                "nome_completo": "República Bolivariana da Venezuela",           "continente": "América do Sul",  "latitude": "6.423750",   "longitude": "-66.589730"},
+    {"codigo_iso": "VN", "nome": "Vietnã",                   "nome_completo": "República Socialista do Vietnã",               "continente": "Ásia",            "latitude": "14.058324",  "longitude": "108.277199"},
+    {"codigo_iso": "ZM", "nome": "Zâmbia",                   "nome_completo": "República da Zâmbia",                          "continente": "África",          "latitude": "-13.133897", "longitude": "27.849332"},
+    {"codigo_iso": "ZW", "nome": "Zimbábue",                 "nome_completo": "República do Zimbábue",                        "continente": "África",          "latitude": "-19.015438", "longitude": "29.154857"},
+]
+
+
+class Command(BaseCommand):
+    help = "Popula ou atualiza todos os países no banco de dados."
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--limpar",
+            action="store_true",
+            help="Remove todos os países existentes antes de inserir.",
+        )
+
+    def handle(self, *args, **options):
+        if options["limpar"]:
+            total_removidos = Pais.objects.all().delete()[0]
+            self.stdout.write(self.style.WARNING(f"{total_removidos} países removidos."))
+
+        criados = 0
+        atualizados = 0
+
+        for dados in PAISES:
+            obj, created = Pais.objects.update_or_create(
+                codigo_iso=dados["codigo_iso"],
+                defaults={
+                    "nome":          dados["nome"],
+                    "nome_completo": dados["nome_completo"],
+                    "continente":    dados["continente"],
+                    "latitude":      dados["latitude"],
+                    "longitude":     dados["longitude"],
+                    "ativo":         True,
+                },
+            )
+            if created:
+                criados += 1
+            else:
+                atualizados += 1
+
+        self.stdout.write(
+            self.style.SUCCESS(
+                f"Concluído: {criados} países criados, {atualizados} atualizados. "
+                f"Total no banco: {Pais.objects.count()}"
+            )
+        )

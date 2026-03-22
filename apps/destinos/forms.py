@@ -29,6 +29,7 @@ class FormularioPlanoViagem(forms.ModelForm):
             'imagens_urls',
         ]
         widgets = {
+            'pais_destino': forms.Select(attrs={'class': 'form-select'}),
             'data_inicio': forms.DateInput(attrs={'type': 'date'}),
             'data_fim': forms.DateInput(attrs={'type': 'date'}),
             'motivo_viagem': forms.Select(),

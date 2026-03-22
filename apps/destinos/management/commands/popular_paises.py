@@ -226,27 +226,45 @@ class Command(BaseCommand):
 
         criados = 0
         atualizados = 0
+        ignorados = 0
 
         for dados in PAISES:
-            obj, created = Pais.objects.update_or_create(
-                codigo_iso=dados["codigo_iso"],
-                defaults={
-                    "nome":          dados["nome"],
-                    "nome_completo": dados["nome_completo"],
-                    "continente":    dados["continente"],
-                    "latitude":      dados["latitude"],
-                    "longitude":     dados["longitude"],
-                    "ativo":         True,
-                },
-            )
-            if created:
-                criados += 1
-            else:
+            defaults = {
+                "nome":          dados["nome"],
+                "nome_completo": dados["nome_completo"],
+                "continente":    dados["continente"],
+                "latitude":      dados["latitude"],
+                "longitude":     dados["longitude"],
+                "ativo":         True,
+            }
+            try:
+                # Tenta pelo codigo_iso (campo único principal)
+                obj = Pais.objects.get(codigo_iso=dados["codigo_iso"])
+                for campo, valor in defaults.items():
+                    setattr(obj, campo, valor)
+                obj.save()
                 atualizados += 1
+            except Pais.DoesNotExist:
+                try:
+                    # Tenta pelo nome (também único) — evita duplicata em caso de race condition
+                    obj = Pais.objects.get(nome=dados["nome"])
+                    obj.codigo_iso = dados["codigo_iso"]
+                    for campo, valor in defaults.items():
+                        setattr(obj, campo, valor)
+                    obj.save()
+                    atualizados += 1
+                except Pais.DoesNotExist:
+                    try:
+                        Pais.objects.create(codigo_iso=dados["codigo_iso"], **defaults)
+                        criados += 1
+                    except Exception as e:
+                        self.stdout.write(
+                            self.style.WARNING(f"Ignorado {dados['codigo_iso']} ({dados['nome']}): {e}")
+                        )
+                        ignorados += 1
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"Concluído: {criados} países criados, {atualizados} atualizados. "
-                f"Total no banco: {Pais.objects.count()}"
-            )
-        )
+        msg = f"Concluído: {criados} criados, {atualizados} atualizados"
+        if ignorados:
+            msg += f", {ignorados} ignorados"
+        msg += f". Total no banco: {Pais.objects.count()}"
+        self.stdout.write(self.style.SUCCESS(msg))

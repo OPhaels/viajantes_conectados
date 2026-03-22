@@ -156,24 +156,43 @@ def view_editar_plano(request, uuid):
         messages.error(request, _('Você não pode editar este plano.'))
         return redirect('destinos:meus_planos')
 
-    form = FormularioPlanoViagem(request.POST or None, instance=plano)
+    if request.method == 'POST':
+        pais_nome       = request.POST.get('pais_nome', '').strip()
+        pais_codigo_iso = request.POST.get('pais_codigo_iso', '').strip()
+        cidade          = request.POST.get('cidade_destino', '').strip()
+        regiao          = request.POST.get('regiao_destino', '').strip()
+        latitude        = request.POST.get('latitude', '').strip()
+        longitude       = request.POST.get('longitude', '').strip()
 
-    if request.method == 'POST' and form.is_valid():
-        plano = form.save(commit=False)
-        plano.save()
+        dados_post = request.POST.copy()
+        dados_post['cidade_destino'] = cidade
+        dados_post['regiao_destino'] = regiao
 
-        # Atualiza ou cria endereço
-        EnderecoPlano.objects.update_or_create(
-            plano=plano,
-            defaults={
-                'cidade': form.cleaned_data.get('cidade_destino', ''),
-                'estado': form.cleaned_data.get('regiao_destino', ''),
-                'pais_texto': plano.pais_destino.nome,
-            }
-        )
+        form = FormularioPlanoViagem(dados_post, instance=plano)
 
-        messages.success(request, _('Plano de viagem atualizado com sucesso!'))
-        return redirect('destinos:detalhes_plano', uuid=plano.uuid)
+        if form.is_valid():
+            plano = form.save(commit=False)
+            plano.cidade_destino = cidade
+            plano.regiao_destino = regiao
+            plano.save()
+
+            EnderecoPlano.objects.update_or_create(
+                plano=plano,
+                defaults={
+                    'cidade':     cidade,
+                    'estado':     regiao,
+                    'pais_texto': pais_nome or plano.pais_destino.nome,
+                    **({'latitude': float(latitude), 'longitude': float(longitude)}
+                       if latitude and longitude else {}),
+                }
+            )
+
+            messages.success(request, _('Plano de viagem atualizado com sucesso!'))
+            return redirect('destinos:detalhes_plano', uuid=plano.uuid)
+        else:
+            messages.error(request, 'Corrija os erros no formulário.')
+    else:
+        form = FormularioPlanoViagem(instance=plano)
 
     return render(request, 'destinos/criar_plano.html', {
         'titulo': _('Editar Plano de Viagem'),

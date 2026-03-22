@@ -459,7 +459,7 @@
                 <small class="text-muted" style="font-size:.76rem;">Quem pode ver seu e-mail</small>
               </div>
               <span class="badge rounded-pill px-3"
-                    style="background:{% if usuario_perfil.mostrar_email %}var(--primary-light){% else %}var(--text-muted){% endif %};">
+                    style="background:{% if usuario_perfil.mostrar_email %}var(--primary){% else %}var(--text-muted){% endif %};">
                 {% if usuario_perfil.mostrar_email %}Amigos{% else %}Privado{% endif %}
               </span>
             </div>
@@ -473,7 +473,7 @@
                 <small class="text-muted" style="font-size:.76rem;">Quem pode ver seu telefone</small>
               </div>
               <span class="badge rounded-pill px-3"
-                    style="{% if usuario_perfil.mostrar_telefone %}background:var(--accent);color:#000;{% else %}background:var(--text-muted);{% endif %}">
+                    style="{% if usuario_perfil.mostrar_telefone %}background:var(--primary);color:#fff;{% else %}background:var(--text-muted);{% endif %}">
                 {% if usuario_perfil.mostrar_telefone %}Amigos{% else %}Privado{% endif %}
               </span>
             </div>

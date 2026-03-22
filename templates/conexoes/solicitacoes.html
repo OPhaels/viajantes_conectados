@@ -51,7 +51,7 @@
 /* ── Card ── */
 .cx-card {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: .85rem;
   padding: .9rem 1rem;
   background: var(--surface);
@@ -71,6 +71,7 @@
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
   border: 2px solid var(--border);
+  margin-top: .15rem;
 }
 .cx-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -78,7 +79,8 @@
 .cx-info { flex: 1; min-width: 0; }
 .cx-name {
   font-weight: 700; font-size: .9rem; color: var(--text-main);
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
 }
 .cx-meta {
   font-size: .75rem; color: var(--text-muted); margin-top: .2rem;
@@ -109,7 +111,8 @@
   gap: .4rem;
   flex-wrap: wrap;
   align-items: center;
-  flex-shrink: 0;
+  width: 100%;
+  margin-top: .25rem;
 }
 
 /* ── Botões ── */

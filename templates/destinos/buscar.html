@@ -6,22 +6,15 @@
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
 <style>
-/* ── Toggle buttons ───────────────────────────────────── */
-.view-btn { transition: var(--transition, .28s ease); }
+/* ═══════════════════════════════════════════════
+   CARDS DE VIAGEM — reformulado
+═══════════════════════════════════════════════ */
+
+/* ── Toggle view ── */
+.view-btn { transition: .2s ease; }
 .view-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
 
-/* ── Status chips ─────────────────────────────────────── */
-.status-chip {
-  display: inline-flex; align-items: center; gap: .3rem;
-  font-size: .68rem; font-weight: 700;
-  padding: .25rem .7rem; border-radius: var(--pill);
-  letter-spacing: .04em; text-transform: uppercase;
-  width: fit-content;
-}
-.status-chip.soon   { background: rgba(192,57,43,.1);  color: #c0392b; border: 1px solid rgba(192,57,43,.25); }
-.status-chip.coming { background: rgba(212,168,71,.1);  color: #b8891f; border: 1px solid rgba(212,168,71,.3); }
-
-/* ── Result pill ──────────────────────────────────────── */
+/* ── Result pill ── */
 .result-pill {
   display: inline-flex; align-items: center; gap: .4rem;
   font-size: .78rem; font-weight: 700; color: var(--primary);
@@ -29,114 +22,226 @@
   padding: .3rem .85rem; border-radius: var(--pill);
 }
 
-/* ── Empty state ──────────────────────────────────────── */
+/* ── Empty state ── */
 .empty-state i { display: block; margin-bottom: .75rem; font-size: 3.5rem; opacity: .2; }
 
-/* ── Bandeira como imagem de capa do card ─────────────── */
-.card-flag-cover {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  filter: brightness(.65) saturate(1.1);
-  transition: transform .45s ease, filter .35s ease;
-}
-.viajante-card:hover .card-flag-cover {
-  transform: scale(1.07);
-  filter: brightness(.75) saturate(1.15);
-}
-/* overlay sobre a bandeira/imagem */
-.card-img-wrapper .img-flag-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,.08) 0%,
-    rgba(0,0,0,.15) 45%,
-    rgba(0,0,0,.72) 100%
-  );
-}
-
-/* ── Botão conectar ───────────────────────────────────── */
-.btn-conectar {
-  display: inline-flex; align-items: center; gap: .35rem;
-  padding: .3rem .75rem; border-radius: var(--radius-sm);
-  font-size: .76rem; font-weight: 700;
-  border: 1.5px solid var(--accent-border);
-  color: var(--primary); background: var(--accent-bg);
-  transition: var(--transition); cursor: pointer;
-  white-space: nowrap; flex-shrink: 0;
-}
-.btn-conectar:hover { background: var(--success); border-color: var(--success); color: #fff; }
-.btn-conectar:disabled { opacity: .4; cursor: not-allowed; background: var(--surface-alt); border-color: var(--border); color: var(--text-muted); }
-
-/* ══════════════════════════════════════════════════════
-   MODO LISTA — layout completo e sem bugs
-══════════════════════════════════════════════════════ */
-.viagem-item.list-mode {
-  flex: 0 0 100%;
-  max-width: 100%;
-}
-
-/* Card vira row */
-.viajante-card.list-mode {
-  flex-direction: row !important;
-  align-items: stretch;
-  height: auto !important;
-}
-
-/* Imagem lateral fixa */
-.viajante-card.list-mode .card-img-wrapper {
-  width: 220px;
-  min-width: 220px;
-  max-width: 220px;
-  flex-shrink: 0;
-  height: auto;
-  border-radius: var(--radius) 0 0 var(--radius);
+/* ════════════════════════════════════════════
+   CARD BASE
+════════════════════════════════════════════ */
+.vc-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
   overflow: hidden;
-}
-.viajante-card.list-mode .card-img-wrapper img {
+  transition: box-shadow .25s ease, transform .2s ease;
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  object-fit: cover;
+}
+.vc-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
 }
 
-/* Body em coluna normal, sem flex-row quebrado */
-.viajante-card.list-mode .card-body {
-  flex-direction: column !important;
-  flex-wrap: nowrap !important;
-  align-content: flex-start;
-  padding: 1rem 1.25rem !important;
-  min-width: 0;
+/* ── Imagem / bandeira ── */
+.vc-img {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.vc-img img.cover {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  filter: brightness(.7) saturate(1.1);
+  transition: transform .4s ease, filter .3s ease;
+}
+.vc-card:hover .vc-img img.cover {
+  transform: scale(1.06);
+  filter: brightness(.8) saturate(1.15);
+}
+.vc-img .overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom, transparent 35%, rgba(0,0,0,.65) 100%);
+  pointer-events: none;
+}
+.vc-img .dest-label {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  padding: .6rem .85rem;
+  color: #fff;
+}
+.vc-img .dest-label h5 {
+  font-size: .97rem; font-weight: 800;
+  margin: 0; text-shadow: 0 1px 6px rgba(0,0,0,.5);
+  letter-spacing: -.01em;
+}
+.vc-img .dest-label small {
+  font-size: .74rem; opacity: .88;
+}
+.vc-img .flag-badge {
+  position: absolute; top: .6rem; right: .6rem;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 2px solid rgba(255,255,255,.7);
+  box-shadow: 0 2px 8px rgba(0,0,0,.3);
+  flex-shrink: 0;
+}
+.vc-img .flag-badge img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.vc-img .ph {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.5rem; color: rgba(255,255,255,.2);
+}
+
+/* ── Body ── */
+.vc-body {
+  padding: .9rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
   flex: 1;
 }
 
-/* Info items viram 2 colunas quando há espaço */
-.viajante-card.list-mode .viagem-info {
-  flex-direction: row;
-  flex-wrap: wrap;
-  gap: .5rem;
+/* ── Viajante row ── */
+.vc-traveler {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
 }
-.viajante-card.list-mode .viagem-info .info-item {
-  flex: 1 1 160px;
+.vc-avatar {
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: .85rem;
+  border: 2px solid var(--border);
+}
+.vc-avatar img {
+  width: 100%; height: 100%; object-fit: cover;
+}
+.vc-traveler-info { flex: 1; min-width: 0; }
+.vc-traveler-info .name {
+  font-size: .88rem; font-weight: 700;
+  color: var(--primary); white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.2;
+}
+.vc-traveler-info .loc {
+  font-size: .73rem; color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ── Status badge ── */
+.vc-status {
+  flex-shrink: 0;
+  font-size: .68rem; font-weight: 700;
+  padding: .22rem .65rem; border-radius: var(--pill);
+  white-space: nowrap;
+}
+.vc-status.amigos  { background: rgba(45,158,107,.1);  color: var(--success); border: 1px solid rgba(45,158,107,.25); }
+.vc-status.voce    { background: var(--accent-bg);      color: var(--primary); border: 1px solid var(--accent-border); }
+
+/* ── Info pills ── */
+.vc-infos {
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.vc-info-pill {
+  flex: 1 1 120px;
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: .45rem .65rem;
   min-width: 0;
 }
-
-/* Ações ficam em linha no modo lista */
-.viajante-card.list-mode .card-acoes {
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: .5rem;
+.vc-info-pill .lbl {
+  font-size: .62rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-muted); display: flex; align-items: center; gap: .25rem;
+  margin-bottom: .15rem;
 }
-.viajante-card.list-mode .card-acoes a,
-.viajante-card.list-mode .card-acoes .btn-conectar,
-.viajante-card.list-mode .card-acoes form { width: auto !important; }
+.vc-info-pill .val {
+  font-size: .83rem; font-weight: 700; color: var(--primary);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
 
-/* Mobile: volta para coluna */
+/* ── Descrição ── */
+.vc-desc {
+  font-size: .81rem; color: var(--text-muted);
+  line-height: 1.5;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Ações ── */
+.vc-actions {
+  margin-top: auto;
+  display: flex;
+  gap: .5rem;
+  flex-wrap: wrap;
+}
+.vc-actions .btn {
+  flex: 1 1 100px;
+  font-size: .78rem;
+  padding: .4rem .75rem;
+  white-space: nowrap;
+}
+
+/* ── Conectar inline ── */
+.btn-conectar {
+  flex-shrink: 0;
+  display: inline-flex; align-items: center; gap: .3rem;
+  padding: .22rem .65rem;
+  border-radius: var(--pill);
+  font-size: .7rem; font-weight: 700;
+  border: 1.5px solid var(--accent-border);
+  color: var(--primary); background: var(--accent-bg);
+  transition: .2s ease; cursor: pointer; white-space: nowrap;
+}
+.btn-conectar:hover { background: var(--success); border-color: var(--success); color: #fff; }
+.btn-conectar:disabled { opacity: .45; cursor: not-allowed; }
+
+/* ════════════════════════════════════════════
+   MODO LISTA
+════════════════════════════════════════════ */
+.viagem-item.list-mode { flex: 0 0 100%; max-width: 100%; }
+
+.vc-card.list-mode {
+  flex-direction: row !important;
+  height: auto !important;
+}
+.vc-card.list-mode .vc-img {
+  width: 200px; min-width: 200px;
+  height: auto;
+  border-radius: var(--radius) 0 0 var(--radius);
+}
+.vc-card.list-mode .vc-body {
+  padding: .85rem 1.1rem;
+}
+.vc-card.list-mode .vc-infos .vc-info-pill {
+  flex: 1 1 150px;
+}
+.vc-card.list-mode .vc-actions {
+  flex-direction: row;
+}
+
 @media (max-width: 575.98px) {
-  .viajante-card.list-mode { flex-direction: column !important; }
-  .viajante-card.list-mode .card-img-wrapper {
-    width: 100% !important; max-width: 100% !important;
-    height: 180px !important;
+  .vc-card.list-mode { flex-direction: column !important; }
+  .vc-card.list-mode .vc-img {
+    width: 100% !important; min-width: unset !important;
+    height: 160px !important;
     border-radius: var(--radius) var(--radius) 0 0;
   }
-  .viajante-card.list-mode .viagem-info { flex-direction: column; }
 }
 </style>
 {% endblock %}
@@ -148,7 +253,6 @@
   <!-- ══════ HERO + FILTROS ══════ -->
   <section class="busca-hero">
     <div class="container">
-
       <div class="text-center mb-4 reveal">
         <h1 class="hero-title">
           <i class="bi bi-globe-americas me-2"></i>Encontre Seu Companheiro de Viagem
@@ -163,27 +267,23 @@
           <div class="filtros-card">
             <form method="get" action="{% url 'destinos:buscar' %}" id="formBusca" novalidate>
               <div class="row g-3 align-items-end">
-
                 <div class="col-12 col-sm-6 col-md-4">
                   <label class="filtro-label"><i class="bi bi-geo-alt-fill me-1"></i>País de Destino</label>
                   <input type="text" name="pais" class="form-control form-control-custom"
                          placeholder="Ex: Brasil, Portugal…"
                          value="{{ request.GET.pais|default:'' }}" autocomplete="off">
                 </div>
-
                 <div class="col-12 col-sm-6 col-md-4">
                   <label class="filtro-label"><i class="bi bi-pin-map-fill me-1"></i>Cidade</label>
                   <input type="text" name="cidade" class="form-control form-control-custom"
                          placeholder="Ex: Lisboa, Porto…"
                          value="{{ request.GET.cidade|default:'' }}" autocomplete="off">
                 </div>
-
                 <div class="col-12 col-sm-6 col-md-4">
                   <label class="filtro-label"><i class="bi bi-calendar-check me-1"></i>Data de Início</label>
                   <input type="date" name="data_inicio" class="form-control form-control-custom"
                          value="{{ request.GET.data_inicio|default:'' }}">
                 </div>
-
                 <div class="col-12">
                   <div class="d-flex gap-2 flex-column flex-sm-row">
                     <button type="submit" class="btn btn-custom btn-primario flex-grow-1">
@@ -194,13 +294,11 @@
                     </a>
                   </div>
                 </div>
-
               </div>
             </form>
           </div>
         </div>
       </div>
-
     </div>
   </section>
 
@@ -221,10 +319,12 @@
           </span>
         </div>
         <div class="d-flex gap-1" role="group">
-          <button type="button" class="btn btn-outline-secondary view-btn active" id="btnGrid"
-                  title="Grade"><i class="bi bi-grid-3x3-gap-fill"></i></button>
-          <button type="button" class="btn btn-outline-secondary view-btn" id="btnList"
-                  title="Lista"><i class="bi bi-list-ul"></i></button>
+          <button type="button" class="btn btn-outline-secondary view-btn active" id="btnGrid" title="Grade">
+            <i class="bi bi-grid-3x3-gap-fill"></i>
+          </button>
+          <button type="button" class="btn btn-outline-secondary view-btn" id="btnList" title="Lista">
+            <i class="bi bi-list-ul"></i>
+          </button>
         </div>
       </div>
 
@@ -233,171 +333,114 @@
 
         {% for plano in destinos %}
         <div class="col-12 col-md-6 col-xl-4 viagem-item">
-          <div class="card viajante-card h-100">
+          <div class="vc-card">
 
-            <!-- ── Capa: imagem do destino ou bandeira ── -->
-            <div class="card-img-wrapper position-relative">
-
-              {# Tenta imagem do destino primeiro, cai na bandeira, cai em placeholder #}
-              {% if plano.pais_destino and plano.pais_destino.imagem_url %}
-                <img src="{{ plano.pais_destino.imagem_url }}"
-                     class="card-flag-cover card-img-top"
-                     alt="{{ plano.pais_destino.nome }}" loading="lazy"
-                     onerror="this.src='https://flagcdn.com/w1280/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png';">
-              {% elif plano.pais_destino and plano.pais_destino.codigo_iso %}
-                <img src="https://flagcdn.com/w1280/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
-                     class="card-flag-cover card-img-top"
-                     alt="Bandeira de {{ plano.pais_destino.nome }}" loading="lazy"
-                     onerror="this.parentElement.querySelector('.card-flag-ph').style.display='flex'; this.style.display='none';">
-              {% else %}
-                <div class="card-flag-ph bg-gradient-placeholder" style="height:220px;">
-                  <i class="bi bi-globe2"></i>
-                </div>
-              {% endif %}
-
-              <!-- Overlay gradiente -->
-              <div class="img-flag-overlay"></div>
-
-              <!-- Bandeira circular (canto) -->
+            <!-- Imagem / Bandeira -->
+            <div class="vc-img">
               {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
-              <span class="country-badge" style="width:44px;height:44px;padding:3px;">
-                <img src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
-                     alt="{{ plano.pais_destino.nome }}"
-                     style="width:100%;height:100%;object-fit:cover;border-radius:50%;"
-                     onerror="this.closest('.country-badge').innerHTML='<i class=\'bi bi-globe2\' style=\'color:#1a3a5c;font-size:1.2rem;\'></i>'">
-              </span>
+                <img class="cover"
+                     src="https://flagcdn.com/w1280/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
+                     alt="{{ plano.pais_destino.nome }}" loading="lazy"
+                     onerror="this.style.display='none';this.nextElementSibling.nextElementSibling.style.display='flex';">
+              {% else %}
+                <div class="ph"><i class="bi bi-globe2"></i></div>
               {% endif %}
-
-              <!-- Nome do destino sobre a imagem -->
-              <div class="country-name">
-                <h5 class="mb-0">{{ plano.pais_destino.nome|default:"Destino a Definir" }}</h5>
+              <div class="overlay"></div>
+              <div class="dest-label">
+                <h5>{{ plano.pais_destino.nome|default:"Destino a Definir" }}</h5>
                 {% if plano.cidade_destino %}
                   <small><i class="bi bi-pin-map me-1"></i>{{ plano.cidade_destino }}</small>
                 {% endif %}
               </div>
-
-              <!-- Placeholder oculto para fallback JS -->
-              <div class="card-flag-ph bg-gradient-placeholder" style="display:none;height:220px;position:absolute;inset:0;">
-                <i class="bi bi-globe2"></i>
+              {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
+              <div class="flag-badge">
+                <img src="https://flagcdn.com/w80/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
+                     alt="{{ plano.pais_destino.nome }}"
+                     onerror="this.closest('.flag-badge').style.display='none'">
               </div>
-
+              {% endif %}
+              <div class="ph" style="display:none;"><i class="bi bi-globe2"></i></div>
             </div>
-            <!-- /card-img-wrapper -->
 
-            <!-- ── Body ── -->
-            <div class="card-body d-flex flex-column gap-3 p-3">
+            <!-- Body -->
+            <div class="vc-body">
 
-              <!-- Viajante + botão conectar na mesma linha -->
-              <div class="d-flex align-items-center justify-content-between gap-2">
-                <div class="d-flex align-items-center gap-2 min-w-0">
-                  <div class="avatar-circle flex-shrink-0" style="overflow:hidden;">
-                    {% if plano.usuario.foto_perfil %}
-                      <img src="{{ plano.usuario.foto_perfil.url }}"
-                           alt="{{ plano.usuario.get_nome_exibicao }}"
-                           style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-                    {% else %}
-                      {{ plano.usuario.get_nome_exibicao|first|upper }}
-                    {% endif %}
-                  </div>
-                  <div class="min-w-0">
-                    <h6 class="mb-0 text-truncate" style="font-size:.88rem;">
-                      {{ plano.usuario.get_nome_exibicao|title }}
-                    </h6>
-                    <small class="text-muted" style="font-size:.75rem;">
-                      <i class="bi bi-geo-alt"></i>
-                      {% if plano.usuario.cidade %}{{ plano.usuario.cidade }}{% if plano.usuario.pais %}, {{ plano.usuario.pais }}{% endif %}
-                      {% elif plano.usuario.pais %}{{ plano.usuario.pais }}
-                      {% else %}Brasil{% endif %}
-                    </small>
+              <!-- Viajante -->
+              <div class="vc-traveler">
+                <div class="vc-avatar">
+                  {% if plano.usuario.foto_perfil %}
+                    <img src="{{ plano.usuario.foto_perfil.url }}" alt="{{ plano.usuario.get_nome_exibicao }}">
+                  {% else %}
+                    {{ plano.usuario.get_nome_exibicao|first|upper }}
+                  {% endif %}
+                </div>
+                <div class="vc-traveler-info">
+                  <div class="name">{{ plano.usuario.get_nome_exibicao|title }}</div>
+                  <div class="loc">
+                    <i class="bi bi-geo-alt"></i>
+                    {% if plano.usuario.cidade_residencia %}{{ plano.usuario.cidade_residencia }}{% if plano.usuario.pais_residencia %}, {{ plano.usuario.pais_residencia }}{% endif %}
+                    {% elif plano.usuario.pais_residencia %}{{ plano.usuario.pais_residencia }}
+                    {% else %}Brasil{% endif %}
                   </div>
                 </div>
-
-                <!-- Conectar ao lado do nome -->
                 {% if plano.usuario == request.user %}
-                  <button class="btn-conectar" disabled style="font-size:.7rem;padding:.25rem .65rem;">
-                    <i class="bi bi-person-fill"></i>Você
-                  </button>
+                  <span class="vc-status voce"><i class="bi bi-person-fill"></i> Você</span>
                 {% elif plano.usuario.uuid in amigos_uuids %}
-                  <button class="btn-conectar" disabled style="font-size:.7rem;padding:.25rem .65rem;background:rgba(45,158,107,.08);border-color:rgba(45,158,107,.25);color:var(--success);">
-                    <i class="bi bi-check-circle-fill"></i>Amigos
-                  </button>
+                  <span class="vc-status amigos"><i class="bi bi-check-circle-fill"></i> Amigos</span>
                 {% else %}
-                  <form method="post"
-                        action="{% url 'conexoes:enviar_solicitacao' plano.usuario.uuid %}"
-                        style="margin:0;flex-shrink:0;">
+                  <form method="post" action="{% url 'conexoes:enviar_solicitacao' plano.usuario.uuid %}" style="margin:0;">
                     {% csrf_token %}
-                    <button type="submit" class="btn-conectar" style="font-size:.7rem;padding:.25rem .65rem;">
-                      <i class="bi bi-person-plus-fill"></i>Conectar
+                    <button type="submit" class="btn-conectar">
+                      <i class="bi bi-person-plus-fill"></i> Conectar
                     </button>
                   </form>
                 {% endif %}
               </div>
 
-              <!-- Infos da viagem -->
-              <div class="viagem-info">
-                <div class="info-item">
-                  <i class="bi bi-calendar-event" style="color:var(--accent);"></i>
-                  <div>
-                    <small class="text-muted d-block" style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Período</small>
-                    <span class="fw-semibold" style="font-size:.83rem;">
-                      {{ plano.data_inicio|date:"d/m/Y" }}
-                      {% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}
-                    </span>
+              <!-- Infos período + duração -->
+              <div class="vc-infos">
+                <div class="vc-info-pill">
+                  <div class="lbl"><i class="bi bi-calendar-event"></i> Período</div>
+                  <div class="val">
+                    {{ plano.data_inicio|date:"d/m/Y" }}
+                    {% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}
                   </div>
                 </div>
-                <div class="info-item">
-                  <i class="bi bi-hourglass-split" style="color:var(--accent);"></i>
-                  <div>
-                    <small class="text-muted d-block" style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Duração</small>
-                    <span class="fw-semibold" style="font-size:.83rem;">
-                      {% if plano.duracao_dias %}
-                        {{ plano.duracao_dias }} dia{{ plano.duracao_dias|pluralize }}
-                      {% else %}
-                        <span class="text-muted">Indefinida</span>
-                      {% endif %}
-                    </span>
-                  </div>
+                {% if plano.duracao_dias %}
+                <div class="vc-info-pill">
+                  <div class="lbl"><i class="bi bi-hourglass-split"></i> Duração</div>
+                  <div class="val">{{ plano.duracao_dias }} dia{{ plano.duracao_dias|pluralize }}</div>
+                </div>
+                {% endif %}
+                <div class="vc-info-pill">
+                  <div class="lbl"><i class="bi bi-heart"></i> Motivo</div>
+                  <div class="val">{{ plano.get_motivo_viagem_display }}</div>
                 </div>
               </div>
 
               <!-- Descrição -->
               {% if plano.descricao %}
-              <p class="text-muted mb-0" style="font-size:.83rem;line-height:1.55;">
-                {{ plano.descricao|truncatewords:18 }}
-              </p>
+              <p class="vc-desc">{{ plano.descricao|truncatewords:20 }}</p>
               {% endif %}
 
-              <!-- Status chip -->
-              {% if plano.data_inicio %}
-                {% with dias=plano.data_inicio|timeuntil %}
-                  {% if "day" in dias or "hour" in dias %}
-                    <span class="status-chip soon"><i class="bi bi-lightning-charge-fill"></i>Viagem em breve</span>
-                  {% elif "week" in dias %}
-                    <span class="status-chip coming"><i class="bi bi-clock"></i>Próxima viagem</span>
-                  {% endif %}
-                {% endwith %}
-              {% endif %}
-
-              <!-- Ver detalhes — apenas este, conectar subiu para junto do nome -->
-              <div class="mt-auto card-acoes">
+              <!-- Ações -->
+              <div class="vc-actions">
                 <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
-                   class="btn btn-custom btn-primario btn-sm w-100">
+                   class="btn btn-custom btn-primario btn-sm">
                   <i class="bi bi-eye me-1"></i>Ver Detalhes
                 </a>
                 {% if plano.usuario.uuid in amigos_uuids and plano.usuario != request.user %}
-                <a href="{% url 'chat:iniciar_conversa_viagem' uuid_usuario=plano.usuario.uuid uuid_plano=plano.uuid %}" class="btn btn-custom btn-success mt-2 btn-sm w-100">
-                <i class="bi bi-chat-dots-fill" style="font-size:.95rem;"></i>
-                <span>Conversar sobre viagem</span>
-              </a>
+                <a href="{% url 'chat:iniciar_conversa_viagem' uuid_usuario=plano.usuario.uuid uuid_plano=plano.uuid %}"
+                   class="btn btn-custom btn-secundario btn-sm"
+                   style="background:var(--success);border-color:var(--success);color:#fff;">
+                  <i class="bi bi-chat-dots-fill me-1"></i>Conversar
+                </a>
                 {% endif %}
               </div>
 
             </div>
-            <!-- /card-body -->
-
           </div>
         </div>
-        <!-- /viagem-item -->
 
         {% empty %}
         <div class="col-12">
@@ -415,7 +458,6 @@
         {% endfor %}
 
       </div>
-      <!-- /viagensGrid -->
 
       <!-- Paginação -->
       {% if destinos.has_other_pages %}
@@ -428,7 +470,6 @@
             </a>
           </li>
           {% endif %}
-
           {% for num in destinos.paginator.page_range %}
             {% if destinos.number == num %}
               <li class="page-item active"><span class="page-link">{{ num }}</span></li>
@@ -438,7 +479,6 @@
               </li>
             {% endif %}
           {% endfor %}
-
           {% if destinos.has_next %}
           <li class="page-item">
             <a class="page-link" href="?page={{ destinos.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">
@@ -452,7 +492,6 @@
 
     </div>
   </section>
-
 </div>
 {% endblock %}
 
@@ -469,12 +508,10 @@
 
   function setGrid() {
     grid.querySelectorAll('.viagem-item').forEach(el => {
-      el.classList.remove('list-mode', 'col-12-forced');
-      // garante as 3 colunas padrão
-      if (!el.classList.contains('col-md-6')) el.classList.add('col-md-6');
-      if (!el.classList.contains('col-xl-4')) el.classList.add('col-xl-4');
+      el.classList.remove('list-mode');
+      el.classList.add('col-md-6', 'col-xl-4');
     });
-    grid.querySelectorAll('.viajante-card').forEach(c => {
+    grid.querySelectorAll('.vc-card').forEach(c => {
       c.classList.remove('list-mode');
       c.classList.add('h-100');
     });
@@ -488,7 +525,7 @@
       el.classList.remove('col-md-6', 'col-xl-4');
       el.classList.add('list-mode');
     });
-    grid.querySelectorAll('.viajante-card').forEach(c => {
+    grid.querySelectorAll('.vc-card').forEach(c => {
       c.classList.add('list-mode');
       c.classList.remove('h-100');
     });
@@ -502,18 +539,17 @@
 
   if (localStorage.getItem(PREF_KEY) === 'list') setList();
 
-  /* Limpar filtros */
   document.getElementById('btnLimpar')?.addEventListener('click', function (e) {
     e.preventDefault();
     window.location.href = this.href.split('?')[0];
   });
 
-  /* Scroll reveal */
   const obs = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); } });
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+    });
   }, { threshold: 0.1, rootMargin: '0px 0px -30px 0px' });
   document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
-
 })();
 </script>
 {% endblock %}

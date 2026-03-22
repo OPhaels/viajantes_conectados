@@ -12,6 +12,7 @@ import logging
 
 from django.db import transaction
 from django.conf import settings
+from urllib3 import request
 from .forms import FormularioPlanoViagem, FormularioBuscaViajantes
 from .models import PlanoViagem, Pais, EnderecoPlano
 from apps.usuarios.models import Usuario
@@ -161,8 +162,8 @@ def view_editar_plano(request, uuid):
         pais_codigo_iso = request.POST.get('pais_codigo_iso', '').strip()
         cidade          = request.POST.get('cidade_destino', '').strip()
         regiao          = request.POST.get('regiao_destino', '').strip()
-        latitude        = request.POST.get('latitude', '').strip()
-        longitude       = request.POST.get('longitude', '').strip()
+        latitude  = request.POST.get('latitude', '').strip().replace(',', '.')
+        longitude = request.POST.get('longitude', '').strip().replace(',', '.')
 
         dados_post = request.POST.copy()
         dados_post['cidade_destino'] = cidade

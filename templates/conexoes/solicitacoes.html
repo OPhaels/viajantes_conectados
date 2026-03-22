@@ -6,151 +6,172 @@
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
 <style>
-/* ── Exclusivo da página de conexões ────────────────────────── */
+/* ════════════════════════════════════════════
+   CONEXÕES — CSS completo + mobile
+════════════════════════════════════════════ */
 
-/* Tabs de navegação */
+/* ── Tabs ── */
 .cx-tabs {
-  display: flex; gap: .5rem; flex-wrap: wrap;
+  display: flex;
+  gap: .25rem;
+  flex-wrap: nowrap;
   border-bottom: 2px solid var(--border);
-  margin-bottom: 2rem;
+  margin-bottom: 1.75rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
 }
+.cx-tabs::-webkit-scrollbar { display: none; }
+
 .cx-tab {
-  display: inline-flex; align-items: center; gap: .45rem;
-  padding: .65rem 1.1rem;
-  font-size: .83rem; font-weight: 700; letter-spacing: .02em;
-  color: var(--text-muted); text-decoration: none;
+  display: inline-flex; align-items: center; gap: .35rem;
+  padding: .6rem .9rem;
+  font-size: .82rem; font-weight: 700;
+  color: var(--text-muted);
   border: none; background: none; cursor: pointer;
   border-bottom: 2.5px solid transparent;
   margin-bottom: -2px;
-  transition: color var(--transition), border-color var(--transition);
+  white-space: nowrap; flex-shrink: 0;
+  transition: color .2s, border-color .2s;
 }
 .cx-tab:hover  { color: var(--primary); }
 .cx-tab.active { color: var(--primary); border-bottom-color: var(--accent); }
-.cx-tab .cx-count {
+
+.cx-count {
   display: inline-flex; align-items: center; justify-content: center;
-  min-width: 20px; height: 20px; padding: 0 5px;
-  border-radius: 10px; font-size: .67rem; font-weight: 800;
-  background: var(--success); color: #ffffff;
+  min-width: 18px; height: 18px; padding: 0 4px;
+  border-radius: 9px; font-size: .62rem; font-weight: 800;
+  background: var(--success); color: #fff; line-height: 1;
 }
 
-/* Painel de conteúdo */
+/* ── Painéis ── */
 .cx-panel { display: none; }
 .cx-panel.active { display: block; }
 
-/* Card de solicitação / amizade */
+/* ── Card ── */
 .cx-card {
-  display: flex; align-items: center; gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: var(--surface); border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: .85rem;
+  padding: .9rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow .2s, transform .2s;
   flex-wrap: wrap;
 }
 .cx-card:hover { box-shadow: var(--shadow-sm); transform: translateY(-1px); }
-.cx-card + .cx-card { margin-top: .65rem; }
+.cx-card + .cx-card { margin-top: .6rem; }
 
-/* Avatar */
+/* ── Avatar ── */
 .cx-avatar {
-  width: 48px; height: 48px; border-radius: 50%;
+  width: 44px; height: 44px; border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff; font-weight: 800; font-size: 1.1rem;
+  color: #fff; font-weight: 800; font-size: 1rem;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; overflow: hidden;
   border: 2px solid var(--border);
 }
 .cx-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-/* Info do usuário */
+/* ── Info ── */
 .cx-info { flex: 1; min-width: 0; }
 .cx-name {
-  font-weight: 700; font-size: .92rem; color: var(--text-main);
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-weight: 700; font-size: .9rem; color: var(--text-main);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.cx-meta { font-size: .78rem; color: var(--text-muted); margin-top: .15rem; }
+.cx-meta {
+  font-size: .75rem; color: var(--text-muted); margin-top: .2rem;
+  display: flex; flex-wrap: wrap; align-items: center; gap: .3rem;
+}
 .cx-meta i { color: var(--accent); }
 
-/* Badge "Novo" */
+/* ── Badge novo ── */
 .cx-badge-novo {
-  font-size: .62rem; font-weight: 800; letter-spacing: .05em;
-  text-transform: uppercase; padding: .18em .55em; border-radius: 4px;
-  background: var(--danger); color: #ffffff; vertical-align: middle; margin-left: .4rem;
+  font-size: .6rem; font-weight: 800; letter-spacing: .05em;
+  text-transform: uppercase; padding: .14em .48em; border-radius: 4px;
+  background: var(--danger); color: #fff; vertical-align: middle; margin-left: .3rem;
 }
 
-/* Status badge */
+/* ── Status ── */
 .cx-status {
-  display: inline-flex; align-items: center; gap: .3rem;
-  font-size: .72rem; font-weight: 700; padding: .22rem .65rem;
+  display: inline-flex; align-items: center; gap: .25rem;
+  font-size: .68rem; font-weight: 700; padding: .18rem .55rem;
   border-radius: var(--pill); text-transform: uppercase; letter-spacing: .04em;
+  white-space: nowrap;
 }
 .cx-status.pending { background: rgba(212,168,71,.1); border: 1px solid var(--accent-border); color: #b8891f; }
 .cx-status.friend  { background: rgba(45,158,107,.1); border: 1px solid rgba(45,158,107,.25); color: var(--success); }
 
-/* Grupo de botões */
-.cx-btns { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; flex-shrink: 0; }
-
-/* Botões de ação */
-.cx-btn {
-  display: inline-flex; align-items: center; gap: .35rem;
-  padding: .38rem .85rem; border-radius: var(--radius-sm);
-  font-size: .78rem; font-weight: 700; cursor: pointer;
-  border: 1.5px solid transparent; text-decoration: none;
-  transition: var(--transition); white-space: nowrap;
+/* ── Grupo de botões ── */
+.cx-btns {
+  display: flex;
+  gap: .4rem;
+  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
 }
-.cx-btn.accept  { background: var(--success); color: #fff; border-color: var(--success); }
-.cx-btn.accept:hover  { background: #24895b; border-color: #24895b; transform: translateY(-1px); }
-.cx-btn.reject  { background: rgba(192,57,43,.08); color: var(--danger); border-color: rgba(192,57,43,.25); }
-.cx-btn.reject:hover  { background: var(--danger); color: #fff; border-color: var(--danger); transform: translateY(-1px); }
-.cx-btn.cancel  { background: var(--surface-alt); color: var(--text-muted); border-color: var(--border); }
-.cx-btn.cancel:hover  { background: var(--danger); color: #fff; border-color: var(--danger); transform: translateY(-1px); }
-.cx-btn.profile { background: transparent; color: var(--primary); border-color: var(--border); }
-.cx-btn.profile:hover { background: var(--primary); color: #fff; border-color: var(--primary); }
-.cx-btn.unfriend { background: transparent; color: var(--danger); border-color: rgba(192,57,43,.25); }
-.cx-btn.unfriend:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
-.cx-btn.add { background: var(--accent-bg); color: var(--primary); border-color: var(--accent-border); }
-.cx-btn.add:hover { background: var(--success); color: #ffffff; border-color: var(--accent); transform: translateY(-1px); }
 
-/* Card de sugestão */
+/* ── Botões ── */
+.cx-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .3rem;
+  padding: .38rem .8rem; border-radius: var(--radius-sm);
+  font-size: .76rem; font-weight: 700; cursor: pointer;
+  border: 1.5px solid transparent; text-decoration: none;
+  transition: .2s; white-space: nowrap;
+}
+.cx-btn.accept   { background: var(--success);              color: #fff;            border-color: var(--success); }
+.cx-btn.accept:hover   { background: #24895b; border-color: #24895b; }
+.cx-btn.reject   { background: rgba(192,57,43,.08);         color: var(--danger);   border-color: rgba(192,57,43,.25); }
+.cx-btn.reject:hover   { background: var(--danger); color: #fff; border-color: var(--danger); }
+.cx-btn.cancel   { background: var(--surface-alt);          color: var(--text-muted); border-color: var(--border); }
+.cx-btn.cancel:hover   { background: var(--danger); color: #fff; border-color: var(--danger); }
+.cx-btn.profile  { background: transparent;                 color: var(--primary);  border-color: var(--border); }
+.cx-btn.profile:hover  { background: var(--primary); color: #fff; border-color: var(--primary); }
+.cx-btn.unfriend { background: transparent;                 color: var(--danger);   border-color: rgba(192,57,43,.25); }
+.cx-btn.unfriend:hover { background: var(--danger); color: #fff; border-color: var(--danger); }
+.cx-btn.add      { background: var(--accent-bg);            color: var(--primary);  border-color: var(--accent-border); }
+.cx-btn.add:hover      { background: var(--success); color: #fff; border-color: var(--success); }
+
+/* ── Card sugestão ── */
 .cx-suggest-card {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius); overflow: hidden; height: 100%;
-  transition: box-shadow var(--transition), transform var(--transition);
+  transition: box-shadow .2s, transform .2s;
   display: flex; flex-direction: column;
 }
 .cx-suggest-card:hover { box-shadow: var(--shadow-md); transform: translateY(-4px); }
 .cx-suggest-top {
-  height: 72px;
+  height: 64px;
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
   position: relative; flex-shrink: 0;
 }
 .cx-suggest-top::after {
   content: ''; position: absolute; bottom: -1px; left: 0; right: 0;
-  height: 24px; background: var(--surface);
+  height: 20px; background: var(--surface);
   clip-path: ellipse(55% 100% at 50% 100%);
 }
 .cx-suggest-avatar {
-  width: 60px; height: 60px; border-radius: 50%;
+  width: 56px; height: 56px; border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  color: #fff; font-weight: 800; font-size: 1.3rem;
+  color: #fff; font-weight: 800; font-size: 1.2rem;
   display: flex; align-items: center; justify-content: center;
   border: 3px solid var(--surface);
   box-shadow: 0 3px 12px rgba(0,0,0,.15);
-  overflow: hidden; margin: -30px auto 0; position: relative; z-index: 2;
+  overflow: hidden; margin: -28px auto 0; position: relative; z-index: 2;
 }
 .cx-suggest-avatar img { width: 100%; height: 100%; object-fit: cover; }
-.cx-suggest-body { padding: .75rem 1rem 1rem; flex: 1; text-align: center; }
-.cx-suggest-name { font-weight: 800; font-size: .92rem; color: var(--primary); margin-bottom: .2rem; }
-.cx-suggest-loc  { font-size: .76rem; color: var(--text-muted); }
+.cx-suggest-body { padding: .65rem 1rem .75rem; flex: 1; text-align: center; }
+.cx-suggest-name { font-weight: 800; font-size: .9rem; color: var(--primary); margin-bottom: .15rem; }
+.cx-suggest-loc  { font-size: .74rem; color: var(--text-muted); }
 .cx-suggest-btns { display: flex; flex-direction: column; gap: .4rem; padding: 0 1rem 1rem; }
 
-/* Empty state */
-.cx-empty {
-  text-align: center; padding: 3rem 1rem;
-  color: var(--text-muted);
-}
+/* ── Empty state ── */
+.cx-empty { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
 .cx-empty i { font-size: 2.75rem; display: block; margin-bottom: .85rem; opacity: .2; color: var(--primary); }
 .cx-empty h5 { font-weight: 700; color: var(--text-main); margin-bottom: .35rem; }
 
-/* Seção dentro do painel */
+/* ── Section label ── */
 .cx-section-label {
   font-size: .72rem; font-weight: 800; text-transform: uppercase;
   letter-spacing: .1em; color: var(--primary);
@@ -160,7 +181,41 @@
 }
 .cx-section-label::before {
   content: ''; display: block; width: 3px; height: 14px;
-  background: var(--accent); border-radius: 2px;
+  background: var(--accent); border-radius: 2px; flex-shrink: 0;
+}
+
+/* ════════════════════════════════════════════
+   MOBILE
+════════════════════════════════════════════ */
+@media (max-width: 575.98px) {
+  /* Botões do card viram bloco completo abaixo do avatar+info */
+  .cx-card {
+    padding: .75rem;
+    gap: .65rem;
+  }
+  .cx-btns {
+    width: 100%;
+    margin-top: .35rem;
+  }
+  .cx-btns form,
+  .cx-btns a,
+  .cx-btns button {
+    flex: 1 1 calc(50% - .2rem);
+  }
+  .cx-btn {
+    width: 100%;
+    font-size: .73rem;
+    padding: .4rem .5rem;
+  }
+
+  /* Sugestões: 2 colunas */
+  .cx-suggest-grid > [class*="col-"] {
+    flex: 0 0 50%;
+    max-width: 50%;
+  }
+
+  /* Evita texto truncado no nome */
+  .cx-name { white-space: normal; }
 }
 </style>
 {% endblock %}
@@ -169,7 +224,7 @@
 {% block conteudo %}
 <div class="viajantes-container">
 
-  <!-- ══════ HERO ══════ -->
+  <!-- HERO -->
   <section class="viajantes-hero">
     <div class="container">
       <div class="text-center">
@@ -183,93 +238,61 @@
 
   <div class="container mb-5">
 
-    <!-- ══════ TABS ══════ -->
+    <!-- TABS — scroll horizontal no mobile -->
     <div class="cx-tabs" id="cxTabs">
       <button class="cx-tab active" data-panel="recebidas">
-        <i class="bi bi-inbox"></i> Recebidas
-        {% if solicitacoes_recebidas %}
-          <span class="cx-count">{{ solicitacoes_recebidas|length }}</span>
-        {% endif %}
+        <i class="bi bi-inbox"></i>Recebidas
+        {% if solicitacoes_recebidas %}<span class="cx-count">{{ solicitacoes_recebidas|length }}</span>{% endif %}
       </button>
       <button class="cx-tab" data-panel="enviadas">
-        <i class="bi bi-send"></i> Enviadas
-        {% if solicitacoes_enviadas %}
-          <span class="cx-count" style="background:var(--text-muted);color:#fff;">{{ solicitacoes_enviadas|length }}</span>
-        {% endif %}
+        <i class="bi bi-send"></i>Enviadas
+        {% if solicitacoes_enviadas %}<span class="cx-count" style="background:var(--text-muted);">{{ solicitacoes_enviadas|length }}</span>{% endif %}
       </button>
       <button class="cx-tab" data-panel="amigos">
-        <i class="bi bi-heart-fill"></i> Amigos
-        {% if amigos_dados %}
-          <span class="cx-count" style="background:var(--success);color:#fff;">{{ amigos_dados|length }}</span>
-        {% endif %}
+        <i class="bi bi-heart-fill"></i>Amigos
+        {% if amigos_dados %}<span class="cx-count">{{ amigos_dados|length }}</span>{% endif %}
       </button>
       <button class="cx-tab" data-panel="sugestoes">
-        <i class="bi bi-person-plus"></i> Descobrir
+        <i class="bi bi-person-plus"></i>Descobrir
       </button>
       <button class="cx-tab" data-panel="bloqueados">
-        <i class="bi bi-slash-circle"></i> Bloqueados
-        {% if bloqueados %}
-          <span class="cx-count" style="background:var(--danger);color:#fff;">{{ bloqueados|length }}</span>
-        {% endif %}
+        <i class="bi bi-slash-circle"></i>Bloqueados
+        {% if bloqueados %}<span class="cx-count" style="background:var(--danger);">{{ bloqueados|length }}</span>{% endif %}
       </button>
     </div>
 
-    <!-- ══════ PAINEL: SOLICITAÇÕES RECEBIDAS ══════ -->
+    <!-- PAINEL: RECEBIDAS -->
     <div class="cx-panel active" id="panel-recebidas">
       {% if solicitacoes_recebidas %}
         <div class="cx-section-label">
           <i class="bi bi-inbox"></i>
           {{ solicitacoes_recebidas|length }} solicitação{% if solicitacoes_recebidas|length != 1 %}ões{% endif %} pendente{% if solicitacoes_recebidas|length != 1 %}s{% endif %}
         </div>
-
-        {% for solicitacao in solicitacoes_recebidas %}
+        {% for s in solicitacoes_recebidas %}
         <div class="cx-card">
-          <!-- Avatar -->
           <div class="cx-avatar">
-            {% if solicitacao.remetente.foto_perfil %}
-              <img src="{{ solicitacao.remetente.foto_perfil.url }}" alt="{{ solicitacao.remetente.get_nome_exibicao }}">
-            {% else %}
-              {{ solicitacao.remetente.get_nome_exibicao|first|upper }}
-            {% endif %}
+            {% if s.remetente.foto_perfil %}<img src="{{ s.remetente.foto_perfil.url }}" alt="">
+            {% else %}{{ s.remetente.get_nome_exibicao|first|upper }}{% endif %}
           </div>
-
-          <!-- Info -->
           <div class="cx-info">
-            <div class="cx-name">
-              {{ solicitacao.remetente.get_nome_exibicao }}
-              <span class="cx-badge-novo">Novo</span>
-            </div>
+            <div class="cx-name">{{ s.remetente.get_nome_exibicao }}<span class="cx-badge-novo">Novo</span></div>
             <div class="cx-meta">
               <i class="bi bi-calendar3"></i>
-              {% if solicitacao.data_criacao|date:"Y-m-d" == hoje %}
-                Hoje às {{ solicitacao.data_criacao|time:"H:i" }}
-              {% else %}
-                {{ solicitacao.data_criacao|date:"d/m/Y" }}
-              {% endif %}
+              {% if s.data_criacao|date:"Y-m-d" == hoje %}Hoje às {{ s.data_criacao|time:"H:i" }}
+              {% else %}{{ s.data_criacao|date:"d/m/Y" }}{% endif %}
             </div>
           </div>
-
-          <!-- Ações -->
           <div class="cx-btns">
-            <form method="post" action="{% url 'conexoes:responder_solicitacao' uuid_solicitacao=solicitacao.uuid acao='aceitar' %}" style="margin:0;">
-              {% csrf_token %}
-              <button type="submit" class="cx-btn accept">
-                <i class="bi bi-check-circle-fill"></i>Aceitar
-              </button>
+            <form method="post" action="{% url 'conexoes:responder_solicitacao' uuid_solicitacao=s.uuid acao='aceitar' %}" style="margin:0;">
+              {% csrf_token %}<button type="submit" class="cx-btn accept"><i class="bi bi-check-circle-fill"></i>Aceitar</button>
             </form>
-            <form method="post" action="{% url 'conexoes:responder_solicitacao' uuid_solicitacao=solicitacao.uuid acao='rejeitar' %}" style="margin:0;">
-              {% csrf_token %}
-              <button type="submit" class="cx-btn reject">
-                <i class="bi bi-x-circle"></i>Rejeitar
-              </button>
+            <form method="post" action="{% url 'conexoes:responder_solicitacao' uuid_solicitacao=s.uuid acao='rejeitar' %}" style="margin:0;">
+              {% csrf_token %}<button type="submit" class="cx-btn reject"><i class="bi bi-x-circle"></i>Rejeitar</button>
             </form>
-            <a href="{% url 'usuarios:perfil_publico' uuid=solicitacao.remetente.uuid %}" class="cx-btn profile">
-              <i class="bi bi-person"></i>Perfil
-            </a>
+            <a href="{% url 'usuarios:perfil_publico' uuid=s.remetente.uuid %}" class="cx-btn profile"><i class="bi bi-person"></i>Perfil</a>
           </div>
         </div>
         {% endfor %}
-
       {% else %}
         <div class="cx-empty">
           <i class="bi bi-inbox"></i>
@@ -279,49 +302,37 @@
       {% endif %}
     </div>
 
-
-    <!-- ══════ PAINEL: SOLICITAÇÕES ENVIADAS ══════ -->
+    <!-- PAINEL: ENVIADAS -->
     <div class="cx-panel" id="panel-enviadas">
       {% if solicitacoes_enviadas %}
         <div class="cx-section-label">
           <i class="bi bi-send"></i>
           {{ solicitacoes_enviadas|length }} solicitação{% if solicitacoes_enviadas|length != 1 %}ões{% endif %} enviada{% if solicitacoes_enviadas|length != 1 %}s{% endif %}
         </div>
-
-        {% for solicitacao in solicitacoes_enviadas %}
+        {% for s in solicitacoes_enviadas %}
         <div class="cx-card">
           <div class="cx-avatar">
-            {% if solicitacao.destinatario.foto_perfil %}
-              <img src="{{ solicitacao.destinatario.foto_perfil.url }}" alt="{{ solicitacao.destinatario.get_nome_exibicao }}">
-            {% else %}
-              {{ solicitacao.destinatario.get_nome_exibicao|first|upper }}
-            {% endif %}
+            {% if s.destinatario.foto_perfil %}<img src="{{ s.destinatario.foto_perfil.url }}" alt="">
+            {% else %}{{ s.destinatario.get_nome_exibicao|first|upper }}{% endif %}
           </div>
-
           <div class="cx-info">
-            <div class="cx-name">{{ solicitacao.destinatario.get_nome_exibicao }}</div>
+            <div class="cx-name">{{ s.destinatario.get_nome_exibicao }}</div>
             <div class="cx-meta">
-              <i class="bi bi-calendar3"></i>
-              Enviada em {{ solicitacao.data_criacao|date:"d/m/Y" }}
-              &nbsp;<span class="cx-status pending"><i class="bi bi-clock-fill"></i>Pendente</span>
+              <i class="bi bi-calendar3"></i> Enviada em {{ s.data_criacao|date:"d/m/Y" }}
+              <span class="cx-status pending"><i class="bi bi-clock-fill"></i>Pendente</span>
             </div>
           </div>
-
           <div class="cx-btns">
-            <form method="post" action="{% url 'conexoes:cancelar_solicitacao' uuid_solicitacao=solicitacao.uuid %}" style="margin:0;">
+            <form method="post" action="{% url 'conexoes:cancelar_solicitacao' uuid_solicitacao=s.uuid %}" style="margin:0;">
               {% csrf_token %}
-              <button type="submit" class="cx-btn cancel"
-                      onclick="return confirm('Cancelar esta solicitação?')">
+              <button type="submit" class="cx-btn cancel" onclick="return confirm('Cancelar esta solicitação?')">
                 <i class="bi bi-trash3"></i>Cancelar
               </button>
             </form>
-            <a href="{% url 'usuarios:perfil_publico' uuid=solicitacao.destinatario.uuid %}" class="cx-btn profile">
-              <i class="bi bi-person"></i>Perfil
-            </a>
+            <a href="{% url 'usuarios:perfil_publico' uuid=s.destinatario.uuid %}" class="cx-btn profile"><i class="bi bi-person"></i>Perfil</a>
           </div>
         </div>
         {% endfor %}
-
       {% else %}
         <div class="cx-empty">
           <i class="bi bi-send"></i>
@@ -331,191 +342,133 @@
       {% endif %}
     </div>
 
-
-    <!-- ══════ PAINEL: AMIGOS ══════ -->
+    <!-- PAINEL: AMIGOS -->
     <div class="cx-panel" id="panel-amigos">
       {% if amigos_dados %}
         <div class="cx-section-label">
           <i class="bi bi-heart-fill"></i>
-          <span id="amigos-count">{{ amigos_dados|length }}</span>
-          amigo{% if amigos_dados|length != 1 %}s{% endif %}
+          <span id="amigos-count">{{ amigos_dados|length }}</span> amigo{% if amigos_dados|length != 1 %}s{% endif %}
         </div>
-
-        {% for item in amigos_dados %}
-          {% with u=item.amigo %}
-          <div class="cx-card" id="amigo-card-{{ u.uuid }}">
-
-            <div class="cx-avatar">
-              {% if u.foto_perfil %}
-                <img src="{{ u.foto_perfil.url }}" alt="{{ u.get_nome_exibicao }}">
-              {% else %}
-                {{ u.get_nome_exibicao|first|upper }}
-              {% endif %}
-            </div>
-
-            <div class="cx-info">
-              <div class="cx-name">{{ u.get_nome_exibicao }}</div>
-              <div class="cx-meta">
-                {% if u.cidade_residencia or u.pais_residencia %}
-                  <i class="bi bi-geo-alt-fill"></i>
-                  {{ u.cidade_residencia }}{% if u.cidade_residencia and u.pais_residencia %}, {% endif %}{{ u.pais_residencia }}
-                  &ensp;
-                {% elif u.cidade or u.pais %}
-                  <i class="bi bi-geo-alt-fill"></i>
-                  {{ u.cidade }}{% if u.cidade and u.pais %}, {% endif %}{{ u.pais }}
-                  &ensp;
-                {% endif %}
-                {% if item.amizade %}
-                  <i class="bi bi-calendar3"></i> desde {{ item.amizade.data_criacao|date:"d/m/Y" }}
-                  &ensp;
-                {% endif %}
-                <span class="cx-status friend"><i class="bi bi-check-circle-fill"></i>Amigos</span>
-              </div>
-            </div>
-
-            <div class="cx-btns">
-              <a href="{% url 'chat:iniciar_conversa' uuid_usuario=u.uuid %}" class="cx-btn accept">
-                <i class="bi bi-chat-dots-fill"></i>Conversar
-              </a>
-              <a href="{% url 'usuarios:perfil_publico' uuid=u.uuid %}" class="cx-btn profile">
-                <i class="bi bi-person"></i>Perfil
-              </a>
-              <button class="cx-btn unfriend"
-                      onclick="desfazerAmizade('{{ u.uuid }}', '{{ u.get_nome_exibicao }}', this)">
-                <i class="bi bi-person-dash"></i>Remover
-              </button>
-              <button class="cx-btn" style="background:rgba(192,57,43,.06);color:var(--danger);border-color:rgba(192,57,43,.2);"
-                      onclick="bloquearAmigo('{{ u.uuid }}', '{{ u.get_nome_exibicao }}', this)">
-                <i class="bi bi-slash-circle"></i>Bloquear
-              </button>
-            </div>
-
+        {% for item in amigos_dados %}{% with u=item.amigo %}
+        <div class="cx-card" id="amigo-card-{{ u.uuid }}">
+          <div class="cx-avatar">
+            {% if u.foto_perfil %}<img src="{{ u.foto_perfil.url }}" alt="">
+            {% else %}{{ u.get_nome_exibicao|first|upper }}{% endif %}
           </div>
-          {% endwith %}
-        {% endfor %}
-
+          <div class="cx-info">
+            <div class="cx-name">{{ u.get_nome_exibicao }}</div>
+            <div class="cx-meta">
+              {% if u.cidade_residencia or u.pais_residencia %}
+                <i class="bi bi-geo-alt-fill"></i>{{ u.cidade_residencia }}{% if u.cidade_residencia and u.pais_residencia %}, {% endif %}{{ u.pais_residencia }}
+              {% endif %}
+              {% if item.amizade %}<i class="bi bi-calendar3"></i>desde {{ item.amizade.data_criacao|date:"d/m/Y" }}{% endif %}
+              <span class="cx-status friend"><i class="bi bi-check-circle-fill"></i>Amigos</span>
+            </div>
+          </div>
+          <div class="cx-btns">
+            <a href="{% url 'chat:iniciar_conversa' uuid_usuario=u.uuid %}" class="cx-btn accept"><i class="bi bi-chat-dots-fill"></i>Conversar</a>
+            <a href="{% url 'usuarios:perfil_publico' uuid=u.uuid %}" class="cx-btn profile"><i class="bi bi-person"></i>Perfil</a>
+            <button class="cx-btn unfriend" onclick="desfazerAmizade('{{ u.uuid }}', '{{ u.get_nome_exibicao }}', this)">
+              <i class="bi bi-person-dash"></i>Remover
+            </button>
+            <button class="cx-btn" style="background:rgba(192,57,43,.06);color:var(--danger);border-color:rgba(192,57,43,.2);"
+                    onclick="bloquearAmigo('{{ u.uuid }}', '{{ u.get_nome_exibicao }}', this)">
+              <i class="bi bi-slash-circle"></i>Bloquear
+            </button>
+          </div>
+        </div>
+        {% endwith %}{% endfor %}
         <div id="amigos-empty" class="cx-empty" style="display:none;">
-          <i class="bi bi-heart"></i>
-          <h5>Nenhuma amizade ainda</h5>
+          <i class="bi bi-heart"></i><h5>Nenhuma amizade ainda</h5>
           <p style="font-size:.88rem;">Aceite solicitações ou descubra viajantes na aba "Descobrir".</p>
         </div>
-
       {% else %}
         <div class="cx-empty">
-          <i class="bi bi-heart"></i>
-          <h5>Nenhuma amizade ainda</h5>
+          <i class="bi bi-heart"></i><h5>Nenhuma amizade ainda</h5>
           <p style="font-size:.88rem;">Aceite solicitações ou descubra viajantes na aba "Descobrir".</p>
         </div>
       {% endif %}
     </div>
 
-
-    <!-- ══════ PAINEL: DESCOBRIR / SUGESTÕES ══════ -->
+    <!-- PAINEL: DESCOBRIR -->
     <div class="cx-panel" id="panel-sugestoes">
       {% if sugestoes %}
-        <div class="cx-section-label">
-          <i class="bi bi-compass"></i>
-          Pessoas que você pode conhecer
-        </div>
-
-        <div class="row g-3">
+        <div class="cx-section-label"><i class="bi bi-compass"></i>Pessoas que você pode conhecer</div>
+        <div class="row g-3 cx-suggest-grid">
           {% for usuario in sugestoes %}
-          <div class="col-12 col-sm-6 col-lg-3">
+          <div class="col-6 col-sm-6 col-lg-3">
             <div class="cx-suggest-card">
-
               <div class="cx-suggest-top"></div>
               <div class="cx-suggest-avatar">
-                {% if usuario.foto_perfil %}
-                  <img src="{{ usuario.foto_perfil.url }}" alt="{{ usuario.get_nome_exibicao }}">
-                {% else %}
-                  {{ usuario.get_nome_exibicao|first|upper }}
-                {% endif %}
+                {% if usuario.foto_perfil %}<img src="{{ usuario.foto_perfil.url }}" alt="">
+                {% else %}{{ usuario.get_nome_exibicao|first|upper }}{% endif %}
               </div>
-
               <div class="cx-suggest-body">
                 <div class="cx-suggest-name">{{ usuario.get_nome_exibicao }}</div>
-                {% if usuario.cidade or usuario.pais %}
-                  <div class="cx-suggest-loc">
-                    <i class="bi bi-geo-alt" style="color:var(--accent);"></i>
-                    {{ usuario.cidade }}{% if usuario.cidade and usuario.pais %}, {% endif %}{{ usuario.pais }}
-                  </div>
+                {% if usuario.cidade_residencia or usuario.pais_residencia %}
+                <div class="cx-suggest-loc">
+                  <i class="bi bi-geo-alt" style="color:var(--accent);"></i>
+                  {{ usuario.cidade_residencia }}{% if usuario.cidade_residencia and usuario.pais_residencia %}, {% endif %}{{ usuario.pais_residencia }}
+                </div>
                 {% endif %}
               </div>
-
               <div class="cx-suggest-btns">
                 <form method="post" action="{% url 'conexoes:enviar_solicitacao' uuid_destinatario=usuario.uuid %}" style="margin:0;">
                   {% csrf_token %}
-                  <button type="submit" class="cx-btn add w-100 justify-content-center">
-                    <i class="bi bi-person-plus-fill"></i>Adicionar
-                  </button>
+                  <button type="submit" class="cx-btn add w-100 justify-content-center"><i class="bi bi-person-plus-fill"></i>Adicionar</button>
                 </form>
-                <a href="{% url 'usuarios:perfil_publico' uuid=usuario.uuid %}" class="cx-btn profile w-100 justify-content-center">
-                  <i class="bi bi-person"></i>Ver Perfil
-                </a>
+                <a href="{% url 'usuarios:perfil_publico' uuid=usuario.uuid %}" class="cx-btn profile w-100 justify-content-center"><i class="bi bi-person"></i>Ver Perfil</a>
               </div>
-
             </div>
           </div>
           {% endfor %}
         </div>
-
       {% else %}
         <div class="cx-empty">
-          <i class="bi bi-people"></i>
-          <h5>Nenhuma sugestão disponível</h5>
-          
-              <a href="{% url 'destinos:buscar_viajantes' %}" class="btn btn-ghost-navy btn-sm">
-                Ver planos ativos de outros viajantes
-              </a>
+          <i class="bi bi-people"></i><h5>Nenhuma sugestão disponível</h5>
+          <a href="{% url 'destinos:buscar_viajantes' %}" class="btn btn-ghost-navy btn-sm">Ver planos ativos de outros viajantes</a>
         </div>
       {% endif %}
     </div>
 
-    <!-- ══════ PAINEL: BLOQUEADOS ══════ -->
+    <!-- PAINEL: BLOQUEADOS -->
     <div class="cx-panel" id="panel-bloqueados">
       {% if bloqueados %}
         <div class="cx-section-label">
           <i class="bi bi-slash-circle"></i>
           {{ bloqueados|length }} usuário{% if bloqueados|length != 1 %}s{% endif %} bloqueado{% if bloqueados|length != 1 %}s{% endif %}
         </div>
-
         {% for b in bloqueados %}
         <div class="cx-card" id="bloqueado-card-{{ b.bloqueado.uuid }}">
           <div class="cx-avatar">
-            {% if b.bloqueado.foto_perfil %}
-              <img src="{{ b.bloqueado.foto_perfil.url }}" alt="{{ b.bloqueado.get_nome_exibicao }}">
-            {% else %}
-              {{ b.bloqueado.get_nome_exibicao|first|upper }}
-            {% endif %}
+            {% if b.bloqueado.foto_perfil %}<img src="{{ b.bloqueado.foto_perfil.url }}" alt="">
+            {% else %}{{ b.bloqueado.get_nome_exibicao|first|upper }}{% endif %}
           </div>
           <div class="cx-info">
             <div class="cx-name">{{ b.bloqueado.get_nome_exibicao }}</div>
             <div class="cx-meta">
               <i class="bi bi-calendar3"></i> Bloqueado em {{ b.data_criacao|date:"d/m/Y" }}
-              &ensp;<span class="cx-status" style="background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);color:var(--danger);">
+              <span class="cx-status" style="background:rgba(192,57,43,.1);border:1px solid rgba(192,57,43,.2);color:var(--danger);">
                 <i class="bi bi-slash-circle-fill"></i>Bloqueado
               </span>
             </div>
           </div>
           <div class="cx-btns">
-            <button class="cx-btn accept"
-                    onclick="desbloquear('{{ b.bloqueado.uuid }}', '{{ b.bloqueado.get_nome_exibicao }}', this)">
+            <button class="cx-btn accept" onclick="desbloquear('{{ b.bloqueado.uuid }}', '{{ b.bloqueado.get_nome_exibicao }}', this)">
               <i class="bi bi-person-check"></i>Desbloquear
             </button>
           </div>
         </div>
         {% endfor %}
-
       {% else %}
         <div class="cx-empty">
-          <i class="bi bi-slash-circle"></i>
-          <h5>Nenhum usuário bloqueado</h5>
+          <i class="bi bi-slash-circle"></i><h5>Nenhum usuário bloqueado</h5>
           <p style="font-size:.88rem;">Você não bloqueou nenhum usuário.</p>
         </div>
       {% endif %}
     </div>
 
-    <!-- Estado completamente vazio -->
+    <!-- Estado vazio geral -->
     {% if not solicitacoes_recebidas and not solicitacoes_enviadas and not amigos_dados and not sugestoes %}
     <div class="cx-empty mt-4">
       <i class="bi bi-compass"></i>
@@ -524,7 +477,7 @@
         Visite a busca de viajantes para encontrar pessoas que vão para os mesmos destinos que você.
       </p>
       <a href="{% url 'destinos:buscar' %}" class="btn btn-custom btn-primario btn-sm">
-        <i class="bi bi-search me-1 text-white"></i>Buscar Viajantes
+        <i class="bi bi-search me-1"></i>Buscar Viajantes
       </a>
     </div>
     {% endif %}
@@ -542,7 +495,6 @@
   const CSRF = '{{ csrf_token }}';
   const PREF = 'vc_cx_tab';
 
-  /* ── Tabs ─────────────────────────────────────────── */
   const tabs   = document.querySelectorAll('.cx-tab');
   const panels = document.querySelectorAll('.cx-panel');
 
@@ -556,24 +508,18 @@
 
   const saved  = localStorage.getItem(PREF);
   const hasNew = document.querySelector('#panel-recebidas .cx-card');
-  if (hasNew)       activate('recebidas');
-  else if (saved)   activate(saved);
+  if (hasNew)     activate('recebidas');
+  else if (saved) activate(saved);
 
-  /* ── Helper AJAX ──────────────────────────────────── */
   async function post(url) {
-    const r = await fetch(url, {
+    return fetch(url, {
       method: 'POST',
-      headers: {
-        'X-CSRFToken': CSRF,
-        'X-Requested-With': 'XMLHttpRequest',
-      },
+      headers: { 'X-CSRFToken': CSRF, 'X-Requested-With': 'XMLHttpRequest' },
     });
-    return r;
   }
 
-  /* ── Remoção animada de card ──────────────────────── */
   function removerCard(el, callback) {
-    el.style.transition = 'opacity .25s ease, transform .25s ease, max-height .3s ease';
+    el.style.transition = 'opacity .25s ease, transform .25s ease';
     el.style.opacity    = '0';
     el.style.transform  = 'translateX(-12px)';
     el.style.overflow   = 'hidden';
@@ -585,7 +531,6 @@
     }, 250);
   }
 
-  /* ── Atualiza contador de amigos ──────────────────── */
   function atualizarContadorAmigos() {
     const cards = document.querySelectorAll('[id^="amigo-card-"]');
     const span  = document.getElementById('amigos-count');
@@ -594,13 +539,10 @@
     if (emptyEl) emptyEl.style.display = cards.length === 0 ? 'block' : 'none';
   }
 
-  /* ── Desfazer amizade (AJAX + remoção visual) ─────── */
   window.desfazerAmizade = async function(uuid, nome, btn) {
     if (!confirm(`Remover ${nome} dos seus amigos?`)) return;
-
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-
     try {
       const r = await post(`/conexoes/desfazer-amizade/${uuid}/`);
       if (r.ok || r.status === 302) {
@@ -618,19 +560,13 @@
     }
   };
 
-  /* ── Bloquear amigo ───────────────────────────────── */
   window.bloquearAmigo = async function(uuid, nome, btn) {
     if (!confirm(`Bloquear ${nome}?\n\nIsso irá:\n• Remover dos seus amigos\n• Encerrar conversas\n• Impedir contato futuro`)) return;
-
     btn.disabled = true;
-
     try {
       await post(`/conexoes/bloquear/${uuid}/`);
-      /* Remove da lista de amigos */
       const card = document.getElementById(`amigo-card-${uuid}`);
       if (card) removerCard(card, atualizarContadorAmigos);
-
-      /* Mostra feedback */
       mostrarToast(`${nome} foi bloqueado.`, 'var(--danger)');
     } catch (_) {
       alert('Erro ao bloquear. Tente novamente.');
@@ -638,24 +574,15 @@
     }
   };
 
-  /* ── Desbloquear ──────────────────────────────────── */
   window.desbloquear = async function(uuid, nome, btn) {
-    if (!confirm(`Desbloquear ${nome}? Você poderá adicionar esta pessoa como amigo novamente.`)) return;
-
+    if (!confirm(`Desbloquear ${nome}?`)) return;
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>';
-
     try {
       const r = await post(`/conexoes/desbloquear/${uuid}/`);
       if (r.ok) {
         const card = document.getElementById(`bloqueado-card-${uuid}`);
-        if (card) removerCard(card, () => {
-          /* Atualiza badge da aba */
-          const badge = document.querySelector('#panel-bloqueados').previousElementSibling
-            ?.querySelector('.cx-count');
-          /* Mostra feedback */
-          mostrarToast(`${nome} foi desbloqueado.`, 'var(--success)');
-        });
+        if (card) removerCard(card, () => mostrarToast(`${nome} foi desbloqueado.`, 'var(--success)'));
       } else {
         alert('Erro ao desbloquear. Tente novamente.');
         btn.disabled = false;
@@ -668,26 +595,16 @@
     }
   };
 
-  /* ── Toast genérico ───────────────────────────────── */
   function mostrarToast(msg, cor) {
     const t = document.createElement('div');
     t.textContent = msg;
-    t.style.cssText = `
-      position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(8px);
-      background:${cor};color:#fff;padding:.55rem 1.25rem;
-      border-radius:var(--pill,100px);font-size:.83rem;font-weight:600;
-      box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;
-      transition:opacity .2s ease,transform .2s ease;z-index:9999;
-      pointer-events:none;white-space:nowrap;
-    `;
+    t.style.cssText = `position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%) translateY(8px);
+      background:${cor};color:#fff;padding:.55rem 1.25rem;border-radius:var(--pill,100px);
+      font-size:.83rem;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.18);opacity:0;
+      transition:opacity .2s ease,transform .2s ease;z-index:9999;pointer-events:none;white-space:nowrap;`;
     document.body.appendChild(t);
-    requestAnimationFrame(() => {
-      t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
-    });
-    setTimeout(() => {
-      t.style.opacity = '0';
-      setTimeout(() => t.remove(), 300);
-    }, 2800);
+    requestAnimationFrame(() => { t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)'; });
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2800);
   }
 
 })();

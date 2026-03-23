@@ -473,9 +473,9 @@
 
 .perfil-container { min-height: 100vh; background: var(--surface-alt); }
 .perfil-hero {
-  height: 240px;
+  height: 50px;
   background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
-  position: relative; margin-bottom: -80px; overflow: hidden;
+  position: relative; margin-bottom: -50px; overflow: hidden;
 }
 .perfil-hero::before {
   content: ''; position: absolute; inset: 0;

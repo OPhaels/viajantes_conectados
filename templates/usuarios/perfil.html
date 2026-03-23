@@ -5,501 +5,503 @@
 
 {% block estilos_extras %}
 <link rel="stylesheet" href="{% static 'css/pages.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
 <style>
-/* ── Hero com padrão de pontos igual ao busca-hero ────────── */
-.perfil-hero::before {
-  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") !important;
+:root {
+  --pf-radius:       14px;
+  --pf-radius-sm:    8px;
+  --pf-pill:         999px;
+  --pf-ease:         .22s cubic-bezier(.4,0,.2,1);
+  --pf-shadow:       0 2px 12px rgba(0,0,0,.07),0 1px 3px rgba(0,0,0,.05);
+  --pf-shadow-lg:    0 8px 28px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.07);
+  --pf-head:         'Sora', sans-serif;
+  --pf-body:         'DM Sans', sans-serif;
 }
 
-/* ── 14 regras cirúrgicas — só o que não existe no pages.css ── */
+/* ── HERO ── */
+.pf-hero {
+  position:relative; height:150px; overflow:hidden;
+  background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 60%,#2c4fa3 100%);
+}
+.pf-hero::before {
+  content:''; position:absolute; inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='.055'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/svg%3E");
+}
+.pf-deco {position:absolute;border-radius:50%;background:rgba(255,255,255,.06);pointer-events:none;}
+.pf-deco-1{width:320px;height:320px;top:-120px;right:-80px;}
+.pf-deco-2{width:180px;height:180px;bottom:-60px;left:10%;}
 
-/* 1. Avata circular grande na sidebar */
-.pf-avatar-wrap {
-  width: 180px; height: 180px; border-radius: 50%;
-  overflow: hidden; border: 4px solid var(--surface);
-  box-shadow: 0 4px 20px rgba(0,0,0,.18);
-  background: rgba(0, 0, 0, 0.638);
-  flex-shrink: 0; margin: 0 auto;
+/* ── LAYOUT ── */
+.pf-layout{max-width:1140px;margin:0 auto;padding:0 1.25rem 4rem;}
+
+/* ── AVATAR STRIP ── */
+.pf-strip {
+  display:flex;align-items:flex-end;gap:1.25rem;
+  margin-top:-64px;margin-bottom:1.75rem;
+  position:relative;z-index:5;flex-wrap:wrap;
 }
-.pf-avatar-wrap img,
-.pf-avatar-wrap .pf-avatar-ph {
-  width: 100%; height: 100%; object-fit: cover;
+.pf-avatar {
+  width:128px;height:128px;border-radius:50%;
+  border:4px solid var(--surface,#fff);
+  box-shadow:0 4px 20px rgba(0,0,0,.18);
+  overflow:hidden;flex-shrink:0;background:#e8eaf0;
 }
+.pf-avatar img,.pf-avatar-ph{width:100%;height:100%;object-fit:cover;}
 .pf-avatar-ph {
-  background: linear-gradient(135deg, var(--primary), var(--primary-light));
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2.8rem; color: rgba(255,255,255,.3);
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  display:flex;align-items:center;justify-content:center;
+  font-size:2.8rem;color:rgba(255,255,255,.35);
+}
+.pf-strip-meta{padding-bottom:.35rem;min-width:0;flex:1;}
+.pf-strip-name {
+  font-family:var(--pf-head);
+  font-size:clamp(1.2rem,3vw,1.6rem);font-weight:800;
+  color:var(--primary);letter-spacing:-.02em;line-height:1.2;
+  margin-bottom:.4rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.pf-pills{display:flex;gap:.45rem;flex-wrap:wrap;align-items:center;}
+.pf-strip-actions{
+  margin-left:auto;display:flex;gap:.5rem;
+  align-items:flex-end;padding-bottom:.35rem;flex-wrap:wrap;
 }
 
-/* 2. Sidebar card sem foto "header" — usa apenas o avatar flutuante */
-.pf-sidebar-card {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
+/* ── PILL ── */
+.pf-pill {
+  display:inline-flex;align-items:center;gap:.3rem;
+  font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  padding:.25rem .7rem;border-radius:var(--pf-pill);line-height:1;
+}
+.pf-pill.active  {background:rgba(22,163,74,.1);border:1.5px solid rgba(22,163,74,.25);color:#16a34a;}
+.pf-pill.inactive{background:rgba(107,114,128,.1);border:1.5px solid rgba(107,114,128,.22);color:#6b7280;}
+.pf-pill.pending {background:rgba(234,179,8,.1);border:1.5px solid rgba(234,179,8,.3);color:#b45309;}
+.pf-pill.friends {background:rgba(22,163,74,.1);border:1.5px solid rgba(22,163,74,.25);color:#16a34a;}
+.pf-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+/* ── GRID ── */
+.pf-grid{display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start;}
+@media(max-width:900px){.pf-grid{grid-template-columns:1fr;}}
+
+/* ── CARD ── */
+.pf-card {
+  background:var(--surface,#fff);border:1px solid var(--border,#e5e7eb);
+  border-radius:var(--pf-radius);box-shadow:var(--pf-shadow);
+  overflow:hidden;transition:box-shadow var(--pf-ease);
+}
+.pf-card:hover{box-shadow:var(--pf-shadow-lg);}
+.pf-card-head {
+  display:flex;align-items:center;justify-content:space-between;
+  padding:.85rem 1.2rem;border-bottom:1px solid var(--border,#e5e7eb);
+  background:var(--surface-alt,#f9fafb);
+}
+.pf-card-title {
+  font-family:var(--pf-head);
+  font-size:.72rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;
+  color:var(--primary);display:flex;align-items:center;gap:.55rem;margin:0;
+}
+.pf-title-bar{width:3px;height:13px;border-radius:2px;background:var(--accent,#f59e0b);flex-shrink:0;}
+.pf-card-body{padding:1.1rem 1.2rem;}
+
+/* ── INFO ROWS ── */
+.pf-info-list{display:flex;flex-direction:column;}
+.pf-info-row{display:flex;align-items:center;gap:.75rem;padding:.65rem 0;border-bottom:1px solid var(--border,#e5e7eb);}
+.pf-info-row:last-child{border-bottom:none;}
+.pf-info-icon{width:34px;height:34px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.pf-info-row small{display:block;font-size:.62rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted,#9ca3af);margin-bottom:.1rem;}
+.pf-info-row span{font-size:.85rem;font-weight:600;color:var(--text-main,#111827);line-height:1.3;}
+
+/* ── STATS ── */
+.pf-stats{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.pf-stat-box{
+  background:var(--surface-alt,#f9fafb);border:1px solid var(--border,#e5e7eb);
+  border-radius:var(--pf-radius-sm);padding:.9rem .75rem;text-align:center;
+  transition:var(--pf-ease);
+}
+.pf-stat-box:hover{border-color:var(--primary);background:rgba(26,58,92,.04);}
+.pf-stat-num{font-family:var(--pf-head);font-size:1.6rem;font-weight:800;color:var(--primary);line-height:1;margin-bottom:.25rem;}
+.pf-stat-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text-muted,#9ca3af);}
+
+/* ── BUTTONS ── */
+.pf-btn {
+  display:inline-flex;align-items:center;gap:.4rem;
+  font-size:.8rem;font-weight:700;padding:.5rem 1rem;
+  border-radius:var(--pf-radius-sm);border:none;cursor:pointer;
+  transition:var(--pf-ease);white-space:nowrap;text-decoration:none;line-height:1;
+}
+.pf-btn-primary{background:var(--primary);color:#fff;}
+.pf-btn-primary:hover{background:var(--primary-light);color:#fff;transform:translateY(-1px);box-shadow:0 4px 14px rgba(26,58,92,.3);}
+.pf-btn-secondary{background:var(--surface-alt,#f3f4f6);color:var(--primary);border:1.5px solid var(--border,#e5e7eb);}
+.pf-btn-secondary:hover{background:var(--primary);color:#fff;border-color:var(--primary);transform:translateY(-1px);}
+.pf-btn-danger{background:rgba(220,38,38,.07);color:#dc2626;border:1.5px solid rgba(220,38,38,.2);}
+.pf-btn-danger:hover{background:#dc2626;color:#fff;border-color:#dc2626;transform:translateY(-1px);}
+.pf-btn-sm{font-size:.74rem;padding:.38rem .8rem;}
+
+/* ── PLAN CARDS ── */
+.pf-plans-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1rem;}
+.pf-plan-card {
+  border:1px solid var(--border,#e5e7eb);border-radius:var(--pf-radius);
+  overflow:hidden;background:var(--surface,#fff);
+  transition:box-shadow var(--pf-ease),transform var(--pf-ease);
+  display:flex;flex-direction:column;text-decoration:none;color:inherit;
+}
+.pf-plan-card:hover{box-shadow:var(--pf-shadow-lg);transform:translateY(-3px);color:inherit;text-decoration:none;}
+.pf-plan-thumb{position:relative;height:110px;overflow:hidden;background:linear-gradient(135deg,var(--primary),var(--primary-light));}
+.pf-plan-thumb img{width:100%;height:100%;object-fit:cover;filter:brightness(.7) saturate(1.1);transition:transform .45s ease;}
+.pf-plan-card:hover .pf-plan-thumb img{transform:scale(1.07);}
+.pf-thumb-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.4));}
+.pf-thumb-ph{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;color:rgba(255,255,255,.25);}
+.pf-plan-body{padding:.85rem;flex:1;display:flex;flex-direction:column;gap:.3rem;}
+.pf-plan-country{font-family:var(--pf-head);font-size:.92rem;font-weight:700;color:var(--text-main,#111827);margin:0;}
+.pf-plan-meta{font-size:.73rem;color:var(--text-muted,#9ca3af);display:flex;align-items:center;gap:.3rem;}
+.pf-plan-footer{
+  padding:.65rem .85rem;border-top:1px solid var(--border,#e5e7eb);
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:.72rem;font-weight:700;color:var(--primary);
 }
 
-/* 3. Topo do sidebar com gradiente navy */
-.pf-sidebar-top {
-  height: 80px;
-  position: relative;
-}
-.pf-sidebar-top::after {
-  content: ''; position: absolute; 
-  clip-path: ellipse(55% 100% at 50% 100%);
-}
+/* ── BADGES ── */
+.pf-badge{display:inline-flex;align-items:center;gap:.25rem;font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;padding:.2rem .6rem;border-radius:var(--pf-pill);}
+.pf-badge-ok  {background:rgba(22,163,74,.1);color:#16a34a;border:1px solid rgba(22,163,74,.2);}
+.pf-badge-warn{background:rgba(234,179,8,.1);color:#b45309;border:1px solid rgba(234,179,8,.25);}
+.pf-badge-off {background:rgba(107,114,128,.1);color:#6b7280;border:1px solid rgba(107,114,128,.2);}
 
-/* 4. Avatar posicionado sobre a linha do gradiente */
-.pf-avatar-outer {
-  position: relative; z-index: 2;
-  margin-top: -55px; margin-bottom: .75rem;
-}
+/* ── PRIVACY ── */
+.pf-priv-list{display:flex;flex-direction:column;}
+.pf-priv-row{display:flex;align-items:center;gap:.85rem;padding:.7rem 0;border-bottom:1px solid var(--border,#e5e7eb);}
+.pf-priv-row:last-child{border-bottom:none;}
+.pf-priv-icon{width:36px;height:36px;border-radius:9px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.9rem;}
+.pf-priv-label{font-size:.85rem;font-weight:600;color:var(--text-main,#111827);}
+.pf-priv-desc{font-size:.74rem;color:var(--text-muted,#9ca3af);}
 
-/* 5. Info row limpa (sem fundo cinza da .info-item) */
-.pf-info-row {
-  display: flex; align-items: center; gap: .65rem;
-  padding: .45rem 0;
-  border-bottom: 1px solid var(--border);
-  font-size: .87rem;
-}
-.pf-info-row:last-child { border-bottom: none; }
-.pf-info-row i { width: 18px; text-align: center; font-size: 1rem; flex-shrink: 0; }
-.pf-info-row small {
-  display: block; font-size: .63rem; font-weight: 700;
-  text-transform: uppercase; letter-spacing: .07em; opacity: .42;
-}
-.pf-info-row span { font-weight: 600; line-height: 1.3; }
+/* ── EMPTY ── */
+.pf-empty{display:flex;flex-direction:column;align-items:center;padding:2.5rem 1rem;text-align:center;}
+.pf-empty-icon{width:64px;height:64px;border-radius:50%;background:var(--surface-alt,#f3f4f6);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--text-muted,#9ca3af);margin-bottom:1rem;}
+.pf-empty p{font-size:.88rem;color:var(--text-muted,#9ca3af);margin-bottom:1rem;}
 
-/* 6. Status pill */
-.pf-status {
-  display: inline-flex; align-items: center; gap: .35rem;
-  font-size: .7rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
-  padding: .28rem .85rem; border-radius: var(--pill);
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .pf-hero{height:160px;}
+  .pf-avatar{width:100px;height:100px;}
+  .pf-strip{margin-top:-50px;gap:.85rem;}
+  .pf-strip-actions{width:100%;margin-left:0;}
+  .pf-plans-grid{grid-template-columns:1fr 1fr;}
 }
-.pf-status.on  { background: rgba(45,158,107,.1); border: 1px solid rgba(45,158,107,.25); color: var(--success); }
-.pf-status.off { background: rgba(107,114,128,.1); border: 1px solid rgba(107,114,128,.2); color: var(--text-muted); }
-
-/* 7. Amizade chip */
-.pf-friend-chip {
-  display: flex; align-items: center; justify-content: center; gap: .45rem;
-  padding: .5rem .85rem; border-radius: var(--radius-sm);
-  font-size: .82rem; font-weight: 700;
-}
-.pf-friend-chip.ok      { background: rgba(45,158,107,.08); border: 1px solid rgba(45,158,107,.2); color: var(--success); }
-.pf-friend-chip.pending { background: var(--accent-bg); border: 1px solid var(--accent-border); color: #b8891f; }
-
-/* 8. Section card header — linha dourada no topo */
-.pf-section {
-  border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden; background: var(--surface);
-  box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--transition);
-}
-.pf-section:hover { box-shadow: var(--shadow-md); }
-.pf-section-head {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: .9rem 1.25rem;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface-alt);
-  gap: .75rem;
-}
-.pf-section-title {
-  display: flex; align-items: center;
-  font-size: .78rem; font-weight: 800; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--primary); margin: 0;
-}
-.pf-section-title::before {
-  content: ''; display: block;
-  width: 3px; height: 14px; border-radius: 2px;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-
-/* 9. Bandeira no mini-card com overlay */
-.pf-flag-img {
-  width: 100%; height: 100%; object-fit: cover; display: block;
-  filter: brightness(.72) saturate(1.1);
-  transition: transform .4s var(--ease), filter .35s ease;
-}
-.plano-mini-card:hover .pf-flag-img {
-  transform: scale(1.07); filter: brightness(.82) saturate(1.15);
-}
-.pf-flag-overlay {
-  position: absolute; inset: 0;
-  background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.42) 100%);
-  pointer-events: none;
-}
-
-/* 10. Privacy row */
-.pf-priv-row {
-  display: flex; align-items: center; gap: .85rem;
-  padding: .75rem 0; border-bottom: 1px solid var(--border);
-}
-.pf-priv-row:last-child { border-bottom: none; }
-.pf-priv-icon {
-  width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: .95rem;
-}
+@media(max-width:420px){.pf-plans-grid{grid-template-columns:1fr;}}
 </style>
 {% endblock %}
 
 
 {% block conteudo %}
-<div class="perfil-container">
+<div>
 
-  <!-- ══════ HERO banner navy ══════ -->
-  <div class="perfil-hero">
-    <div class="hero-overlay"></div>
+  <!-- HERO -->
+  <div class="pf-hero">
+    <div class="pf-deco pf-deco-1"></div>
+    <div class="pf-deco pf-deco-2"></div>
   </div>
 
-  <div class="container pb-5">
-    <div class="row g-4 align-items-start">
+  <div class="pf-layout">
 
-      <!-- ═══════ SIDEBAR ═══════ -->
-      <div class="col-12 col-md-4 col-lg-3">
+    <!-- AVATAR STRIP -->
+    <div class="pf-strip">
+      <div class="pf-avatar">
+        {% if usuario_perfil.foto_perfil %}
+          <img src="{{ usuario_perfil.foto_perfil.url }}" alt="{{ usuario_perfil.nome_completo }}">
+        {% else %}
+          <div class="pf-avatar-ph"><i class="bi bi-person-fill"></i></div>
+        {% endif %}
+      </div>
 
-        <!-- Card principal -->
-        <div class="pf-sidebar-card">
-
-          <!-- Faixa superior + avatar flutuante -->
-          <div class="pf-sidebar-top"></div>
-          <div class="text-center px-3">
-            <div class="pf-avatar-outer">
-              <div class="pf-avatar-wrap mx-auto">
-                {% if usuario_perfil.foto_perfil %}
-                  <img src="{{ usuario_perfil.foto_perfil.url }}"
-                       alt="{{ usuario_perfil.nome_completo }}">
-                {% else %}
-                  <div class="pf-avatar-ph">
-                    <i class="bi bi-person-fill"></i>
-                  </div>
-                {% endif %}
-              </div>
-            </div>
-
-            <!-- Nome + status -->
-            <h2 class="mb-1" style="font-size:1.25rem;font-weight:800;color:var(--primary);letter-spacing:-.02em;">
-              {{ usuario_perfil.nome_completo }}
-            </h2>
-            <div class="mb-3">
-              {% if usuario_perfil.ativo %}
-                <span class="pf-status on"><i class="bi bi-circle-fill" style="font-size:.38rem;"></i>Ativo</span>
-              {% else %}
-                <span class="pf-status off"><i class="bi bi-circle-fill" style="font-size:.38rem;"></i>Inativo</span>
-              {% endif %}
-            </div>
-          </div>
-
-          <!-- Info rows -->
-          <div class="px-3 pb-3">
-            <div class="pf-info-row">
-              <i class="bi bi-geo-alt-fill" style="color:var(--danger);"></i>
-              <div>
-                <small>Localização</small>
-                <span>
-                  {% if usuario_perfil.cidade_residencia %}{{ usuario_perfil.cidade_residencia }}, {% endif %}
-                  {{ usuario_perfil.pais_residencia|default:"Não informado" }}
-                </span>
-              </div>
-            </div>
-
-            {% if usuario_perfil.data_nascimento %}
-            <div class="pf-info-row">
-              <i class="bi bi-cake2" style="color:var(--primary);"></i>
-              <div>
-                <small>Nascimento</small>
-                <span>{{ usuario_perfil.data_nascimento|date:"d/m/Y" }}</span>
-              </div>
-            </div>
+      <div class="pf-strip-meta">
+        <div class="pf-strip-name">{{ usuario_perfil.nome_completo }}</div>
+        <div class="pf-pills">
+          {% if usuario_perfil.ativo %}
+            <span class="pf-pill active"><span class="dot"></span>Ativo</span>
+          {% else %}
+            <span class="pf-pill inactive"><span class="dot"></span>Inativo</span>
+          {% endif %}
+          {% if not e_proprio_perfil %}
+            {% if sao_amigos %}
+              <span class="pf-pill friends"><i class="bi bi-check-circle-fill" style="font-size:.65rem;"></i>Amigos</span>
+            {% elif solicitacao_pendente %}
+              <span class="pf-pill pending"><i class="bi bi-clock-fill" style="font-size:.65rem;"></i>Solicitação enviada</span>
             {% endif %}
+          {% endif %}
+        </div>
+      </div>
 
-            {% if usuario_perfil.telefone %}
-              {% if e_proprio_perfil or usuario_perfil.mostrar_telefone %}
+      <div class="pf-strip-actions">
+        {% if e_proprio_perfil %}
+          <a href="{% url 'usuarios:editar_perfil' %}" class="pf-btn pf-btn-primary pf-btn-sm">
+            <i class="bi bi-pencil-fill"></i>Editar Perfil
+          </a>
+          <a href="{% url 'destinos:meus_planos' %}" class="pf-btn pf-btn-secondary pf-btn-sm">
+            <i class="bi bi-map-fill"></i>Meus Planos
+          </a>
+        {% else %}
+          {% if sao_amigos %}
+            <a href="{% url 'chat:iniciar_conversa' uuid_usuario=usuario_perfil.uuid %}" class="pf-btn pf-btn-primary pf-btn-sm">
+              <i class="bi bi-chat-dots-fill"></i>Conversar
+            </a>
+          {% elif not solicitacao_pendente %}
+            <button class="pf-btn pf-btn-primary pf-btn-sm" onclick="enviarSolicitacao('{{ usuario_perfil.uuid }}')">
+              <i class="bi bi-person-plus-fill"></i>Adicionar Amigo
+            </button>
+          {% endif %}
+          <button class="pf-btn pf-btn-danger pf-btn-sm" onclick="confirmarBloqueio('{{ usuario_perfil.uuid }}','{{ usuario_perfil.get_nome_exibicao }}')">
+            <i class="bi bi-slash-circle"></i>Bloquear
+          </button>
+        {% endif %}
+      </div>
+    </div><!-- /strip -->
+
+
+    <!-- MAIN GRID -->
+    <div class="pf-grid">
+
+      <!-- SIDEBAR -->
+      <aside class="d-flex flex-column gap-3">
+
+        <div class="pf-card">
+          <div class="pf-card-head">
+            <h6 class="pf-card-title">
+              <span class="pf-title-bar"></span>
+              <i class="bi bi-person-lines-fill" style="color:var(--accent);"></i>
+              Informações
+            </h6>
+          </div>
+          <div class="pf-card-body">
+            <div class="pf-info-list">
+
               <div class="pf-info-row">
-                <i class="bi bi-telephone" style="color:var(--accent);"></i>
+                <div class="pf-info-icon" style="background:rgba(220,38,38,.08);">
+                  <i class="bi bi-geo-alt-fill" style="color:#dc2626;"></i>
+                </div>
+                <div>
+                  <small>Localização</small>
+                  <span>{% if usuario_perfil.cidade_residencia %}{{ usuario_perfil.cidade_residencia }}, {% endif %}{{ usuario_perfil.pais_residencia|default:"Não informado" }}</span>
+                </div>
+              </div>
+
+              {% if usuario_perfil.data_nascimento %}
+              <div class="pf-info-row">
+                <div class="pf-info-icon" style="background:rgba(26,58,92,.08);">
+                  <i class="bi bi-cake2" style="color:var(--primary);"></i>
+                </div>
+                <div>
+                  <small>Nascimento</small>
+                  <span>{{ usuario_perfil.data_nascimento|date:"d/m/Y" }}</span>
+                </div>
+              </div>
+              {% endif %}
+
+              {% if usuario_perfil.telefone %}{% if e_proprio_perfil or usuario_perfil.mostrar_telefone %}
+              <div class="pf-info-row">
+                <div class="pf-info-icon" style="background:rgba(245,158,11,.08);">
+                  <i class="bi bi-telephone" style="color:var(--accent);"></i>
+                </div>
                 <div>
                   <small>Telefone</small>
                   <span>{{ usuario_perfil.telefone }}</span>
                 </div>
               </div>
-              {% endif %}
-            {% endif %}
+              {% endif %}{% endif %}
 
-            {% if e_proprio_perfil or usuario_perfil.mostrar_email %}
-            <div class="pf-info-row">
-              <i class="bi bi-envelope" style="color:var(--primary);"></i>
-              <div>
-                <small>Email</small>
-                <span>{{ usuario_perfil.email }}</span>
-              </div>
-            </div>
-            {% endif %}
-
-            <div class="pf-info-row">
-              <i class="bi bi-calendar-check" style="color:var(--success);"></i>
-              <div>
-                <small>Membro desde</small>
-                <span>{{ usuario_perfil.data_criacao|date:"d/m/Y" }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Botões de ação -->
-          <div class="px-3 pb-3 d-grid gap-2">
-            {% if e_proprio_perfil %}
-              <a href="{% url 'usuarios:editar_perfil' %}" class="btn btn-custom btn-primario btn-sm">
-                <i class="bi bi-pencil-fill me-1"></i>Editar Perfil
-              </a>
-              <a href="{% url 'destinos:meus_planos' %}" class="btn btn-custom btn-secundario btn-sm">
-                <i class="bi bi-map-fill me-1"></i>Meus Planos
-              </a>
-            {% else %}
-              {% if sao_amigos %}
-                <div class="pf-friend-chip ok mb-1">
-                  <i class="bi bi-check-circle-fill"></i>Vocês são amigos!
+              {% if e_proprio_perfil or usuario_perfil.mostrar_email %}
+              <div class="pf-info-row">
+                <div class="pf-info-icon" style="background:rgba(26,58,92,.08);">
+                  <i class="bi bi-envelope" style="color:var(--primary-light);"></i>
                 </div>
-                <a href="{% url 'chat:iniciar_conversa' uuid_usuario=usuario_perfil.uuid %}"
-                   class="btn btn-custom btn-primario btn-sm">
-                  <i class="bi bi-chat-dots-fill me-1"></i>Conversar
-                </a>
-              {% elif solicitacao_pendente %}
-                <div class="pf-friend-chip pending">
-                  <i class="bi bi-clock-fill"></i>Solicitação pendente
+                <div>
+                  <small>E-mail</small>
+                  <span>{{ usuario_perfil.email }}</span>
                 </div>
-              {% else %}
-                <button class="btn btn-custom btn-primario btn-sm"
-                        onclick="enviarSolicitacao('{{ usuario_perfil.uuid }}')">
-                  <i class="bi bi-person-plus-fill me-1"></i>Adicionar Amigo
-                </button>
+              </div>
               {% endif %}
 
-              <!-- Bloquear — disponível em qualquer estado de amizade -->
-              <button class="btn btn-sm"
-                      style="background:rgba(192,57,43,.07);color:var(--danger);
-                             border:1.5px solid rgba(192,57,43,.22);border-radius:var(--radius-sm);
-                             font-size:.78rem;font-weight:700;padding:.38rem .85rem;
-                             transition:var(--transition);"
-                      onmouseover="this.style.background='var(--danger)';this.style.color='#fff';"
-                      onmouseout="this.style.background='rgba(192,57,43,.07)';this.style.color='var(--danger)';"
-                      onclick="confirmarBloqueio('{{ usuario_perfil.uuid }}', '{{ usuario_perfil.get_nome_exibicao }}')">
-                <i class="bi bi-slash-circle me-1"></i>Bloquear usuário
-              </button>
+              <div class="pf-info-row">
+                <div class="pf-info-icon" style="background:rgba(22,163,74,.08);">
+                  <i class="bi bi-calendar-check" style="color:#16a34a;"></i>
+                </div>
+                <div>
+                  <small>Membro desde</small>
+                  <span>{{ usuario_perfil.data_criacao|date:"d/m/Y" }}</span>
+                </div>
+              </div>
 
-            {% endif %}
+            </div>
           </div>
-
         </div>
-        <!-- /pf-sidebar-card -->
 
-        <!-- Estatísticas -->
-        <div class="pf-section mt-3">
-          <div class="pf-section-head">
-            <h6 class="pf-section-title">
+        <div class="pf-card">
+          <div class="pf-card-head">
+            <h6 class="pf-card-title">
+              <span class="pf-title-bar"></span>
               <i class="bi bi-bar-chart-fill" style="color:var(--accent);"></i>
               Estatísticas
             </h6>
           </div>
-          <div class="p-3">
-            <div class="stat-item">
-              <span class="stat-label">
-                <i class="bi bi-map me-1" style="color:var(--accent);"></i>Planos de Viagem
-              </span>
-              <span class="stat-value">{{ planos_count|default:0 }}</span>
-            </div>
-            <div class="stat-item" style="border-bottom:none;padding-bottom:0;">
-              <span class="stat-label">
-                <i class="bi bi-people me-1" style="color:var(--accent);"></i>Amigos
-              </span>
-              <span class="stat-value">{{ amigos_count|default:0 }}</span>
+          <div class="pf-card-body">
+            <div class="pf-stats">
+              <div class="pf-stat-box">
+                <div class="pf-stat-num">{{ planos_count|default:0 }}</div>
+                <div class="pf-stat-label"><i class="bi bi-map me-1"></i>Planos</div>
+              </div>
+              <div class="pf-stat-box">
+                <div class="pf-stat-num">{{ amigos_count|default:0 }}</div>
+                <div class="pf-stat-label"><i class="bi bi-people me-1"></i>Amigos</div>
+              </div>
             </div>
           </div>
         </div>
 
-      </div>
-      <!-- /sidebar -->
+      </aside>
 
 
-      <!-- ═══════ CONTEÚDO PRINCIPAL ═══════ -->
-      <div class="col-12 col-md-8 col-lg-9 d-flex flex-column gap-4">
+      <!-- CONTENT -->
+      <div class="d-flex flex-column gap-3">
 
-        <!-- Biografia -->
         {% if usuario_perfil.biografia %}
-        <div class="pf-section">
-          <div class="pf-section-head">
-            <h6 class="pf-section-title">
-              <i class="bi bi-chat-quote-fill" style="color:var(--accent);"></i>Sobre
+        <div class="pf-card">
+          <div class="pf-card-head">
+            <h6 class="pf-card-title">
+              <span class="pf-title-bar"></span>
+              <i class="bi bi-chat-quote-fill" style="color:var(--accent);"></i>
+              Sobre
             </h6>
           </div>
-          <div class="p-4">
-            <p class="mb-0" style="line-height:1.8;color:var(--text-main);font-size:.93rem;">
-              {{ usuario_perfil.biografia }}
-            </p>
+          <div class="pf-card-body">
+            <p class="mb-0" style="line-height:1.85;color:var(--text-main);font-size:.9rem;">{{ usuario_perfil.biografia }}</p>
           </div>
         </div>
         {% endif %}
 
-        <!-- Planos de Viagem -->
-        <div class="pf-section">
-          <div class="pf-section-head">
-            <h6 class="pf-section-title">
-              <i class="bi bi-map-fill" style="color:var(--accent);"></i>Planos de Viagem
+        <!-- Planos -->
+        <div class="pf-card">
+          <div class="pf-card-head">
+            <h6 class="pf-card-title">
+              <span class="pf-title-bar"></span>
+              <i class="bi bi-map-fill" style="color:var(--accent);"></i>
+              Planos de Viagem
             </h6>
             {% if e_proprio_perfil %}
-              <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-secundario btn-sm">
-                <i class="bi bi-plus-circle-fill me-1"></i>Novo Plano
+              <a href="{% url 'destinos:criar_plano' %}" class="pf-btn pf-btn-secondary pf-btn-sm">
+                <i class="bi bi-plus-circle-fill"></i>Novo Plano
               </a>
             {% endif %}
           </div>
-
-          <div class="p-4">
+          <div class="pf-card-body">
             {% if planos %}
-              <div class="row g-3">
+              <div class="pf-plans-grid">
                 {% for plano in planos %}
-                <div class="col-12 col-sm-6">
-                  <div class="plano-mini-card">
-
-                    <div class="plano-mini-header" style="position:relative;">
-                      {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
-                        <img
-                          src="https://flagcdn.com/w640/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
-                          alt="{{ plano.pais_destino.nome }}"
-                          class="pf-flag-img"
-                          onerror="this.style.display='none';this.nextElementSibling.style.display='none';this.nextElementSibling.nextElementSibling.style.display='flex';"
-                        >
-                        <div class="pf-flag-overlay"></div>
-                        <div class="plano-mini-placeholder" style="display:none;">
-                          <i class="bi bi-globe2"></i>
-                        </div>
-                      {% else %}
-                        <div class="plano-mini-placeholder">
-                          <i class="bi bi-globe2"></i>
-                        </div>
-                      {% endif %}
-                    </div>
-
-                    <div class="plano-mini-body">
-                      <h6 class="mb-2">{{ plano.pais_destino.nome }}</h6>
-                      <p class="mb-1 small text-muted">
-                        <i class="bi bi-calendar3 me-1" style="color:var(--accent);"></i>
-                        {{ plano.data_inicio|date:"d/m/Y" }}
-                        {% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}
-                      </p>
-                      <p class="mb-2 small text-muted">
-                        <i class="bi bi-heart me-1" style="color:var(--accent);"></i>
-                        {{ plano.get_motivo_viagem_display }}
-                      </p>
-                      {% if plano.viagem_concluida %}
-                        <span class="badge bg-success rounded-pill" style="background:var(--primary);font-size:.67rem;">Concluída</span>
-                      {% elif plano.ativo %}
-                        <span class="badge rounded-pill" style="background:var(--success);font-size:.67rem;">Ativa</span>
-                      {% else %}
-                        <span class="badge bg-secondary rounded-pill" style="background:var(--danger);font-size:.67rem;">Inativa</span>
-                      {% endif %}
-                    </div>
-
-                    <a href="{% url 'destinos:detalhes_plano' plano.uuid %}" class="plano-mini-link">
-                      Ver Detalhes <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
+                <a href="{% url 'destinos:detalhes_plano' plano.uuid %}" class="pf-plan-card">
+                  <div class="pf-plan-thumb">
+                    {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
+                      <img src="https://flagcdn.com/w640/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png" alt="{{ plano.pais_destino.nome }}">
+                      <div class="pf-thumb-overlay"></div>
+                    {% else %}
+                      <div class="pf-thumb-ph"><i class="bi bi-globe2"></i></div>
+                    {% endif %}
                   </div>
-                </div>
+                  <div class="pf-plan-body">
+                    <p class="pf-plan-country">{{ plano.pais_destino.nome }}</p>
+                    <span class="pf-plan-meta"><i class="bi bi-calendar3" style="color:var(--accent);"></i>{{ plano.data_inicio|date:"d/m/Y" }}{% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}</span>
+                    <span class="pf-plan-meta"><i class="bi bi-heart" style="color:var(--accent);"></i>{{ plano.get_motivo_viagem_display }}</span>
+                    <div class="mt-auto pt-2">
+                      {% if plano.viagem_concluida %}<span class="pf-badge pf-badge-warn">Concluída</span>
+                      {% elif plano.ativo %}<span class="pf-badge pf-badge-ok">Ativa</span>
+                      {% else %}<span class="pf-badge pf-badge-off">Inativa</span>{% endif %}
+                    </div>
+                  </div>
+                  <div class="pf-plan-footer">Ver detalhes <i class="bi bi-arrow-right"></i></div>
+                </a>
                 {% endfor %}
               </div>
-
             {% else %}
-              <div class="text-center py-5">
-                <i class="bi bi-map d-block mb-3"
-                   style="font-size:2.75rem;opacity:.15;color:var(--primary);"></i>
+              <div class="pf-empty">
+                <div class="pf-empty-icon"><i class="bi bi-map"></i></div>
                 {% if e_proprio_perfil %}
-                  <p class="text-muted mb-3" style="font-size:.9rem;">Você ainda não tem planos de viagem.</p>
-                  <a href="{% url 'destinos:criar_plano' %}" class="btn btn-custom btn-primario btn-sm">
-                    <i class="bi bi-plus-circle-fill me-1"></i>Criar Primeiro Plano
-                  </a>
+                  <p>Você ainda não tem planos de viagem.</p>
+                  <a href="{% url 'destinos:criar_plano' %}" class="pf-btn pf-btn-primary pf-btn-sm"><i class="bi bi-plus-circle-fill"></i>Criar Primeiro Plano</a>
                 {% else %}
-                  <p class="text-muted mb-0" style="font-size:.9rem;">
-                    Este viajante não tem planos publicados.
-                  </p>
+                  <p class="mb-0">Este viajante não tem planos publicados.</p>
                 {% endif %}
               </div>
             {% endif %}
           </div>
         </div>
-        <!-- /planos -->
 
         <!-- Privacidade -->
         {% if e_proprio_perfil %}
-        <div class="pf-section">
-          <div class="pf-section-head">
-            <h6 class="pf-section-title">
-              <i class="bi bi-shield-lock-fill" style="color:var(--accent);"></i>Privacidade
+        <div class="pf-card">
+          <div class="pf-card-head">
+            <h6 class="pf-card-title">
+              <span class="pf-title-bar"></span>
+              <i class="bi bi-shield-lock-fill" style="color:var(--accent);"></i>
+              Privacidade
             </h6>
+            <a href="{% url 'usuarios:editar_perfil' %}" class="pf-btn pf-btn-secondary pf-btn-sm">
+              <i class="bi bi-pencil-fill"></i>Gerenciar
+            </a>
           </div>
-          <div class="p-4">
+          <div class="pf-card-body">
+            <div class="pf-priv-list">
 
-            <div class="pf-priv-row">
-              <div class="pf-priv-icon" style="background:rgba(26,58,92,.08);">
-                <i class="bi bi-globe2" style="color:var(--primary);"></i>
+              <div class="pf-priv-row">
+                <div class="pf-priv-icon" style="background:rgba(26,58,92,.08);">
+                  <i class="bi bi-globe2" style="color:var(--primary);"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="pf-priv-label">Perfil</div>
+                  <div class="pf-priv-desc">Visibilidade do seu perfil</div>
+                </div>
+                <span class="pf-badge {% if usuario_perfil.perfil_publico %}pf-badge-ok{% else %}pf-badge-off{% endif %}">
+                  {% if usuario_perfil.perfil_publico %}Público{% else %}Privado{% endif %}
+                </span>
               </div>
-              <div class="flex-grow-1">
-                <div class="fw-semibold" style="font-size:.88rem;">Perfil</div>
-                <small class="text-muted" style="font-size:.76rem;">Visibilidade do seu perfil</small>
-              </div>
-              <span class="badge rounded-pill px-3"
-                    style="background:{% if usuario_perfil.perfil_publico %}var(--primary){% else %}var(--text-muted){% endif %};">
-                {% if usuario_perfil.perfil_publico %}Público{% else %}Privado{% endif %}
-              </span>
-            </div>
 
-            <div class="pf-priv-row">
-              <div class="pf-priv-icon" style="background:rgba(42,82,152,.08);">
-                <i class="bi bi-envelope" style="color:var(--primary-light);"></i>
+              <div class="pf-priv-row">
+                <div class="pf-priv-icon" style="background:rgba(42,82,152,.08);">
+                  <i class="bi bi-envelope" style="color:var(--primary-light);"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="pf-priv-label">E-mail</div>
+                  <div class="pf-priv-desc">Quem pode ver seu e-mail</div>
+                </div>
+                <span class="pf-badge {% if usuario_perfil.mostrar_email %}pf-badge-ok{% else %}pf-badge-off{% endif %}">
+                  {% if usuario_perfil.mostrar_email %}Amigos{% else %}Privado{% endif %}
+                </span>
               </div>
-              <div class="flex-grow-1">
-                <div class="fw-semibold" style="font-size:.88rem;">Email</div>
-                <small class="text-muted" style="font-size:.76rem;">Quem pode ver seu e-mail</small>
-              </div>
-              <span class="badge rounded-pill px-3"
-                    style="background:{% if usuario_perfil.mostrar_email %}var(--primary){% else %}var(--text-muted){% endif %};">
-                {% if usuario_perfil.mostrar_email %}Amigos{% else %}Privado{% endif %}
-              </span>
-            </div>
 
-            <div class="pf-priv-row">
-              <div class="pf-priv-icon" style="background:var(--accent-bg);">
-                <i class="bi bi-telephone" style="color:var(--accent);"></i>
+              <div class="pf-priv-row">
+                <div class="pf-priv-icon" style="background:rgba(245,158,11,.08);">
+                  <i class="bi bi-telephone" style="color:var(--accent);"></i>
+                </div>
+                <div class="flex-grow-1">
+                  <div class="pf-priv-label">Telefone</div>
+                  <div class="pf-priv-desc">Quem pode ver seu telefone</div>
+                </div>
+                <span class="pf-badge {% if usuario_perfil.mostrar_telefone %}pf-badge-ok{% else %}pf-badge-off{% endif %}">
+                  {% if usuario_perfil.mostrar_telefone %}Amigos{% else %}Privado{% endif %}
+                </span>
               </div>
-              <div class="flex-grow-1">
-                <div class="fw-semibold" style="font-size:.88rem;">Telefone</div>
-                <small class="text-muted" style="font-size:.76rem;">Quem pode ver seu telefone</small>
-              </div>
-              <span class="badge rounded-pill px-3"
-                    style="{% if usuario_perfil.mostrar_telefone %}background:var(--primary);color:#fff;{% else %}background:var(--text-muted);{% endif %}">
-                {% if usuario_perfil.mostrar_telefone %}Amigos{% else %}Privado{% endif %}
-              </span>
-            </div>
 
-              <a href="{% url 'usuarios:editar_perfil' %}" class="btn btn-custom btn-primario btn-sm mt-3">
-                <i class="bi bi-pencil-fill me-1"></i>Gerenciar Privacidade
-              </a>
             </div>
           </div>
         </div>
         {% endif %}
 
-      </div>
-      <!-- /main -->
-    </div>
-  </div>
+      </div><!-- /content -->
+    </div><!-- /grid -->
+  </div><!-- /layout -->
 </div>
 
 
-<!-- ══════ MODAL AMIZADE ══════ -->
+<!-- MODAL AMIZADE -->
 <div class="modal fade" id="modalSolicitacao" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content border-0" style="border-radius:var(--radius);overflow:hidden;">
-      <div class="modal-header border-0"
-           style="background:linear-gradient(135deg,var(--primary),var(--primary-light));">
-        <h5 class="modal-title text-white fw-bold">
+    <div class="modal-content border-0" style="border-radius:var(--pf-radius);overflow:hidden;">
+      <div class="modal-header border-0" style="background:linear-gradient(135deg,var(--primary),var(--primary-light));">
+        <h5 class="modal-title text-white fw-bold" style="font-size:.95rem;">
           <i class="bi bi-person-plus-fill me-2"></i>Enviar Solicitação de Amizade
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
@@ -507,51 +509,44 @@
       <form method="post" action="{% url 'conexoes:enviar_solicitacao' usuario_perfil.uuid %}">
         {% csrf_token %}
         <div class="modal-body p-4">
-          <label for="mensagem" class="form-label">
+          <label for="mensagem" class="form-label fw-semibold" style="font-size:.84rem;">
             <i class="bi bi-chat-text me-1" style="color:var(--accent);"></i>Mensagem Opcional
           </label>
-          <textarea name="mensagem" id="mensagem" class="form-control" rows="3"
-                    placeholder="Conte um pouco sobre você..."></textarea>
-          <small class="text-muted mt-1 d-block">Máximo de 500 caracteres</small>
+          <textarea name="mensagem" id="mensagem" class="form-control" rows="3" placeholder="Conte um pouco sobre você..."></textarea>
+          <small class="text-muted mt-1 d-block" style="font-size:.74rem;">Máximo de 500 caracteres</small>
           <input type="hidden" name="destinatario_uuid" id="destinatario_uuid">
         </div>
         <div class="modal-footer" style="border-top:1px solid var(--border);">
-          <button type="button" class="btn btn-ghost-navy btn-sm" data-bs-dismiss="modal">Cancelar</button>
-          <button type="submit" class="btn btn-custom btn-primario btn-sm">
-            <i class="bi bi-send-fill me-1"></i>Enviar Solicitação
-          </button>
+          <button type="button" class="pf-btn pf-btn-secondary pf-btn-sm" data-bs-dismiss="modal">Cancelar</button>
+          <button type="submit" class="pf-btn pf-btn-primary pf-btn-sm"><i class="bi bi-send-fill"></i>Enviar</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- ══════ MODAL BLOQUEIO ══════ -->
+<!-- MODAL BLOQUEIO -->
 <div class="modal fade" id="modalBloqueio" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content border-0" style="border-radius:var(--radius);overflow:hidden;">
-      <div class="modal-header border-0"
-           style="background:linear-gradient(135deg,var(--danger),#922b21);">
-        <h5 class="modal-title text-white fw-bold" style="font-size:.95rem;">
+    <div class="modal-content border-0" style="border-radius:var(--pf-radius);overflow:hidden;">
+      <div class="modal-header border-0" style="background:linear-gradient(135deg,#dc2626,#922b21);">
+        <h5 class="modal-title text-white fw-bold" style="font-size:.9rem;">
           <i class="bi bi-slash-circle me-2"></i>Bloquear usuário
         </h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
-      <div class="modal-body p-4" style="font-size:.88rem;color:var(--text-muted);">
-        Tem certeza que deseja bloquear
-        <strong id="bloqueioNome" style="color:var(--text-main);"></strong>?
-        <ul class="mt-2 mb-0" style="font-size:.82rem;padding-left:1.2rem;">
+      <div class="modal-body p-4" style="font-size:.86rem;color:var(--text-muted);">
+        Tem certeza que deseja bloquear <strong id="bloqueioNome" style="color:var(--text-main);"></strong>?
+        <ul class="mt-2 mb-0" style="font-size:.8rem;padding-left:1.2rem;line-height:1.9;">
           <li>A amizade será desfeita</li>
           <li>As conversas serão encerradas</li>
           <li>Contato futuro será impedido</li>
         </ul>
       </div>
       <div class="modal-footer border-0 pt-0 gap-2">
-        <button type="button" class="btn btn-ghost-navy btn-sm" data-bs-dismiss="modal">Cancelar</button>
-        <button type="button" class="btn btn-sm fw-bold" id="bloqueioConfirmBtn"
-                style="background:var(--danger);color:#fff;border:none;
-                       border-radius:var(--radius-sm);padding:.4rem 1rem;">
-          <i class="bi bi-slash-circle me-1"></i>Confirmar bloqueio
+        <button type="button" class="pf-btn pf-btn-secondary pf-btn-sm" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="pf-btn pf-btn-danger pf-btn-sm" id="bloqueioConfirmBtn">
+          <i class="bi bi-slash-circle"></i>Confirmar
         </button>
       </div>
     </div>

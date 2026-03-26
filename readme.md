@@ -6,6 +6,8 @@
 
 ## 🚀 Início Rápido
 
+Beta - https://mostrando-somente.up.railway.app/
+
 ### Pré-requisitos
 - Python 3.11
 - Django 5.0+

@@ -20,7 +20,7 @@
 
 /* ── HERO ── */
 .pf-hero {
-  position:relative; height:150px; overflow:hidden;
+  position:relative; height:220px; overflow:hidden;
   background:linear-gradient(135deg,var(--primary) 0%,var(--primary-light) 60%,#2c4fa3 100%);
 }
 .pf-hero::before {
@@ -552,37 +552,4 @@
     </div>
   </div>
 </div>
-{% endblock %}
-
-{% block scripts_extras %}
-<script>
-function enviarSolicitacao(uuid) {
-  document.getElementById('destinatario_uuid').value = uuid;
-  new bootstrap.Modal(document.getElementById('modalSolicitacao')).show();
-}
-
-function confirmarBloqueio(uuid, nome) {
-  document.getElementById('bloqueioNome').textContent = nome;
-  document.getElementById('bloqueioConfirmBtn').onclick = async function () {
-    bootstrap.Modal.getInstance(document.getElementById('modalBloqueio')).hide();
-    try {
-      const r = await fetch(`/conexoes/bloquear/${uuid}/`, {
-        method: 'POST',
-        headers: {
-          'X-CSRFToken': '{{ csrf_token }}',
-          'X-Requested-With': 'XMLHttpRequest'
-        }
-      });
-      if (r.ok) {
-        window.location.href = '{% url "destinos:buscar_viajantes" %}';
-      } else {
-        alert('Erro ao bloquear usuário. Tente novamente.');
-      }
-    } catch (_) {
-      alert('Erro de conexão. Tente novamente.');
-    }
-  };
-  new bootstrap.Modal(document.getElementById('modalBloqueio')).show();
-}
-</script>
 {% endblock %}

@@ -168,7 +168,11 @@ class Usuario(AbstractUser):
     
     def get_nome_exibicao(self):
         """Retorna o nome para exibição pública."""
-        return self.nome_completo.split()[0] if self.nome_completo else self.email
+        if self.nome_completo and self.nome_completo.strip():
+            first_name = self.nome_completo.strip().split()[0]
+            if first_name:
+                return first_name
+        return self.email.split('@')[0] if self.email else "Viajante"
     
     def esta_bloqueado(self):
         """Verifica se a conta está temporariamente bloqueada."""

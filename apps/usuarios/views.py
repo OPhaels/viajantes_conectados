@@ -128,7 +128,7 @@ def view_login_usuario(request):
             logger.info(f'Login bem-sucedido: {usuario_autenticado.email}')
             messages.success(request, _(f'Bem-vindo, {usuario_autenticado.get_nome_exibicao()}!'))
             
-            proximo = request.GET.get('next', 'destinos:buscar')
+            proximo = request.GET.get('next', '/')
             return redirect(proximo)
         else:
             # Incrementar tentativas falhas
@@ -247,6 +247,11 @@ def view_perfil_usuario(request, uuid=None):
         'solicitacao_pendente': solicitacao_pendente,
         'planos': planos,
         'planos_count': planos.count(),
+        'amigos_count': Amizade.objects.filter(
+            usuario1=usuario
+        ).count() + Amizade.objects.filter(
+            usuario2=usuario
+        ).count(),
         'titulo': usuario.get_nome_exibicao()
     }
     

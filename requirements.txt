@@ -65,6 +65,7 @@ pycparser==2.23
 pyflakes==3.2.0
 PyJWT==2.10.1
 pyOpenSSL==25.1.0
+django-resend==2.0.0
 pytest==7.4.4
 pytest-django==4.7.0
 python-dateutil==2.9.0.post0

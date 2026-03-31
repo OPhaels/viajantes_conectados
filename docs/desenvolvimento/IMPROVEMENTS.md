@@ -309,21 +309,6 @@ sucesso, erro = processar_solicitacao_amizade(
 )
 ```
 
-### Usar Novo Design System
-```html
-<!-- Botão primário -->
-<button class="botao botao-primario">Enviar</button>
-
-<!-- Card profissional -->
-<div class="card">
-    <div class="card-corpo">Conteúdo aqui</div>
-</div>
-
-<!-- Grid responsivo -->
-<div class="grid grid-3">...</div>
-```
-
----
 
 ## ✔️ Checklist de Segurança
 

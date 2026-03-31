@@ -83,3 +83,37 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
+
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form");
+
+    if (form) {
+        // Restaurar dados do formulário ao carregar a página
+        const savedData = localStorage.getItem("formData");
+        if (savedData) {
+            const formData = JSON.parse(savedData);
+            Object.keys(formData).forEach(key => {
+                const input = form.querySelector(`[name="${key}"]`);
+                if (input && input.type !== "password") { // Ignorar campos de senha
+                    input.value = formData[key];
+                }
+            });
+        }
+
+        // Salvar dados do formulário ao alterar os campos
+        form.addEventListener("input", function () {
+            const formData = {};
+            form.querySelectorAll("input, textarea, select").forEach(input => {
+                if (input.type !== "password") { // Ignorar campos de senha
+                    formData[input.name] = input.value;
+                }
+            });
+            localStorage.setItem("formData", JSON.stringify(formData));
+        });
+
+        // Limpar dados do formulário após o envio
+        form.addEventListener("submit", function () {
+            localStorage.removeItem("formData");
+        });
+    }
+});

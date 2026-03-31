@@ -316,6 +316,7 @@ body {
   font-weight: 600;
   font-size: .75rem;
   letter-spacing: .04em;
+  color: white;
 }
 
 /* ========================================
@@ -560,4 +561,4 @@ body {
   font-size: .78rem;
   color: rgba(255, 255, 255, .3);
   margin: 0;
-}s
+}

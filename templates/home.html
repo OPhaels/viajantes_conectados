@@ -5,503 +5,867 @@
 {% block titulo %}Viajantes Conectados - Encontre Companheiros de Viagem{% endblock %}
 
 {% block estilos_extras %}
-<link rel="stylesheet" href="{% static 'css/pages.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700;800&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/pages.css' %}">
 
-{% if user.is_authenticated %}
 <style>
-/* ══════════════════════════════════════════
-   TOKENS — HOME LOGADO
-══════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════
+   DESIGN TOKENS — MOBILE FIRST
+   Aplica para ambos os estados (logado / landing)
+══════════════════════════════════════════════════════ */
 :root {
-  --hm-navy:      #0d1b2e;
-  --hm-gold:      #d4a847;
-  --hm-gold2:     #f0c96a;
-  --hm-radius:    16px;
-  --hm-radius-sm: 10px;
-  --hm-ease:      cubic-bezier(.4,0,.2,1);
-  --hm-shadow:    0 2px 14px rgba(0,0,0,.07), 0 1px 4px rgba(0,0,0,.05);
-  --hm-shadow-lg: 0 10px 40px rgba(0,0,0,.13);
-  --hm-gold-glow: 0 4px 24px rgba(212,168,71,.22);
-  --hm-head:      'Sora', sans-serif;
-  --hm-body:      'DM Sans', sans-serif;
+  /* Cores */
+  --c-navy:        #0d1b2e;
+  --c-navy-2:      #1a2f4a;
+  --c-navy-3:      #0f2339;
+  --c-gold:        #d4a847;
+  --c-gold-2:      #f0c96a;
+  --c-gold-dim:    rgba(212,168,71,.12);
+  --c-gold-border: rgba(212,168,71,.22);
+  --c-white-10:    rgba(255,255,255,.10);
+  --c-white-06:    rgba(255,255,255,.06);
+  --c-white-04:    rgba(255,255,255,.04);
+  --c-surface:     var(--surface, #ffffff);
+  --c-border:      var(--border, #e2ddd8);
+  --c-text:        var(--text-main, #1a1a2e);
+  --c-muted:       var(--text-muted, #9ca3af);
+  --c-primary:     var(--primary, #1a3a5c);
+
+  /* Tipografia */
+  --f-head: 'Sora', sans-serif;
+  --f-body: 'DM Sans', sans-serif;
+
+  /* Espaçamento base */
+  --sp-xs:  .375rem;
+  --sp-sm:  .75rem;
+  --sp-md:  1.25rem;
+  --sp-lg:  2rem;
+  --sp-xl:  3rem;
+  --sp-2xl: 5rem;
+
+  /* Bordas */
+  --r-sm:  10px;
+  --r-md:  14px;
+  --r-lg:  18px;
+  --r-xl:  22px;
+  --r-pill:999px;
+
+  /* Sombras */
+  --shadow-sm: 0 2px 12px rgba(0,0,0,.06), 0 1px 3px rgba(0,0,0,.04);
+  --shadow-md: 0 6px 28px rgba(0,0,0,.10);
+  --shadow-lg: 0 14px 48px rgba(0,0,0,.14);
+  --shadow-gold: 0 4px 28px rgba(212,168,71,.22);
+
+  /* Animações */
+  --ease: cubic-bezier(.4,0,.2,1);
+  --ease-spring: cubic-bezier(.34,1.56,.64,1);
+  --dur-fast: 200ms;
+  --dur-base: 320ms;
+  --dur-slow: 560ms;
+
+  /* Touch target mínimo */
+  --touch-target: 44px;
 }
 
-/* ── ANIMAÇÕES ── */
-@keyframes hm-fadeUp  { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:none} }
-@keyframes hm-slideR  { from{opacity:0;transform:translateX(28px)} to{opacity:1;transform:none} }
-@keyframes hm-shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
-@keyframes hm-pulse   { 0%,100%{box-shadow:0 0 0 0 rgba(212,168,71,.45)} 50%{box-shadow:0 0 0 7px rgba(212,168,71,0)} }
-@keyframes hm-float   { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+/* ── RESET / BASE ─────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
 
-.hm-a1{opacity:0;animation:hm-fadeUp .5s .05s var(--hm-ease) forwards;}
-.hm-a2{opacity:0;animation:hm-fadeUp .5s .15s var(--hm-ease) forwards;}
-.hm-a3{opacity:0;animation:hm-fadeUp .5s .25s var(--hm-ease) forwards;}
-.hm-a4{opacity:0;animation:hm-fadeUp .5s .35s var(--hm-ease) forwards;}
-.hm-ar{opacity:0;animation:hm-slideR .6s .2s var(--hm-ease) forwards;}
+/* Fonte base herdada de body */
+body { font-family: var(--f-body); }
 
-/* ══════════════════════════════════════════
-   BANNER GREETING
-══════════════════════════════════════════ */
+/* ── KEYFRAMES ────────────────────────────────────── */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(20px); }
+  to   { opacity:1; transform:none; }
+}
+@keyframes slideRight {
+  from { opacity:0; transform:translateX(24px); }
+  to   { opacity:1; transform:none; }
+}
+@keyframes shimmer {
+  0%   { background-position: 200% center; }
+  100% { background-position:-200% center; }
+}
+@keyframes pulseDot {
+  0%,100% { box-shadow: 0 0 0 0   rgba(212,168,71,.5); }
+  50%     { box-shadow: 0 0 0 7px rgba(212,168,71,0);   }
+}
+@keyframes float {
+  0%,100% { transform:translateY(0);   }
+  50%     { transform:translateY(-9px);}
+}
+@keyframes spinSlow {
+  to { transform:rotate(360deg); }
+}
+
+/* ── UTILITÁRIOS ──────────────────────────────────── */
+.u-sr-only {
+  position:absolute; width:1px; height:1px;
+  padding:0; margin:-1px; overflow:hidden;
+  clip:rect(0,0,0,0); white-space:nowrap; border:0;
+}
+
+/* Animações escalonadas */
+.a-up-1 { opacity:0; animation: fadeUp var(--dur-slow) .05s var(--ease) forwards; }
+.a-up-2 { opacity:0; animation: fadeUp var(--dur-slow) .15s var(--ease) forwards; }
+.a-up-3 { opacity:0; animation: fadeUp var(--dur-slow) .25s var(--ease) forwards; }
+.a-up-4 { opacity:0; animation: fadeUp var(--dur-slow) .35s var(--ease) forwards; }
+.a-right{ opacity:0; animation: slideRight .6s .2s var(--ease) forwards; }
+
+/* Scroll-reveal (JS adiciona .is-visible) */
+.reveal {
+  opacity:0;
+  transform:translateY(22px);
+  transition: opacity var(--dur-slow) var(--ease),
+              transform var(--dur-slow) var(--ease);
+}
+.reveal.from-left  { transform:translateX(-26px); }
+.reveal.from-right { transform:translateX(26px);  }
+.reveal.is-visible { opacity:1; transform:none; }
+.reveal.d1 { transition-delay:.1s; }
+.reveal.d2 { transition-delay:.2s; }
+.reveal.d3 { transition-delay:.3s; }
+.reveal.d4 { transition-delay:.4s; }
+
+
+/* ══════════════════════════════════════════════════════
+   COMPONENTES COMPARTILHADOS
+══════════════════════════════════════════════════════ */
+/* Eyebrow (pequena legenda acima de títulos) */
+.eyebrow {
+  display:inline-flex; align-items:center; gap:.45rem;
+  font-family:var(--f-head);
+  font-size:.68rem; font-weight:700;
+  letter-spacing:.18em; text-transform:uppercase;
+  color:var(--c-gold);
+  margin-bottom:.85rem;
+}
+.eyebrow__dot {
+  width:6px; height:6px; border-radius:50%;
+  background:var(--c-gold);
+  animation: pulseDot 2.2s ease-in-out infinite;
+  flex-shrink:0;
+}
+
+.badge-ok   { background:rgba(22,163,74,.1);  color:#ffffff; border:1px solid rgba(22,163,74,.2);  }
+.badge-warn { background:rgba(234,179,8,.1);  color:#b45309; border:1px solid rgba(234,179,8,.25); }
+.badge-off  { background:rgba(107,114,128,.1);color:#6b7280; border:1px solid rgba(107,114,128,.2);}
+
+/* Cabeçalho de seção */
+.sec-head {
+  display:flex; align-items:center;
+  justify-content:space-between;
+  gap:1rem; margin-bottom:1.1rem;
+}
+.sec-title {
+  font-family:var(--f-head);
+  font-size:.72rem; font-weight:800;
+  text-transform:uppercase; letter-spacing:.10em;
+  color:var(--c-primary);
+  display:flex; align-items:center; gap:.55rem;
+  margin:0;
+}
+.sec-title__bar {
+  width:3px; height:13px; border-radius:2px;
+  background:var(--c-gold); flex-shrink:0;
+}
+.sec-link {
+  font-size:.78rem; font-weight:600;
+  color:var(--c-primary); text-decoration:none;
+  display:flex; align-items:center; gap:.3rem;
+  opacity:.6; transition:opacity var(--dur-fast);
+  white-space:nowrap; min-height:var(--touch-target);
+  align-items:center;
+}
+.sec-link:hover { opacity:1; color:var(--c-primary); }
+
+/* Empty state */
+.empty-state {
+  grid-column: 1 / -1;
+  display:flex; flex-direction:column; align-items:center;
+  padding:2.5rem 1.25rem; text-align:center;
+  background:var(--c-surface);
+  border:1px solid var(--c-border);
+  border-radius:var(--r-lg);
+  box-shadow:var(--shadow-sm);
+}
+.empty-state__icon {
+  width:60px; height:60px; border-radius:50%;
+  background:var(--surface-alt, #f7f5f2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.6rem; color:var(--c-muted);
+  margin-bottom:.85rem;
+}
+.empty-state p {
+  font-size:.87rem; color:var(--c-muted); margin-bottom:.85rem;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   HOME LOGADO
+══════════════════════════════════════════════════════ */
+
+/* ─ Banner ─────────────────────────────────────────── */
 .hm-banner {
-  position: relative; overflow: hidden;
-  background: linear-gradient(125deg, var(--hm-navy) 0%, #1a2f4a 55%, #0f2339 100%);
-  padding: 3rem 0 5.5rem;
+  position:relative; overflow:hidden;
+  background: linear-gradient(125deg, var(--c-navy) 0%, var(--c-navy-2) 55%, var(--c-navy-3) 100%);
+  padding: var(--sp-xl) 0 4.5rem;
 }
 .hm-banner::before {
-  content: '';
-  position: absolute; inset: 0;
+  content:''; position:absolute; inset:0; pointer-events:none;
   background-image: radial-gradient(rgba(255,255,255,.04) 1px, transparent 1px);
-  background-size: 28px 28px;
-  pointer-events: none;
+  background-size:28px 28px;
 }
 .hm-banner__glow {
-  position: absolute; top: -80px; right: -80px;
-  width: 520px; height: 520px; border-radius: 50%;
+  position:absolute; top:-80px; right:-80px;
+  width:min(520px, 90vw); height:min(520px, 90vw);
+  border-radius:50%; pointer-events:none;
   background: radial-gradient(circle, rgba(212,168,71,.09) 0%, transparent 65%);
-  pointer-events: none;
 }
-/* onda separadora */
+/* Onda separadora inferior */
 .hm-banner::after {
-  content: '';
-  position: absolute; bottom: -1px; left: 0; right: 0; height: 60px;
+  content:''; position:absolute; bottom:-1px; left:0; right:0;
+  height:54px;
   background: var(--bs-body-bg, #f5f3f0);
   clip-path: ellipse(55% 100% at 50% 100%);
 }
-.hm-banner__inner { position: relative; z-index: 2; }
+.hm-banner__inner { position:relative; z-index:2; }
 
-/* eyebrow */
-.hm-eyebrow {
-  font-family: var(--hm-head);
-  font-size: .68rem; font-weight: 700; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--hm-gold);
-  display: flex; align-items: center; gap: .5rem;
-  margin-bottom: .85rem;
-}
-.hm-eyebrow__dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--hm-gold);
-  animation: hm-pulse 2.2s ease-in-out infinite;
-}
-
-/* headline */
+/* Título de boas-vindas */
 .hm-greeting {
-  font-family: var(--hm-head);
-  font-size: clamp(1.75rem, 4vw, 2.7rem);
-  font-weight: 800; letter-spacing: -.03em;
-  color: #fff; line-height: 1.12; margin-bottom: .7rem;
+  font-family:var(--f-head);
+  font-size:clamp(1.65rem, 5.5vw, 2.7rem);
+  font-weight:800; letter-spacing:-.03em;
+  color:#fff; line-height:1.12; margin-bottom:.65rem;
 }
 .hm-greeting mark {
-  background: linear-gradient(90deg, var(--hm-gold), var(--hm-gold2), var(--hm-gold));
-  background-size: 200%;
-  -webkit-background-clip: text; background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: hm-shimmer 3s linear infinite;
+  background: linear-gradient(90deg, var(--c-gold), var(--c-gold-2), var(--c-gold));
+  background-size:200%; -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation: shimmer 3s linear infinite;
 }
 .hm-banner__sub {
-  font-size: .93rem; color: rgba(255,255,255,.5);
-  line-height: 1.65; max-width: 440px;
+  font-size:.92rem; color:rgba(255,255,255,.5); line-height:1.65; max-width:440px;
 }
 
-/* ações rápidas no banner */
+/* Ações do banner */
 .hm-banner__actions {
-  display: flex; flex-wrap: wrap; gap: .7rem;
-  margin-top: 1.75rem;
+  display:flex; flex-direction:column; gap:.65rem;
+  margin-top:1.5rem; width:100%;
 }
-.hm-btn-gold {
-  display: inline-flex; align-items: center; gap: .45rem;
-  padding: .6rem 1.3rem; border-radius: var(--hm-radius-sm);
-  font-family: var(--hm-body); font-size: .83rem; font-weight: 700;
-  background: linear-gradient(135deg, var(--hm-gold), #b8891f);
-  color: #ffffffe1; border: none; cursor: pointer;
-  box-shadow: var(--hm-gold-glow);
-  transition: transform .22s var(--hm-ease), box-shadow .22s var(--hm-ease);
-  text-decoration: none;
+.btn-gold, .btn-ghost-navy {
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.45rem; width:100%; padding:.82rem 1.5rem;
+  border-radius:var(--r-sm); font-size:.9rem; font-weight:700;
+  text-decoration:none; min-height:var(--touch-target);
+  transition: transform var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease),
+              background var(--dur-fast);
+  cursor:pointer; border:none;
 }
-.hm-btn-gold:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 32px rgba(212,168,71,.42);
-  color: #ffffff;
+.btn-gold {
+  background: linear-gradient(135deg, var(--c-gold), #b8891f);
+  color:#ffffff; box-shadow:var(--shadow-gold);
 }
-.hm-btn-ghost {
-  display: inline-flex; align-items: center; gap: .45rem;
-  padding: .6rem 1.3rem; border-radius: var(--hm-radius-sm);
-  font-family: var(--hm-body); font-size: .83rem; font-weight: 600;
-  background: rgba(255,255,255,.07); color: rgba(255,255,255,.85);
-  border: 1px solid rgba(255,255,255,.15);
-  cursor: pointer; transition: background .22s, transform .22s var(--hm-ease);
-  text-decoration: none;
+.btn-gold:hover, .btn-gold:focus-visible {
+  transform:translateY(-2px);
+  box-shadow:0 8px 36px rgba(212,168,71,.4);
+  color:#ffffff;
 }
-.hm-btn-ghost:hover { background: rgba(255,255,255,.14); color: #fff; transform: translateY(-2px); }
+.btn-ghost-navy {
+  background:var(--c-white-06); color:#fff;
+  border:1px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(8px);
+}
+.btn-ghost-navy:hover, .btn-ghost-navy:focus-visible {
+  background:var(--c-white-10); color:#fff;
+  transform:translateY(-2px);
+}
 
-/* mini-stats lado direito do banner */
+/* Focus-visible acessível */
+.btn-gold:focus-visible,
+.btn-ghost-navy:focus-visible {
+  outline:2px solid var(--c-gold-2); outline-offset:3px;
+}
+
+/* Mini-stats do banner */
 .hm-bstats {
-  display: flex; flex-direction: column; gap: .8rem;
+  display:flex; flex-direction:row; flex-wrap:wrap; gap:.7rem;
+  margin-top:var(--sp-lg);
 }
 .hm-bstat {
-  display: flex; align-items: center; gap: .85rem;
-  background: rgba(255,255,255,.06);
-  border: 1px solid rgba(255,255,255,.09);
-  border-radius: 12px; padding: .85rem 1.15rem;
-  backdrop-filter: blur(8px);
-  transition: background .25s, border-color .25s;
+  flex:1 1 140px; display:flex; align-items:center; gap:.85rem;
+  background:var(--c-white-06); border:1px solid var(--c-white-10);
+  border-radius:var(--r-md); padding:.8rem 1rem;
+  backdrop-filter:blur(8px);
+  transition: background var(--dur-base), border-color var(--dur-base);
 }
-.hm-bstat:hover { background: rgba(212,168,71,.08); border-color: rgba(212,168,71,.22); }
+.hm-bstat:hover {
+  background:rgba(212,168,71,.08); border-color:var(--c-gold-border);
+}
 .hm-bstat__icon {
-  width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0;
-  background: rgba(212,168,71,.12); border: 1px solid rgba(212,168,71,.2);
-  color: var(--hm-gold);
-  display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+  width:40px; height:40px; border-radius:10px; flex-shrink:0;
+  background:var(--c-gold-dim); border:1px solid var(--c-gold-border);
+  color:var(--c-gold); display:flex; align-items:center;
+  justify-content:center; font-size:1.05rem;
 }
-.hm-bstat__num  { font-family: var(--hm-head); font-size: 1.25rem; font-weight: 800; color: #fff; line-height: 1; }
-.hm-bstat__label{ font-size: .68rem; color: rgba(255,255,255,.45); font-weight: 500; }
+.hm-bstat__num {
+  font-family:var(--f-head); font-size:1.2rem;
+  font-weight:800; color:#fff; line-height:1;
+}
+.hm-bstat__label {
+  font-size:.66rem; color:rgba(255,255,255,.45); font-weight:500;
+}
 
-/* ══════════════════════════════════════════
-   CONTENT LAYOUT
-══════════════════════════════════════════ */
+/* ─ Layout do conteúdo logado ──────────────────────── */
 .hm-content {
-  max-width: 1200px; margin: 0 auto;
-  padding: 2rem 1.25rem 4rem;
+  max-width:1200px; margin:0 auto;
+  padding:var(--sp-lg) var(--sp-md) var(--sp-2xl);
 }
 
-/* ── cabeçalho de seção ── */
-.hm-sec-head {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 1.1rem; gap: 1rem;
-}
-.hm-sec-title {
-  font-family: var(--hm-head);
-  font-size: .72rem; font-weight: 800;
-  text-transform: uppercase; letter-spacing: .1em;
-  color: var(--primary, #1a3a5c);
-  display: flex; align-items: center; gap: .55rem; margin: 0;
-}
-.hm-sec-bar { width: 3px; height: 13px; border-radius: 2px; background: var(--hm-gold); flex-shrink: 0; }
-.hm-sec-link {
-  font-size: .78rem; font-weight: 600; color: var(--primary, #1a3a5c);
-  text-decoration: none; display: flex; align-items: center; gap: .3rem;
-  opacity: .6; transition: opacity .2s; white-space: nowrap;
-}
-.hm-sec-link:hover { opacity: 1; color: var(--primary, #1a3a5c); }
-
-/* ══════════════════════════════════════════
-   ATALHOS RÁPIDOS
-══════════════════════════════════════════ */
+/* ─ Atalhos rápidos ────────────────────────────────── */
 .hm-quick {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 1rem; margin-bottom: 2.5rem;
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:.75rem;
+  margin-bottom:var(--sp-lg);
 }
 .hm-qcard {
-  display: flex; align-items: center; gap: .85rem;
-  padding: 1rem 1.1rem;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #e2ddd8);
-  border-radius: var(--hm-radius);
-  box-shadow: var(--hm-shadow);
-  text-decoration: none; color: inherit;
-  transition: box-shadow .22s var(--hm-ease), transform .22s var(--hm-ease), border-color .22s;
-  position: relative; overflow: hidden;
+  display:flex; align-items:center; gap:.75rem;
+  padding:.9rem 1rem;
+  background:var(--c-surface); border:1px solid var(--c-border);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-sm);
+  text-decoration:none; color:inherit; position:relative; overflow:hidden;
+  min-height:var(--touch-target);
+  transition: box-shadow var(--dur-base) var(--ease),
+              transform var(--dur-base) var(--ease),
+              border-color var(--dur-base);
 }
 .hm-qcard::after {
-  content: '';
-  position: absolute; bottom: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, var(--hm-gold), var(--hm-gold2));
-  transform: scaleX(0); transform-origin: left;
-  transition: transform .28s var(--hm-ease);
+  content:''; position:absolute; bottom:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--c-gold), var(--c-gold-2));
+  transform:scaleX(0); transform-origin:left;
+  transition:transform var(--dur-base) var(--ease);
 }
-.hm-qcard:hover { box-shadow: var(--hm-shadow-lg); transform: translateY(-3px); border-color: rgba(212,168,71,.3); color: inherit; text-decoration: none; }
-.hm-qcard:hover::after { transform: scaleX(1); }
+.hm-qcard:hover, .hm-qcard:focus-visible {
+  box-shadow:var(--shadow-md); transform:translateY(-3px);
+  border-color:var(--c-gold-border); color:inherit; text-decoration:none;
+}
+.hm-qcard:hover::after, .hm-qcard:focus-visible::after { transform:scaleX(1); }
+.hm-qcard:focus-visible { outline:2px solid var(--c-gold); outline-offset:2px; }
 .hm-qcard__icon {
-  width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center; font-size: 1.2rem;
-  transition: transform .22s;
+  width:40px; height:40px; border-radius:11px; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+  transition:transform var(--dur-base) var(--ease-spring);
 }
-.hm-qcard:hover .hm-qcard__icon { transform: scale(1.1) rotate(-4deg); }
-.hm-qcard__label { font-size: .8rem; font-weight: 700; color: var(--text-main, #1a1a2e); }
-.hm-qcard__desc  { font-size: .69rem; color: var(--text-muted, #9ca3af); margin-top: .08rem; }
+.hm-qcard:hover .hm-qcard__icon { transform:scale(1.1) rotate(-5deg); }
+.hm-qcard__label { font-size:.79rem; font-weight:700; color:var(--c-text); }
+.hm-qcard__desc  { font-size:.67rem; color:var(--c-muted); margin-top:.05rem; }
 
-/* ══════════════════════════════════════════
-   MEUS PLANOS RAIL
-══════════════════════════════════════════ */
+/* ─ Grid de planos ─────────────────────────────────── */
 .hm-plans-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem; margin-bottom: 2.5rem;
+  display:grid; grid-template-columns:1fr; gap:.9rem;
+  margin-bottom:var(--sp-lg);
 }
 .hm-pcard {
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #e2ddd8);
-  border-radius: var(--hm-radius);
-  box-shadow: var(--hm-shadow);
-  overflow: hidden; display: flex; flex-direction: column;
-  text-decoration: none; color: inherit;
-  transition: box-shadow .22s var(--hm-ease), transform .22s var(--hm-ease);
+  background:var(--c-surface); border:1px solid var(--c-border);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-sm);
+  overflow:hidden; display:flex; flex-direction:column;
+  text-decoration:none; color:inherit;
+  transition: box-shadow var(--dur-base) var(--ease),
+              transform var(--dur-base) var(--ease);
 }
-.hm-pcard:hover { box-shadow: var(--hm-shadow-lg); transform: translateY(-3px); color: inherit; text-decoration: none; }
+.hm-pcard:hover, .hm-pcard:focus-visible {
+  box-shadow:var(--shadow-lg); transform:translateY(-3px);
+  color:inherit; text-decoration:none;
+  outline:none;
+}
+.hm-pcard:focus-visible { outline:2px solid var(--c-gold); outline-offset:2px; }
 .hm-pcard__thumb {
-  position: relative; height: 100px; overflow: hidden;
-  background: linear-gradient(135deg, var(--primary,#1a3a5c), #2a5298);
+  position:relative; height:90px; overflow:hidden;
+  background: linear-gradient(135deg, var(--c-primary), #2a5298);
 }
 .hm-pcard__thumb img {
-  width: 100%; height: 100%; object-fit: cover;
-  filter: brightness(.72) saturate(1.1); transition: transform .4s ease;
+  width:100%; height:100%; object-fit:cover;
+  filter:brightness(.72) saturate(1.1);
+  transition:transform .4s ease;
 }
-.hm-pcard:hover .hm-pcard__thumb img { transform: scale(1.07); }
+.hm-pcard:hover .hm-pcard__thumb img { transform:scale(1.07); }
 .hm-pcard__overlay {
-  position: absolute; inset: 0;
+  position:absolute; inset:0;
   background: linear-gradient(to bottom, transparent 35%, rgba(0,0,0,.45));
 }
 .hm-pcard__ph {
-  width: 100%; height: 100%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 2rem; color: rgba(255,255,255,.22);
+  width:100%; height:100%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.8rem; color:rgba(255,255,255,.2);
 }
-.hm-pcard__body { padding: .85rem; flex: 1; display: flex; flex-direction: column; gap: .25rem; }
-.hm-pcard__country {
-  font-family: var(--hm-head); font-size: .9rem; font-weight: 700;
-  color: var(--text-main, #1a1a2e); margin: 0;
+.hm-pcard__body { padding:.8rem; flex:1; display:flex; flex-direction:column; gap:.2rem; }
+.hm-pcard__country { font-family:var(--f-head); font-size:.9rem; font-weight:700; margin:0; }
+.hm-pcard__meta {
+  font-size:.72rem; color:var(--c-muted);
+  display:flex; align-items:center; gap:.3rem;
 }
-.hm-pcard__meta { font-size: .72rem; color: var(--text-muted, #9ca3af); display: flex; align-items: center; gap: .3rem; }
 .hm-pcard__footer {
-  padding: .6rem .85rem;
-  border-top: 1px solid var(--border, #e2ddd8);
-  display: flex; align-items: center; justify-content: space-between;
-  font-size: .71rem; font-weight: 700; color: var(--primary, #1a3a5c);
+  padding:.55rem .8rem; border-top:1px solid var(--c-border);
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:.71rem; font-weight:700; color:var(--c-primary);
 }
 
-/* card "novo plano" */
+/* Card "novo plano" */
 .hm-pcard-new {
-  border: 2px dashed rgba(212,168,71,.35);
-  background: rgba(212,168,71,.03);
-  border-radius: var(--hm-radius);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: .6rem; padding: 2rem 1rem; min-height: 170px;
-  text-decoration: none; color: inherit;
-  transition: border-color .22s, background .22s, transform .22s;
+  border:2px dashed rgba(212,168,71,.35);
+  background:rgba(212,168,71,.025);
+  border-radius:var(--r-lg);
+  display:flex; flex-direction:column; align-items:center;
+  justify-content:center; gap:.55rem;
+  padding:1.75rem 1rem; min-height:160px;
+  text-decoration:none; color:inherit;
+  transition: border-color var(--dur-base),
+              background var(--dur-base),
+              transform var(--dur-base);
 }
-.hm-pcard-new:hover {
-  border-color: var(--hm-gold); background: rgba(212,168,71,.07);
-  transform: translateY(-3px); color: inherit; text-decoration: none;
+.hm-pcard-new:hover, .hm-pcard-new:focus-visible {
+  border-color:var(--c-gold); background:rgba(212,168,71,.07);
+  transform:translateY(-3px); color:inherit; text-decoration:none;
 }
+.hm-pcard-new:focus-visible { outline:2px solid var(--c-gold); outline-offset:2px; }
 .hm-pcard-new__icon {
-  width: 48px; height: 48px; border-radius: 12px;
-  background: rgba(212,168,71,.1); border: 1px solid rgba(212,168,71,.2);
-  color: var(--hm-gold);
-  display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
-  transition: transform .22s;
+  width:46px; height:46px; border-radius:12px;
+  background:var(--c-gold-dim); border:1px solid var(--c-gold-border);
+  color:var(--c-gold); display:flex; align-items:center;
+  justify-content:center; font-size:1.25rem;
+  transition:transform var(--dur-base) var(--ease-spring);
 }
-.hm-pcard-new:hover .hm-pcard-new__icon { transform: scale(1.1); }
-.hm-pcard-new span { font-size: .8rem; font-weight: 700; color: var(--hm-gold); }
+.hm-pcard-new:hover .hm-pcard-new__icon { transform:scale(1.1) rotate(8deg); }
+.hm-pcard-new span { font-size:.8rem; font-weight:700; color:var(--c-gold); }
 
-/* ══════════════════════════════════════════
-   BADGES
-══════════════════════════════════════════ */
-.hm-badge {
-  display: inline-flex; align-items: center; gap: .2rem;
-  font-size: .62rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
-  padding: .18rem .55rem; border-radius: 999px;
-}
-.hm-badge-ok   { background: rgba(22,163,74,.1);   color: #16a34a; border: 1px solid rgba(22,163,74,.2); }
-.hm-badge-warn { background: rgba(234,179,8,.1);   color: #b45309; border: 1px solid rgba(234,179,8,.25); }
-.hm-badge-off  { background: rgba(107,114,128,.1); color: #6b7280; border: 1px solid rgba(107,114,128,.2); }
-
-/* ══════════════════════════════════════════
-   VIAJANTES SUGERIDOS
-══════════════════════════════════════════ */
+/* ─ Grid de viajantes ──────────────────────────────── */
 .hm-travelers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem; margin-bottom: 2.5rem;
+  display:grid; grid-template-columns:1fr 1fr; gap:.9rem;
+  margin-bottom:var(--sp-lg);
 }
 .hm-tcard {
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #e2ddd8);
-  border-radius: var(--hm-radius);
-  box-shadow: var(--hm-shadow);
-  padding: 1.25rem 1rem 1rem;
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  gap: .5rem;
-  transition: box-shadow .22s var(--hm-ease), transform .22s var(--hm-ease);
+  background:var(--c-surface); border:1px solid var(--c-border);
+  border-radius:var(--r-lg); box-shadow:var(--shadow-sm);
+  padding:1.15rem .9rem 1rem;
+  display:flex; flex-direction:column; align-items:center;
+  text-align:center; gap:.45rem;
+  transition: box-shadow var(--dur-base) var(--ease),
+              transform var(--dur-base) var(--ease);
 }
-.hm-tcard:hover { box-shadow: var(--hm-shadow-lg); transform: translateY(-3px); }
+.hm-tcard:hover { box-shadow:var(--shadow-lg); transform:translateY(-3px); }
 .hm-tcard__avatar {
-  width: 60px; height: 60px; border-radius: 50%;
-  overflow: hidden; border: 3px solid var(--surface, #fff);
-  box-shadow: 0 0 0 2px rgba(212,168,71,.3);
-  background: linear-gradient(135deg, var(--primary,#1a3a5c), #2a5298);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.4rem; color: rgba(255,255,255,.3);
-  flex-shrink: 0;
+  width:56px; height:56px; border-radius:50%; overflow:hidden;
+  border:3px solid var(--c-surface);
+  box-shadow:0 0 0 2px rgba(212,168,71,.3);
+  background: linear-gradient(135deg, var(--c-primary), #2a5298);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; color:rgba(255,255,255,.3); flex-shrink:0;
 }
-.hm-tcard__avatar img { width: 100%; height: 100%; object-fit: cover; }
-.hm-tcard__name  { font-family: var(--hm-head); font-size: .88rem; font-weight: 700; color: var(--text-main, #1a1a2e); margin: 0; }
-.hm-tcard__dest  { font-size: .72rem; color: var(--text-muted, #9ca3af); display: flex; align-items: center; gap: .25rem; }
+.hm-tcard__avatar img { width:100%; height:100%; object-fit:cover; }
+.hm-tcard__name {
+  font-family:var(--f-head); font-size:.84rem; font-weight:700;
+  color:var(--c-text); margin:0;
+  /* Previne overflow de nomes longos */
+  overflow:hidden; text-overflow:ellipsis;
+  white-space:nowrap; max-width:100%;
+}
+.hm-tcard__dest {
+  font-size:.7rem; color:var(--c-muted);
+  display:flex; align-items:center; justify-content:center; gap:.25rem;
+}
 .hm-tcard__btn {
-  margin-top: .25rem;
-  display: inline-flex; align-items: center; gap: .35rem;
-  padding: .38rem .9rem; border-radius: var(--hm-radius-sm);
-  font-size: .74rem; font-weight: 700;
-  background: var(--primary, #1a3a5c); color: #fff; border: none; cursor: pointer;
-  transition: background .22s, transform .22s;
-  text-decoration: none;
+  margin-top:.2rem;
+  display:inline-flex; align-items:center; gap:.3rem;
+  padding:.4rem .85rem; border-radius:var(--r-sm);
+  font-size:.73rem; font-weight:700;
+  background:var(--c-primary); color:#fff;
+  border:none; cursor:pointer; text-decoration:none;
+  min-height:var(--touch-target);
+  transition: background var(--dur-fast), transform var(--dur-fast);
 }
-.hm-tcard__btn:hover { background: #2a5298; color: #fff; transform: translateY(-1px); }
+.hm-tcard__btn:hover, .hm-tcard__btn:focus-visible {
+  background:#2a5298; color:#fff; transform:translateY(-1px);
+}
+.hm-tcard__btn:focus-visible { outline:2px solid var(--c-gold-2); outline-offset:2px; }
 
-/* ══════════════════════════════════════════
-   EMPTY STATE
-══════════════════════════════════════════ */
-.hm-empty {
-  grid-column: 1 / -1;
-  display: flex; flex-direction: column; align-items: center;
-  padding: 2.5rem 1rem; text-align: center;
-  background: var(--surface, #fff);
-  border: 1px solid var(--border, #e2ddd8);
-  border-radius: var(--hm-radius); box-shadow: var(--hm-shadow);
-}
-.hm-empty__icon {
-  width: 60px; height: 60px; border-radius: 50%;
-  background: var(--surface-alt, #f7f5f2);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.6rem; color: var(--text-muted, #9ca3af); margin-bottom: .85rem;
-}
-.hm-empty p { font-size: .87rem; color: var(--text-muted, #9ca3af); margin-bottom: .85rem; }
 
-/* ══════════════════════════════════════════
-   RESPONSIVE
-══════════════════════════════════════════ */
-@media(max-width:768px){
-  .hm-banner { padding: 2.5rem 0 5rem; }
-  .hm-bstats { flex-direction: row; flex-wrap: wrap; }
-  .hm-bstat  { flex: 1 1 140px; }
-}
-@media(max-width:500px){
-  .hm-quick { grid-template-columns: 1fr 1fr; }
-  .hm-plans-grid, .hm-travelers-grid { grid-template-columns: 1fr; }
-}
-</style>
+/* ══════════════════════════════════════════════════════
+   LANDING PAGE (não logado) — mobile first
+══════════════════════════════════════════════════════ */
+.landing-page { overflow-x:hidden; }
 
-{% else %}
-<style>
-/* ══════════════════════════════════════════
-   LANDING PAGE (não logado) — sem alterações
-══════════════════════════════════════════ */
-:root {
-  --lp-navy:   #0b1120;
-  --lp-navy2:  #111827;
-  --lp-gold:   #d4a847;
-  --lp-gold2:  #f0c96a;
-  --lp-cream:  #f5f0e8;
-  --lp-muted:  #6b7280;
-  --lp-border: rgba(255,255,255,.08);
-  --lp-radius: 18px;
-  --lp-radius-sm: 10px;
-  --lp-ease:   cubic-bezier(.4,0,.2,1);
-  --lp-shadow: 0 8px 40px rgba(0,0,0,.18);
-  --lp-shadow-gold: 0 4px 32px rgba(212,168,71,.22);
+/* ─ Hero ────────────────────────────────────────────── */
+.lp-hero {
+  min-height:100svh; background-color:var(--c-navy);
+  position:relative; display:flex; align-items:center;
+  overflow:hidden; padding:4.5rem 0 4rem;
 }
-.landing-page { overflow-x: hidden; }
-@keyframes lp-fadeUp   { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
-@keyframes lp-fadeIn   { from{opacity:0} to{opacity:1} }
-@keyframes lp-slideR   { from{opacity:0;transform:translateX(32px)} to{opacity:1;transform:translateX(0)} }
-@keyframes lp-slideL   { from{opacity:0;transform:translateX(-32px)} to{opacity:1;transform:translateX(0)} }
-@keyframes lp-float    { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-@keyframes lp-spin-slow{ from{transform:rotate(0deg)} to{transform:rotate(360deg)} }
-@keyframes lp-shimmer  { 0%{background-position:200% center} 100%{background-position:-200% center} }
-@keyframes lp-pulse-ring{ 0%{box-shadow:0 0 0 0 rgba(212,168,71,.4)} 70%{box-shadow:0 0 0 12px rgba(212,168,71,0)} 100%{box-shadow:0 0 0 0 rgba(212,168,71,0)} }
-@keyframes lp-counter  { from{opacity:0;transform:scale(.85)} to{opacity:1;transform:scale(1)} }
-.reveal { opacity:0; transform:translateY(24px); transition:opacity .65s var(--lp-ease),transform .65s var(--lp-ease); }
-.reveal.from-left  { transform:translateX(-28px); }
-.reveal.from-right { transform:translateX(28px); }
-.reveal.visible    { opacity:1; transform:none; }
-.reveal.d1 { transition-delay:.1s } .reveal.d2 { transition-delay:.2s }
-.reveal.d3 { transition-delay:.3s } .reveal.d4 { transition-delay:.4s }
-.lp-hero { min-height:100svh; background-color:var(--lp-navy); position:relative; display:flex; align-items:center; overflow:hidden; padding:3rem 2rem 4rem; }
-.lp-hero__mesh { position:absolute; inset:0; background: radial-gradient(ellipse 80% 60% at 65% 40%,rgba(212,168,71,.07) 0%,transparent 65%), radial-gradient(ellipse 50% 80% at 10% 80%,rgba(59,130,246,.08) 0%,transparent 60%), linear-gradient(170deg,#0b1120 0%,#0f172a 50%,#0b1120 100%); pointer-events:none; }
-.lp-hero__dots { position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.045) 1px,transparent 1px); background-size:30px 30px; pointer-events:none; }
-.lp-hero::after { content:''; position:absolute; bottom:-1px; left:0; right:0; height:80px; background:var(--bs-body-bg,#fff); clip-path:polygon(0 100%,100% 100%,100% 60%,0 100%); }
+.lp-hero__mesh {
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 80% 60% at 65% 40%, rgba(212,168,71,.07) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 80% at 10% 80%, rgba(59,130,246,.08) 0%, transparent 60%),
+    linear-gradient(170deg, #0b1120 0%, #0f172a 50%, #0b1120 100%);
+}
+.lp-hero__dots {
+  position:absolute; inset:0; pointer-events:none;
+  background-image: radial-gradient(rgba(255,255,255,.045) 1px, transparent 1px);
+  background-size:30px 30px;
+}
+.lp-hero::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0; height:70px;
+  background:var(--bs-body-bg, #fff);
+  clip-path:polygon(0 100%, 100% 100%, 100% 55%, 0 100%);
+}
 .lp-hero__inner { position:relative; z-index:2; width:100%; }
-.lp-eyebrow { display:inline-flex; align-items:center; gap:.5rem; font-size:.72rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase; color:var(--lp-gold); background:rgba(212,168,71,.1); border:1px solid rgba(212,168,71,.25); padding:.35rem 1rem; border-radius:100px; margin-bottom:1.5rem; animation:lp-fadeIn .6s var(--lp-ease) both; }
-.lp-eyebrow__dot { width:6px; height:6px; border-radius:50%; background:var(--lp-gold); animation:lp-pulse-ring 2s infinite; }
-.lp-hero__h1 { font-size:clamp(2.4rem,6vw,4.2rem); font-weight:800; line-height:1.08; color:#fff; letter-spacing:-.03em; margin-bottom:1.5rem; animation:lp-fadeUp .7s .1s var(--lp-ease) both; }
-.lp-hero__h1 mark { background:linear-gradient(90deg,var(--lp-gold),var(--lp-gold2),var(--lp-gold)); background-size:200% auto; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; animation:lp-shimmer 3s linear infinite; }
-.lp-hero__lead { font-size:clamp(1rem,2vw,1.2rem); color:rgba(255,255,255,.6); line-height:1.7; max-width:520px; margin-bottom:2.5rem; animation:lp-fadeUp .7s .2s var(--lp-ease) both; }
-.lp-hero__cta { display:flex; flex-wrap:wrap; gap:.85rem; animation:lp-fadeUp .7s .3s var(--lp-ease) both; }
-.btn-lp-primary { display:inline-flex; align-items:center; gap:.5rem; padding:.85rem 2rem; border-radius:var(--lp-radius-sm); font-weight:700; font-size:.95rem; background:linear-gradient(135deg,var(--lp-gold),#b8891f); color:#ffffff; border:none; box-shadow:var(--lp-shadow-gold); transition:transform .25s var(--lp-ease),box-shadow .25s var(--lp-ease); text-decoration:none; white-space:nowrap; }
-.btn-lp-primary:hover { transform:translateY(-2px); box-shadow:0 8px 40px rgba(212,168,71,.4); color:#ffffff; }
-.btn-lp-ghost { display:inline-flex; align-items:center; gap:.5rem; padding:.85rem 2rem; border-radius:var(--lp-radius-sm); font-weight:600; font-size:.95rem; background:rgba(255,255,255,.06); color:#fff; border:1px solid rgba(255,255,255,.15); backdrop-filter:blur(8px); transition:background .25s,transform .25s var(--lp-ease); text-decoration:none; white-space:nowrap; }
-.btn-lp-ghost:hover { background:rgba(255,255,255,.12); color:#fff; transform:translateY(-2px); }
-.lp-trust { display:flex; flex-wrap:wrap; gap:1.25rem; margin-top:2.5rem; animation:lp-fadeUp .7s .45s var(--lp-ease) both; }
-.lp-trust__item { display:flex; align-items:center; gap:.5rem; font-size:.8rem; color:rgba(255,255,255,.45); font-weight:500; }
-.lp-trust__item i { color:var(--lp-gold); font-size:.9rem; }
-.lp-hero__visual { position:relative; height:440px; animation:lp-slideR .8s .2s var(--lp-ease) both; }
-.lp-globe-ring { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:320px; height:320px; border-radius:50%; border:1px solid rgba(212,168,71,.15); box-shadow:inset 0 0 60px rgba(212,168,71,.04),0 0 0 60px rgba(212,168,71,.02); }
-.lp-globe-ring::before { content:''; position:absolute; inset:20px; border-radius:50%; border:1px dashed rgba(212,168,71,.1); animation:lp-spin-slow 30s linear infinite; }
-.lp-globe-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:140px; height:140px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#1a2a4a,#0b1120); border:1px solid rgba(212,168,71,.2); display:flex; align-items:center; justify-content:center; font-size:3.5rem; color:rgba(212,168,71,.6); animation:lp-float 5s ease-in-out infinite; box-shadow:0 0 60px rgba(212,168,71,.12); }
-.lp-fc { position:absolute; background:rgba(15,23,42,.85); backdrop-filter:blur(12px); border:1px solid rgba(255,255,255,.1); border-radius:14px; padding:.75rem 1.1rem; display:flex; align-items:center; gap:.7rem; box-shadow:var(--lp-shadow); white-space:nowrap; }
-.lp-fc__icon { width:36px; height:36px; border-radius:8px; background:rgba(212,168,71,.12); color:var(--lp-gold); display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
-.lp-fc__value { font-size:.95rem; font-weight:700; color:#fff; }
-.lp-fc__label { font-size:.68rem; color:rgba(255,255,255,.45); font-weight:500; }
-.lp-fc--1 { top:8%; left:0; animation:lp-float 4.5s 0s ease-in-out infinite; }
-.lp-fc--2 { top:40%; right:0; animation:lp-float 4.5s .8s ease-in-out infinite; }
-.lp-fc--3 { bottom:10%; left:5%; animation:lp-float 4.5s 1.6s ease-in-out infinite; }
-.lp-how { padding:7rem 0 5rem; background:var(--bs-body-bg,#fff); position:relative; }
-.lp-section-label { font-size:.7rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:var(--lp-gold); display:block; margin-bottom:.6rem; }
-.lp-section-title { font-size:clamp(1.8rem,4vw,2.8rem); font-weight:800; letter-spacing:-.025em; line-height:1.15; margin-bottom:.75rem; }
-.lp-section-sub { font-size:1.05rem; color:var(--lp-muted); max-width:500px; margin:0 auto; line-height:1.65; }
-.lp-step { background:var(--bs-body-bg,#fff); border:1px solid rgba(0,0,0,.07); border-radius:var(--lp-radius); padding:2rem 1.75rem; height:100%; position:relative; overflow:hidden; transition:box-shadow .3s var(--lp-ease),transform .3s var(--lp-ease),border-color .3s; }
-.lp-step:hover { box-shadow:0 16px 60px rgba(0,0,0,.1); transform:translateY(-4px); border-color:rgba(212,168,71,.3); }
-.lp-step::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--lp-gold),var(--lp-gold2)); transform:scaleX(0); transform-origin:left; transition:transform .35s var(--lp-ease); border-radius:3px 3px 0 0; }
+
+.lp-eyebrow {
+  display:inline-flex; align-items:center; gap:.5rem;
+  font-size:.7rem; font-weight:700; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--c-gold); background:rgba(212,168,71,.1);
+  border:1px solid rgba(212,168,71,.25); padding:.35rem 1rem;
+  border-radius:var(--r-pill); margin-bottom:1.4rem;
+  animation: fadeUp .6s var(--ease) both;
+}
+.lp-eyebrow__dot {
+  width:6px; height:6px; border-radius:50%; background:var(--c-gold);
+  animation:pulseDot 2s infinite; flex-shrink:0;
+}
+
+.lp-hero__h1 {
+  font-family:var(--f-head);
+  font-size:clamp(2.1rem, 7.5vw, 4.2rem);
+  font-weight:800; line-height:1.08;
+  color:#fff; letter-spacing:-.03em;
+  margin-bottom:1.4rem;
+  animation: fadeUp .7s .1s var(--ease) both;
+}
+.lp-hero__h1 mark {
+  background: linear-gradient(90deg, var(--c-gold), var(--c-gold-2), var(--c-gold));
+  background-size:200% auto; -webkit-background-clip:text; background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+.lp-hero__lead {
+  font-size:clamp(.96rem, 2vw, 1.15rem); color:rgba(255,255,255,.6);
+  line-height:1.72; margin-bottom:2.25rem;
+  animation: fadeUp .7s .2s var(--ease) both;
+}
+
+.lp-hero__cta {
+  display:flex; flex-direction:column; gap:.75rem;
+  animation: fadeUp .7s .3s var(--ease) both;
+}
+
+.btn-lp-primary, .btn-lp-ghost {
+  display:inline-flex; align-items:center; justify-content:center;
+  gap:.5rem; width:100%; padding:.88rem 2rem;
+  border-radius:var(--r-sm); font-weight:700; font-size:.95rem;
+  text-decoration:none; white-space:nowrap;
+  min-height:var(--touch-target);
+  transition: transform var(--dur-fast) var(--ease),
+              box-shadow var(--dur-fast) var(--ease),
+              background var(--dur-fast);
+  cursor:pointer; border:none;
+}
+.btn-lp-primary {
+  background: linear-gradient(135deg, var(--c-gold), #b8891f);
+  color:#ffffff; box-shadow:var(--shadow-gold);
+}
+.btn-lp-primary:hover, .btn-lp-primary:focus-visible {
+  transform:translateY(-2px); color:#ffffff;
+  box-shadow:0 8px 40px rgba(212,168,71,.42);
+}
+.btn-lp-ghost {
+  background:var(--c-white-06); color:#fff;
+  border:1px solid rgba(255,255,255,.15); backdrop-filter:blur(8px);
+}
+.btn-lp-ghost:hover, .btn-lp-ghost:focus-visible {
+  background:var(--c-white-10); color:#fff; transform:translateY(-2px);
+}
+.btn-lp-primary:focus-visible,
+.btn-lp-ghost:focus-visible { outline:2px solid var(--c-gold-2); outline-offset:3px; }
+
+.lp-trust {
+  display:flex; flex-wrap:wrap; gap:1rem 1.5rem;
+  margin-top:2.25rem;
+  animation: fadeUp .7s .45s var(--ease) both;
+}
+.lp-trust__item {
+  display:flex; align-items:center; gap:.45rem;
+  font-size:.8rem; color:rgba(255,255,255,.45); font-weight:500;
+}
+.lp-trust__item i { color:var(--c-gold); font-size:.9rem; }
+
+/* Visual hero (globo) */
+.lp-hero__visual {
+  position:relative; height:340px; margin-top:3rem;
+  animation: slideRight .8s .2s var(--ease) both;
+}
+.lp-globe-ring {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:min(290px,80vw); height:min(290px,80vw);
+  border-radius:50%; border:1px solid rgba(212,168,71,.15);
+  box-shadow: inset 0 0 60px rgba(212,168,71,.04),
+              0 0 0 60px rgba(212,168,71,.02);
+}
+.lp-globe-ring::before {
+  content:''; position:absolute; inset:20px; border-radius:50%;
+  border:1px dashed rgba(212,168,71,.1);
+  animation:spinSlow 30s linear infinite;
+}
+.lp-globe-center {
+  position:absolute; top:50%; left:50%;
+  transform:translate(-50%,-50%);
+  width:min(130px,36vw); height:min(130px,36vw);
+  border-radius:50%;
+  background:radial-gradient(circle at 35% 35%, #1a2a4a, #0b1120);
+  border:1px solid rgba(212,168,71,.2);
+  display:flex; align-items:center; justify-content:center;
+  font-size:clamp(2.4rem,6vw,3.5rem); color:rgba(212,168,71,.6);
+  animation:float 5s ease-in-out infinite;
+  box-shadow:0 0 60px rgba(212,168,71,.12);
+}
+
+/* Floating cards */
+.lp-fc {
+  position:absolute;
+  background:rgba(15,23,42,.85); backdrop-filter:blur(12px);
+  border:1px solid rgba(255,255,255,.1);
+  border-radius:var(--r-md); padding:.7rem 1rem;
+  display:flex; align-items:center; gap:.65rem;
+  box-shadow:0 8px 40px rgba(0,0,0,.18); white-space:nowrap;
+}
+.lp-fc__icon {
+  width:34px; height:34px; border-radius:8px;
+  background:rgba(212,168,71,.12); color:var(--c-gold);
+  display:flex; align-items:center; justify-content:center;
+  font-size:.95rem; flex-shrink:0;
+}
+.lp-fc__value  { font-size:.92rem; font-weight:700; color:#fff; }
+.lp-fc__label  { font-size:.66rem; color:rgba(255,255,255,.45); font-weight:500; }
+.lp-fc--1 { display:none; } /* oculto no mobile */
+.lp-fc--2 { bottom:22%; right:0; animation:float 4.5s .8s ease-in-out infinite; }
+.lp-fc--3 { bottom:6%;  left:3%; animation:float 4.5s 1.6s ease-in-out infinite; }
+
+/* ─ How it works ────────────────────────────────────── */
+.lp-how {
+  padding:5.5rem 0 4rem;
+  background:var(--bs-body-bg, #fff); position:relative;
+}
+.lp-section-label {
+  font-size:.7rem; font-weight:700; letter-spacing:.2em;
+  text-transform:uppercase; color:var(--c-gold); display:block; margin-bottom:.6rem;
+}
+.lp-section-title {
+  font-family:var(--f-head);
+  font-size:clamp(1.7rem, 4vw, 2.8rem);
+  font-weight:800; letter-spacing:-.025em; line-height:1.15; margin-bottom:.75rem;
+}
+.lp-section-sub {
+  font-size:1rem; color:#6b7280; max-width:500px; margin:0 auto; line-height:1.65;
+}
+
+.lp-step {
+  background:var(--bs-body-bg, #fff); border:1px solid rgba(0,0,0,.07);
+  border-radius:var(--r-lg); padding:1.75rem 1.5rem;
+  height:100%; position:relative; overflow:hidden;
+  transition: box-shadow var(--dur-slow) var(--ease),
+              transform var(--dur-slow) var(--ease),
+              border-color var(--dur-slow);
+}
+.lp-step:hover { box-shadow:0 16px 56px rgba(0,0,0,.09); transform:translateY(-4px); border-color:rgba(212,168,71,.3); }
+.lp-step::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:3px;
+  background: linear-gradient(90deg, var(--c-gold), var(--c-gold-2));
+  transform:scaleX(0); transform-origin:left;
+  transition:transform var(--dur-slow) var(--ease); border-radius:3px 3px 0 0;
+}
 .lp-step:hover::before { transform:scaleX(1); }
-.lp-step__num { font-size:.68rem; font-weight:800; letter-spacing:.15em; text-transform:uppercase; color:var(--lp-gold); margin-bottom:1rem; }
-.lp-step__icon { width:56px; height:56px; border-radius:14px; background:linear-gradient(135deg,rgba(212,168,71,.12),rgba(212,168,71,.04)); border:1px solid rgba(212,168,71,.15); color:var(--lp-gold); display:flex; align-items:center; justify-content:center; font-size:1.5rem; margin-bottom:1.25rem; transition:background .3s,transform .3s; }
-.lp-step:hover .lp-step__icon { background:linear-gradient(135deg,rgba(212,168,71,.22),rgba(212,168,71,.08)); transform:scale(1.08) rotate(-3deg); }
-.lp-step__title { font-size:1.15rem; font-weight:700; margin-bottom:.6rem; }
-.lp-step__text  { font-size:.9rem; color:var(--lp-muted); line-height:1.7; margin:0; }
-.lp-benefits { background:var(--lp-navy); padding:7rem 2rem; position:relative; overflow:hidden; }
-.lp-benefits__bg { position:absolute; inset:0; background: radial-gradient(ellipse 70% 70% at 90% 50%,rgba(212,168,71,.05) 0%,transparent 65%), radial-gradient(ellipse 50% 50% at 10% 20%,rgba(59,130,246,.06) 0%,transparent 60%); pointer-events:none; }
-.lp-benefits__dots { position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1px); background-size:28px 28px; pointer-events:none; }
-.lp-benefit { display:flex; gap:1.25rem; margin-bottom:2rem; align-items:flex-start; }
-.lp-benefit__icon { width:48px; height:48px; border-radius:12px; background:rgba(212,168,71,.1); border:1px solid rgba(212,168,71,.2); color:var(--lp-gold); display:flex; align-items:center; justify-content:center; font-size:1.2rem; flex-shrink:0; transition:background .3s,transform .3s; }
+.lp-step__num {
+  font-size:.67rem; font-weight:800; letter-spacing:.15em;
+  text-transform:uppercase; color:var(--c-gold); margin-bottom:1rem;
+}
+.lp-step__icon {
+  width:54px; height:54px; border-radius:14px;
+  background: linear-gradient(135deg, rgba(212,168,71,.12), rgba(212,168,71,.04));
+  border:1px solid rgba(212,168,71,.15); color:var(--c-gold);
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.45rem; margin-bottom:1.15rem;
+  transition: background var(--dur-base), transform var(--dur-base) var(--ease-spring);
+}
+.lp-step:hover .lp-step__icon { background: linear-gradient(135deg, rgba(212,168,71,.22), rgba(212,168,71,.08)); transform:scale(1.08) rotate(-3deg); }
+.lp-step__title { font-size:1.1rem; font-weight:700; margin-bottom:.55rem; }
+.lp-step__text  { font-size:.9rem; color:#6b7280; line-height:1.72; margin:0; }
+
+/* ─ Benefits ─────────────────────────────────────────── */
+.lp-benefits {
+  background:var(--c-navy); padding:5.5rem 1.25rem;
+  position:relative; overflow:hidden;
+}
+.lp-benefits__bg {
+  position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 70% 70% at 90% 50%, rgba(212,168,71,.05) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 50% at 10% 20%, rgba(59,130,246,.06) 0%, transparent 60%);
+}
+.lp-benefits__dots {
+  position:absolute; inset:0; pointer-events:none;
+  background-image:radial-gradient(rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.lp-benefit {
+  display:flex; gap:1.2rem; margin-bottom:1.85rem; align-items:flex-start;
+}
+.lp-benefit__icon {
+  width:46px; height:46px; border-radius:12px;
+  background:rgba(212,168,71,.1); border:1px solid rgba(212,168,71,.2);
+  color:var(--c-gold); display:flex; align-items:center; justify-content:center;
+  font-size:1.15rem; flex-shrink:0;
+  transition: background var(--dur-base), transform var(--dur-base);
+}
 .lp-benefit:hover .lp-benefit__icon { background:rgba(212,168,71,.18); transform:scale(1.08); }
-.lp-benefit__title { font-size:1rem; font-weight:700; color:#fff; margin-bottom:.3rem; }
-.lp-benefit__text  { font-size:.88rem; color:rgba(255,255,255,.5); line-height:1.65; margin:0; }
-.lp-stats { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
-.lp-stat { background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.07); border-radius:var(--lp-radius); padding:1.75rem 1.5rem; text-align:center; transition:background .3s,border-color .3s,transform .3s; }
+.lp-benefit__title { font-size:.98rem; font-weight:700; color:#fff; margin-bottom:.28rem; }
+.lp-benefit__text  { font-size:.87rem; color:rgba(255,255,255,.5); line-height:1.68; margin:0; }
+
+/* Stats grid */
+.lp-stats { display:grid; grid-template-columns:1fr 1fr; gap:.85rem; }
+.lp-stat {
+  background:var(--c-white-04); border:1px solid rgba(255,255,255,.07);
+  border-radius:var(--r-lg); padding:1.6rem 1.25rem; text-align:center;
+  transition: background var(--dur-base), border-color var(--dur-base), transform var(--dur-base);
+}
 .lp-stat:hover { background:rgba(212,168,71,.06); border-color:rgba(212,168,71,.2); transform:translateY(-3px); }
-.lp-stat__num { font-size:clamp(1.8rem,3.5vw,2.6rem); font-weight:800; letter-spacing:-.03em; color:var(--lp-gold); display:block; line-height:1; margin-bottom:.5rem; }
-.lp-stat__label { font-size:.78rem; color:rgba(255,255,255,.45); font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
-.lp-testimonials { padding:7rem 0 5rem; background:var(--bs-body-bg,#fff); }
-.lp-tcard { background:var(--bs-body-bg,#fff); border:1px solid rgba(0,0,0,.07); border-radius:var(--lp-radius); padding:2rem; height:100%; position:relative; transition:box-shadow .3s var(--lp-ease),transform .3s; }
-.lp-tcard:hover { box-shadow:0 12px 50px rgba(0,0,0,.09); transform:translateY(-3px); }
-.lp-tcard__quote { position:absolute; top:1.25rem; right:1.5rem; font-size:3.5rem; line-height:1; color:rgba(212,168,71,.12); font-family:Georgia,serif; pointer-events:none; user-select:none; }
-.lp-tcard__stars { display:flex; gap:.2rem; margin-bottom:1rem; }
-.lp-tcard__stars i { color:var(--lp-gold); font-size:.85rem; }
-.lp-tcard__text { font-size:.92rem; line-height:1.75; color:var(--bs-body-color,#333); margin-bottom:1.5rem; }
-.lp-tcard__author { display:flex; align-items:center; gap:.85rem; border-top:1px solid rgba(0,0,0,.06); padding-top:1rem; }
-.lp-tcard__avatar { width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--lp-gold),#b8891f); display:flex; align-items:center; justify-content:center; font-size:.9rem; font-weight:700; color:#000; flex-shrink:0; }
-.lp-tcard__name { font-weight:700; font-size:.9rem; margin:0; }
-.lp-tcard__dest { font-size:.78rem; color:var(--lp-muted); margin:0; }
-.lp-cta { background:linear-gradient(135deg,var(--lp-navy) 0%,#0f172a 100%); padding:7rem 2rem; position:relative; overflow:hidden; }
-.lp-cta::before { content:''; position:absolute; inset:0; background: radial-gradient(ellipse 60% 70% at 80% 50%,rgba(212,168,71,.08) 0%,transparent 60%), radial-gradient(ellipse 40% 60% at 15% 30%,rgba(59,130,246,.07) 0%,transparent 55%); pointer-events:none; }
+.lp-stat__num {
+  font-family:var(--f-head);
+  font-size:clamp(1.7rem,3.5vw,2.6rem); font-weight:800; letter-spacing:-.03em;
+  color:var(--c-gold); display:block; line-height:1; margin-bottom:.45rem;
+}
+.lp-stat__label { font-size:.77rem; color:rgba(255,255,255,.45); font-weight:600; letter-spacing:.04em; text-transform:uppercase; }
+
+/* ─ Testimonials ─────────────────────────────────────── */
+.lp-testimonials { padding:5.5rem 0 4rem; background:var(--bs-body-bg, #fff); }
+.lp-tcard {
+  background:var(--bs-body-bg, #fff); border:1px solid rgba(0,0,0,.07);
+  border-radius:var(--r-lg); padding:1.85rem; height:100%; position:relative;
+  transition: box-shadow var(--dur-slow) var(--ease), transform var(--dur-slow);
+}
+.lp-tcard:hover { box-shadow:0 12px 48px rgba(0,0,0,.09); transform:translateY(-3px); }
+.lp-tcard__quote {
+  position:absolute; top:1.25rem; right:1.5rem;
+  font-size:3.4rem; line-height:1; color:rgba(212,168,71,.11);
+  font-family:Georgia,serif; pointer-events:none; user-select:none;
+}
+.lp-tcard__text { font-size:.91rem; line-height:1.76; color:var(--bs-body-color,#333); margin:0; }
+
+/* ─ CTA Final ───────────────────────────────────────── */
+.lp-cta {
+  background: linear-gradient(135deg, var(--c-navy) 0%, #0f172a 100%);
+  padding:5.5rem 1.25rem; position:relative; overflow:hidden;
+}
+.lp-cta::before {
+  content:''; position:absolute; inset:0; pointer-events:none;
+  background:
+    radial-gradient(ellipse 60% 70% at 80% 50%, rgba(212,168,71,.08) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 60% at 15% 30%, rgba(59,130,246,.07) 0%, transparent 55%);
+}
 .lp-cta__inner { position:relative; z-index:2; }
-.lp-cta__title { font-size:clamp(2rem,5vw,3.4rem); font-weight:800; letter-spacing:-.035em; line-height:1.1; color:#fff; margin-bottom:1.25rem; }
-.lp-cta__title span { background:linear-gradient(90deg,var(--lp-gold),var(--lp-gold2)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
-.lp-cta__sub { font-size:1.05rem; color:rgba(255,255,255,.55); line-height:1.7; margin-bottom:2.5rem; max-width:480px; }
-.lp-cta__features { display:flex; flex-direction:column; gap:.75rem; margin-bottom:2.5rem; }
-.lp-cta__feat { display:flex; align-items:center; gap:.65rem; font-size:.88rem; color:rgba(255,255,255,.6); }
-.lp-cta__feat i { color:var(--lp-gold); font-size:1rem; flex-shrink:0; }
-.lp-cta__card { background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1); border-radius:var(--lp-radius); padding:4rem; backdrop-filter:blur(16px); }
-.lp-cta__card-title { font-size:.7rem; font-weight:700; letter-spacing:.15em; text-transform:uppercase; color:var(--lp-gold); margin-bottom:1.25rem; }
-.lp-dest-row { display:flex; align-items:center; gap:.85rem; padding:.75rem 0; border-bottom:1px solid rgba(255,255,255,.06); }
-.lp-dest-row:last-child { border-bottom:none; }
-.lp-dest-row__flag { width:36px; height:24px; border-radius:4px; object-fit:cover; flex-shrink:0; box-shadow:0 2px 8px rgba(0,0,0,.3); }
-.lp-dest-row__name { font-size:.9rem; color:#fff; font-weight:600; flex:1; }
-.lp-dest-row__count { font-size:.72rem; font-weight:700; color:var(--lp-gold); background:rgba(212,168,71,.1); border:1px solid rgba(212,168,71,.2); padding:.2rem .6rem; border-radius:100px; }
-@media(max-width:991.98px){ .lp-hero{padding:5rem 0 5rem;min-height:auto} .lp-hero__visual{height:300px;margin-top:3rem} .lp-globe-ring{width:240px;height:240px} .lp-globe-center{width:110px;height:110px;font-size:2.8rem} .lp-hero__lead{max-width:100%} .lp-benefits,.lp-how,.lp-testimonials,.lp-cta{padding:5rem 0} .lp-stats{grid-template-columns:1fr 1fr} }
-@media(max-width:575.98px){ .lp-hero{padding:4rem 0 4rem} .lp-hero__h1{font-size:3.1rem;text-align:center} .lp-hero__cta .btn-lp-primary,.lp-hero__cta .btn-lp-ghost{width:100%;justify-content:center} .lp-fc--1{display:none} .lp-fc--2{top:auto;bottom:20%;right:0} .lp-stats{grid-template-columns:1fr 1fr;gap:.75rem} .lp-stat__num{font-size:1.8rem} .lp-benefits,.lp-how,.lp-testimonials,.lp-cta{padding:4rem 0} }
+.lp-cta__title {
+  font-family:var(--f-head);
+  font-size:clamp(1.9rem, 5vw, 3.4rem); font-weight:800;
+  letter-spacing:-.035em; line-height:1.1; color:#fff; margin-bottom:1.15rem;
+}
+.lp-cta__title span {
+  background: linear-gradient(90deg, var(--c-gold), var(--c-gold-2));
+  -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+}
+.lp-cta__sub {
+  font-size:1.02rem; color:rgba(255,255,255,.55); line-height:1.72;
+  margin-bottom:2.25rem; max-width:480px;
+}
+
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVIDADE — tablet (≥576px)
+══════════════════════════════════════════════════════ */
+@media (min-width:576px) {
+  .hm-banner__actions {
+    flex-direction:row; flex-wrap:wrap;
+  }
+  .btn-gold, .btn-ghost-navy { width:auto; flex:1 1 auto; }
+
+  .hm-quick { grid-template-columns: repeat(3, 1fr); }
+  .hm-plans-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .lp-hero__cta { flex-direction:row; flex-wrap:wrap; }
+  .btn-lp-primary, .btn-lp-ghost { width:auto; }
+  .lp-fc--1 { display:flex; top:8%; left:0; animation:float 4.5s 0s ease-in-out infinite; }
+}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVIDADE — desktop (≥768px)
+══════════════════════════════════════════════════════ */
+@media (min-width:768px) {
+  .hm-banner { padding: var(--sp-xl) 0 5.5rem; }
+
+  .hm-quick { grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+  .hm-plans-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+  .hm-travelers-grid { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+
+  .hm-pcard__thumb { height:100px; }
+
+  .lp-hero { padding:3rem 0 4rem; }
+  .lp-hero__visual { height:440px; margin-top:0; }
+  .lp-globe-ring { width:320px; height:320px; }
+  .lp-globe-center { width:140px; height:140px; font-size:3.5rem; }
+
+  .lp-how, .lp-testimonials { padding:7rem 0 5rem; }
+  .lp-benefits, .lp-cta { padding:7rem 2rem; }
+}
+
+/* ══════════════════════════════════════════════════════
+   RESPONSIVIDADE — wide desktop (≥992px)
+══════════════════════════════════════════════════════ */
+@media (min-width:992px) {
+  .hm-bstats { flex-direction:column; flex-wrap:nowrap; margin-top:0; }
+  .hm-bstat  { flex:none; }
+  .hm-content { padding:var(--sp-lg) var(--sp-md) 5rem; }
+}
+@media (max-width: 768px){
+  .lp-eyebrow{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .lp-trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+  }
+  .lp-globe-ring {
+    margin: 0;
+    padding: 0;
+  }
+}
+/* ══════════════════════════════════════════════════════
+   ACESSIBILIDADE — reduzir movimento
+══════════════════════════════════════════════════════ */
+@media (prefers-reduced-motion:reduce) {
+  *, *::before, *::after {
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
 </style>
-{% endif %}
 {% endblock %}
 
 
@@ -509,516 +873,599 @@
 
 {% if user.is_authenticated %}
 <!-- ╔══════════════════════════════════════════════════════╗
-     ║  HOME LOGADO                                        ║
+     ║  HOME — USUÁRIO AUTENTICADO                         ║
      ╚══════════════════════════════════════════════════════╝ -->
 <div>
 
-  <!-- ── BANNER GREETING ─────────────────────── -->
-  <div class="hm-banner">
-    <div class="hm-banner__glow"></div>
+  <!-- BANNER GREETING ─────────────────────────────────── -->
+  <div class="hm-banner" role="banner">
+    <div class="hm-banner__glow" aria-hidden="true"></div>
     <div class="container hm-banner__inner">
       <div class="row align-items-center gy-4">
 
         <!-- Esquerda: saudação + ações -->
         <div class="col-lg-7">
-          <div class="hm-eyebrow hm-a1">
-            <span class="hm-eyebrow__dot"></span>
+          <div class="eyebrow a-up-1" aria-hidden="true">
+            <span class="eyebrow__dot"></span>
             Bem-vindo de volta
           </div>
-          <h1 class="hm-greeting hm-a2">
-            Olá, <mark>{{ user.get_nome_exibicao|default:"Viajante" }}</mark>!<br>
+          <h1 class="hm-greeting a-up-2">
+            Olá, <mark>{{ user.get_nome_exibicao|default:"Viajante"|truncatechars:30 }}</mark>!<br>
             Para onde vamos hoje?
           </h1>
-          <p class="hm-banner__sub hm-a3">
+          <p class="hm-banner__sub a-up-3">
             Explore destinos, encontre companheiros e planeje sua próxima aventura.
           </p>
-          <div class="hm-banner__actions hm-a4">
-            <a href="{% url 'destinos:buscar' %}" class="hm-btn-gold">
-              <i class="bi bi-search"></i> Buscar Viajantes
+
+          <!-- Ações principais -->
+          <nav class="hm-banner__actions a-up-4" aria-label="Ações principais">
+            <a href="{% url 'destinos:buscar' %}" class="btn-gold">
+              <i class="bi bi-search" aria-hidden="true"></i>
+              Buscar Viajantes
             </a>
-            <a href="{% url 'destinos:criar_plano' %}" class="hm-btn-ghost">
-              <i class="bi bi-plus-circle"></i> Novo Plano
+            <a href="{% url 'destinos:criar_plano' %}" class="btn-ghost-navy">
+              <i class="bi bi-plus-circle" aria-hidden="true"></i>
+              Novo Plano
             </a>
-            <a href="{% url 'usuarios:perfil_publico' uuid=user.uuid %}" class="hm-btn-ghost">
-              <i class="bi bi-person-circle"></i> Meu Perfil
+            <a href="{% url 'usuarios:perfil_publico' uuid=user.uuid %}" class="btn-ghost-navy">
+              <i class="bi bi-person-circle" aria-hidden="true"></i>
+              Meu Perfil
             </a>
-          </div>
+          </nav>
         </div>
 
         <!-- Direita: mini-stats pessoais -->
-        <div class="col-lg-4 offset-lg-1 hm-ar">
-          <div class="hm-bstats">
+        <div class="col-lg-4 offset-lg-1 a-right">
+          <div class="hm-bstats" role="region" aria-label="Resumo da sua conta">
+
             <div class="hm-bstat">
-              <div class="hm-bstat__icon"><i class="bi bi-map-fill"></i></div>
+              <div class="hm-bstat__icon" aria-hidden="true">
+                <i class="bi bi-map-fill"></i>
+              </div>
               <div>
-                <div class="hm-bstat__num">{{ planos_count|default:0 }}</div>
+                <div class="hm-bstat__num" aria-label="{{ planos_count|default:0 }} planos de viagem">
+                  {{ planos_count|default:0 }}
+                </div>
                 <div class="hm-bstat__label">Meus planos de viagem</div>
               </div>
             </div>
+
             <div class="hm-bstat">
-              <div class="hm-bstat__icon"><i class="bi bi-people-fill"></i></div>
+              <div class="hm-bstat__icon" aria-hidden="true">
+                <i class="bi bi-people-fill"></i>
+              </div>
               <div>
-                <div class="hm-bstat__num">{{ amigos_count|default:0 }}</div>
+                <div class="hm-bstat__num" aria-label="{{ amigos_count|default:0 }} conexões">
+                  {{ amigos_count|default:0 }}
+                </div>
                 <div class="hm-bstat__label">Conexões feitas</div>
               </div>
             </div>
+
             <div class="hm-bstat">
-              <div class="hm-bstat__icon"><i class="bi bi-bell-fill"></i></div>
+              <div class="hm-bstat__icon" aria-hidden="true">
+                <i class="bi bi-bell-fill"></i>
+              </div>
               <div>
-                <div class="hm-bstat__num">{{ solicitacoes_pendentes|default:0 }}</div>
+                <div class="hm-bstat__num" aria-label="{{ solicitacoes_pendentes|default:0 }} solicitações pendentes">
+                  {{ solicitacoes_pendentes|default:0 }}
+                </div>
                 <div class="hm-bstat__label">Solicitações pendentes</div>
               </div>
             </div>
+
           </div>
         </div>
 
       </div>
     </div>
   </div>
+  <!-- /BANNER -->
 
-  <!-- ── CONTENT ─────────────────────────────── -->
-  <div class="hm-content">
+
+  <!-- CONTEÚDO ─────────────────────────────────────────── -->
+  <main class="hm-content" id="main-content">
 
     <!-- Atalhos rápidos -->
-    <div class="hm-sec-head">
-      <h2 class="hm-sec-title"><span class="hm-sec-bar"></span><i class="bi bi-lightning-fill" style="color:var(--hm-gold);"></i>Atalhos Rápidos</h2>
-    </div>
-    <div class="hm-quick mb-4">
-      <a href="{% url 'destinos:buscar' %}" class="hm-qcard">
-        <div class="hm-qcard__icon" style="background:rgba(26,58,92,.08);color:var(--primary,#1a3a5c);">
-          <i class="bi bi-search"></i>
-        </div>
-        <div>
-          <div class="hm-qcard__label">Buscar</div>
-        </div>
-      </a>
-      <a href="{% url 'destinos:criar_plano' %}" class="hm-qcard">
-        <div class="hm-qcard__icon" style="background:rgba(212,168,71,.1);color:var(--hm-gold);">
-          <i class="bi bi-plus-circle-fill"></i>
-        </div>
-        <div>
-          <div class="hm-qcard__label">Criar Plano</div>
-        </div>
-      </a>
-      <a href="{% url 'destinos:meus_planos' %}" class="hm-qcard">
-        <div class="hm-qcard__icon" style="background:rgba(22,163,74,.08);color:#16a34a;">
-          <i class="bi bi-map-fill"></i>
-        </div>
-        <div>
-          <div class="hm-qcard__label">Meus Planos</div>
-        </div>
-      </a>
-      <a href="{% url 'conexoes:amigos' %}" class="hm-qcard">
-        <div class="hm-qcard__icon" style="background:rgba(59,130,246,.08);color:#3b82f6;">
-          <i class="bi bi-people-fill"></i>
-        </div>
-        <div>
-          <div class="hm-qcard__label">Amigos</div>
-        </div>
-      </a>
-      <a href="{% url 'chat:conversas' %}" class="hm-qcard">
-        <div class="hm-qcard__icon" style="background:rgba(168,85,247,.08);color:#a855f7;">
-          <i class="bi bi-chat-dots-fill"></i>
-        </div>
-        <div>
-          <div class="hm-qcard__label">Mensagens</div>
-        </div>
-      </a>
-      <a href="{% url 'usuarios:editar_perfil' %}" class="hm-qcard">
-        <div class="hm-qcard__icon" style="background:rgba(220,38,38,.07);color:#dc2626;">
-          <i class="bi bi-gear-fill"></i>
-        </div>
-        <div>
-          <div class="hm-qcard__label">Editar Perfil</div>
-        </div>
-      </a>
-    </div>
+    <section aria-labelledby="atalhos-titulo">
+      <div class="sec-head">
+        <h2 class="sec-title" id="atalhos-titulo">
+          <span class="sec-title__bar" aria-hidden="true"></span>
+          <i class="bi bi-lightning-fill" style="color:var(--c-gold);" aria-hidden="true"></i>
+          Atalhos Rápidos
+        </h2>
+      </div>
+
+      <nav class="hm-quick mb-4" aria-label="Atalhos rápidos">
+
+        <a href="{% url 'destinos:buscar' %}" class="hm-qcard">
+          <div class="hm-qcard__icon" style="background:rgba(26,58,92,.08);color:var(--c-primary);" aria-hidden="true">
+            <i class="bi bi-search"></i>
+          </div>
+          <div>
+            <div class="hm-qcard__label">Buscar</div>
+            <div class="hm-qcard__desc">Encontrar viajantes</div>
+          </div>
+        </a>
+
+        <a href="{% url 'destinos:criar_plano' %}" class="hm-qcard">
+          <div class="hm-qcard__icon" style="background:rgba(212,168,71,.1);color:var(--c-gold);" aria-hidden="true">
+            <i class="bi bi-plus-circle-fill"></i>
+          </div>
+          <div>
+            <div class="hm-qcard__label">Criar Plano</div>
+            <div class="hm-qcard__desc">Nova viagem</div>
+          </div>
+        </a>
+
+        <a href="{% url 'destinos:meus_planos' %}" class="hm-qcard">
+          <div class="hm-qcard__icon" style="background:rgba(22,163,74,.08);color:#16a34a;" aria-hidden="true">
+            <i class="bi bi-map-fill"></i>
+          </div>
+          <div>
+            <div class="hm-qcard__label">Meus Planos</div>
+            <div class="hm-qcard__desc">Gerenciar viagens</div>
+          </div>
+        </a>
+
+        <a href="{% url 'conexoes:solicitacoes' %}" class="hm-qcard">
+          <div class="hm-qcard__icon" style="background:rgba(59,130,246,.08);color:#3b82f6;" aria-hidden="true">
+            <i class="bi bi-people-fill"></i>
+          </div>
+          <div>
+            <div class="hm-qcard__label">Amigos</div>
+            <div class="hm-qcard__desc">Suas conexões</div>
+          </div>
+        </a>
+
+        <a href="{% url 'chat:conversas' %}" class="hm-qcard">
+          <div class="hm-qcard__icon" style="background:rgba(168,85,247,.08);color:#a855f7;" aria-hidden="true">
+            <i class="bi bi-chat-dots-fill"></i>
+          </div>
+          <div>
+            <div class="hm-qcard__label">Mensagens</div>
+            <div class="hm-qcard__desc">Conversas ativas</div>
+          </div>
+        </a>
+
+        <a href="{% url 'usuarios:editar_perfil' %}" class="hm-qcard">
+          <div class="hm-qcard__icon" style="background:rgba(220,38,38,.07);color:#dc2626;" aria-hidden="true">
+            <i class="bi bi-gear-fill"></i>
+          </div>
+          <div>
+            <div class="hm-qcard__label">Editar Perfil</div>
+            <div class="hm-qcard__desc">Configurações</div>
+          </div>
+        </a>
+
+      </nav>
+    </section>
+
 
     <!-- Meus Planos -->
-    <div class="hm-sec-head">
-      <h2 class="hm-sec-title">
-        <span class="hm-sec-bar"></span>
-        <i class="bi bi-map-fill" style="color:var(--hm-gold);"></i>
-        Meus Planos de Viagem
-      </h2>
-      <a href="{% url 'destinos:meus_planos' %}" class="hm-sec-link">
-        Ver todos <i class="bi bi-arrow-right"></i>
-      </a>
-    </div>
-    <div class="hm-plans-grid">
-      {% for plano in planos_recentes %}
-      <a href="{% url 'destinos:detalhes_plano' plano.uuid %}" class="hm-pcard">
-        <div class="hm-pcard__thumb">
-          {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
-            <img src="https://flagcdn.com/w640/{{ plano.pais_destino.codigo_iso|lower|cut:" " }}.png"
-                 alt="{{ plano.pais_destino.nome }}"
-                 onerror="this.style.display='none';">
-            <div class="hm-pcard__overlay"></div>
-          {% else %}
-            <div class="hm-pcard__ph"><i class="bi bi-globe2"></i></div>
-          {% endif %}
-        </div>
-        <div class="hm-pcard__body">
-          <p class="hm-pcard__country">{{ plano.pais_destino.nome }}</p>
-          <span class="hm-pcard__meta">
-            <i class="bi bi-calendar3" style="color:var(--hm-gold);"></i>
-            {{ plano.data_inicio|date:"d/m/Y" }}{% if plano.data_fim %} — {{ plano.data_fim|date:"d/m/Y" }}{% endif %}
-          </span>
-          <span class="hm-pcard__meta">
-            <i class="bi bi-heart" style="color:var(--hm-gold);"></i>
-            {{ plano.get_motivo_viagem_display }}
-          </span>
-          <div class="mt-auto pt-2">
-            {% if plano.viagem_concluida %}
-              <span class="hm-badge hm-badge-warn">Concluída</span>
-            {% elif plano.ativo %}
-              <span class="hm-badge hm-badge-ok">Ativa</span>
+    <section aria-labelledby="planos-titulo">
+      <div class="sec-head">
+        <h2 class="sec-title" id="planos-titulo">
+          <span class="sec-title__bar" aria-hidden="true"></span>
+          <i class="bi bi-map-fill" style="color:var(--c-gold);" aria-hidden="true"></i>
+          Meus Planos de Viagem
+        </h2>
+        <a href="{% url 'destinos:meus_planos' %}" class="sec-link" aria-label="Ver todos os meus planos de viagem">
+          Ver todos <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        </a>
+      </div>
+
+      <div class="hm-plans-grid">
+        {% for plano in planos_recentes %}
+        <a href="{% url 'destinos:detalhes_plano' plano.uuid %}"
+           class="hm-pcard"
+           aria-label="Plano para {{ plano.pais_destino.nome|default:'destino' }}, {{ plano.data_inicio|date:'d/m/Y' }}">
+
+          <div class="hm-pcard__thumb">
+            {% if plano.pais_destino and plano.pais_destino.codigo_iso %}
+            {# codigo_iso: apenas letras a-z/A-Z são aceitas para evitar injeção de URL #}
+            {% with iso=plano.pais_destino.codigo_iso|lower|cut:" "|truncatechars:2 %}
+            <img src="https://flagcdn.com/w640/{{ iso }}.png"
+                 alt="Bandeira de {{ plano.pais_destino.nome|escape }}"
+                 loading="lazy"
+                 onerror="this.closest('.hm-pcard__thumb').querySelector('.hm-pcard__ph').style.display='flex';this.style.display='none';">
+            <div class="hm-pcard__overlay" aria-hidden="true"></div>
+            <div class="hm-pcard__ph" aria-hidden="true" style="display:none;">
+              <i class="bi bi-globe2"></i>
+            </div>
+            {% endwith %}
             {% else %}
-              <span class="hm-badge hm-badge-off">Inativa</span>
+            <div class="hm-pcard__ph" aria-hidden="true">
+              <i class="bi bi-globe2"></i>
+            </div>
             {% endif %}
           </div>
+
+          <div class="hm-pcard__body">
+            <p class="hm-pcard__country">{{ plano.pais_destino.nome|escape|default:"Destino" }}</p>
+            <span class="hm-pcard__meta">
+              <i class="bi bi-calendar3" style="color:var(--c-gold);" aria-hidden="true"></i>
+              <time datetime="{{ plano.data_inicio|date:'Y-m-d' }}">{{ plano.data_inicio|date:"d/m/Y" }}</time>
+              {% if plano.data_fim %}
+                — <time datetime="{{ plano.data_fim|date:'Y-m-d' }}">{{ plano.data_fim|date:"d/m/Y" }}</time>
+              {% endif %}
+            </span>
+            <span class="hm-pcard__meta">
+              <i class="bi bi-heart" style="color:var(--c-gold);" aria-hidden="true"></i>
+              {{ plano.get_motivo_viagem_display|escape|default:"—" }}
+            </span>
+            <div class="mt-auto pt-2">
+              {% if plano.viagem_concluida %}
+                <span class="badge-status badge-warn">Concluída</span>
+              {% elif plano.ativo %}
+                <span class="badge-status badge-ok">Ativa</span>
+              {% else %}
+                <span class="badge-status badge-off">Inativa</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="hm-pcard__footer" aria-hidden="true">
+            Ver detalhes <i class="bi bi-arrow-right"></i>
+          </div>
+        </a>
+        {% empty %}
+        <div class="empty-state" role="status">
+          <div class="empty-state__icon" aria-hidden="true"><i class="bi bi-map"></i></div>
+          <p>Você ainda não tem planos de viagem.</p>
+          <a href="{% url 'destinos:criar_plano' %}" class="btn-gold" style="width:auto;font-size:.82rem;padding:.5rem 1.15rem;">
+            <i class="bi bi-plus-circle-fill" aria-hidden="true"></i> Criar Primeiro Plano
+          </a>
         </div>
-        <div class="hm-pcard__footer">
-          Ver detalhes <i class="bi bi-arrow-right"></i>
-        </div>
-      </a>
-      {% empty %}
-      <div class="hm-empty">
-        <div class="hm-empty__icon"><i class="bi bi-map"></i></div>
-        <p>Você ainda não tem planos de viagem.</p>
-        <a href="{% url 'destinos:criar_plano' %}" class="hm-btn-gold" style="font-size:.8rem;padding:.5rem 1.1rem;">
-          <i class="bi bi-plus-circle-fill"></i> Criar Primeiro Plano
+        {% endfor %}
+
+        {% if planos_recentes %}
+        <a href="{% url 'destinos:criar_plano' %}" class="hm-pcard-new" aria-label="Criar novo plano de viagem">
+          <div class="hm-pcard-new__icon" aria-hidden="true"><i class="bi bi-plus-lg"></i></div>
+          <span>Novo Plano</span>
+        </a>
+        {% endif %}
+      </div>
+    </section>
+
+
+    <!-- Viajantes Sugeridos -->
+    <section aria-labelledby="sugeridos-titulo">
+      <div class="sec-head">
+        <h2 class="sec-title" id="sugeridos-titulo">
+          <span class="sec-title__bar" aria-hidden="true"></span>
+          <i class="bi bi-people-fill" style="color:var(--c-gold);" aria-hidden="true"></i>
+          Viajantes com Destinos Similares
+        </h2>
+        <a href="{% url 'destinos:buscar' %}" class="sec-link" aria-label="Explorar todos os viajantes">
+          Explorar todos <i class="bi bi-arrow-right" aria-hidden="true"></i>
         </a>
       </div>
-      {% endfor %}
 
-      <!-- Card "novo plano" sempre visível -->
-      {% if planos_recentes %}
-      <a href="{% url 'destinos:criar_plano' %}" class="hm-pcard-new">
-        <div class="hm-pcard-new__icon"><i class="bi bi-plus-lg"></i></div>
-        <span>Novo Plano</span>
-      </a>
-      {% endif %}
-    </div>
-
-    <!-- Viajantes sugeridos -->
-    <div class="hm-sec-head">
-      <h2 class="hm-sec-title">
-        <span class="hm-sec-bar"></span>
-        <i class="bi bi-people-fill" style="color:var(--hm-gold);"></i>
-        Viajantes com Destinos Similares
-      </h2>
-      <a href="{% url 'destinos:buscar' %}" class="hm-sec-link">
-        Explorar todos <i class="bi bi-arrow-right"></i>
-      </a>
-    </div>
-    <div class="hm-travelers-grid">
-      {% for viajante in viajantes_sugeridos %}
-      <div class="hm-tcard">
-        <div class="hm-tcard__avatar">
-          {% if viajante.foto_perfil %}
-            <img src="{{ viajante.foto_perfil.url }}" alt="{{ viajante.get_nome_exibicao }}">
-          {% else %}
+      <div class="hm-travelers-grid">
+        {% for viajante in viajantes_sugeridos %}
+        <article class="hm-tcard">
+          <div class="hm-tcard__avatar" aria-hidden="true">
+            {% if viajante.foto_perfil %}
+            <img src="{{ viajante.foto_perfil.url }}"
+                 alt=""
+                 loading="lazy">
+            {% else %}
             <i class="bi bi-person-fill"></i>
-          {% endif %}
+            {% endif %}
+          </div>
+          <p class="hm-tcard__name">{{ viajante.get_nome_exibicao|escape|truncatechars:22 }}</p>
+          <span class="hm-tcard__dest">
+            <i class="bi bi-geo-alt-fill" style="color:var(--c-gold);" aria-hidden="true"></i>
+            {{ viajante.pais_residencia|escape|default:"—" }}
+          </span>
+          <a href="{% url 'usuarios:perfil_publico' uuid=viajante.uuid %}"
+             class="hm-tcard__btn"
+             aria-label="Ver perfil de {{ viajante.get_nome_exibicao|escape }}">
+            <i class="bi bi-eye" aria-hidden="true"></i> Ver Perfil
+          </a>
+        </article>
+        {% empty %}
+        <div class="empty-state" role="status">
+          <div class="empty-state__icon" aria-hidden="true"><i class="bi bi-people"></i></div>
+          <p>Crie um plano de viagem para encontrar companheiros com o mesmo destino!</p>
+          <a href="{% url 'destinos:buscar' %}" class="btn-gold" style="width:auto;font-size:.82rem;padding:.5rem 1.15rem;">
+            <i class="bi bi-search" aria-hidden="true"></i> Buscar Viajantes
+          </a>
         </div>
-        <p class="hm-tcard__name">{{ viajante.get_nome_exibicao }}</p>
-        <span class="hm-tcard__dest">
-          <i class="bi bi-geo-alt-fill" style="color:var(--hm-gold);"></i>
-          {{ viajante.pais_residencia|default:"—" }}
-        </span>
-        <a href="{% url 'usuarios:perfil_publico' uuid=viajante.uuid %}" class="hm-tcard__btn">
-          <i class="bi bi-eye"></i> Ver Perfil
-        </a>
+        {% endfor %}
       </div>
-      {% empty %}
-      <div class="hm-empty">
-        <div class="hm-empty__icon"><i class="bi bi-people"></i></div>
-        <p>Crie um plano de viagem para encontrar companheiros com o mesmo destino!</p>
-        <a href="{% url 'destinos:buscar' %}" class="hm-btn-gold" style="font-size:.8rem;padding:.5rem 1.1rem;">
-          <i class="bi bi-search"></i> Buscar Viajantes
-        </a>
-      </div>
-      {% endfor %}
-    </div>
+    </section>
 
-  </div>
+  </main>
 </div>
 
 
 {% else %}
 <!-- ╔══════════════════════════════════════════════════════╗
-     ║  LANDING PAGE (não logado) — inalterada             ║
+     ║  LANDING PAGE — USUÁRIO NÃO AUTENTICADO             ║
      ╚══════════════════════════════════════════════════════╝ -->
 <div class="landing-page">
 
-  <!-- ① HERO -->
-  <section class="lp-hero">
-    <div class="lp-hero__mesh"></div>
-    <div class="lp-hero__dots"></div>
+  <!-- ① HERO ──────────────────────────────────────────── -->
+  <section class="lp-hero" aria-label="Seção principal">
+    <div class="lp-hero__mesh" aria-hidden="true"></div>
+    <div class="lp-hero__dots" aria-hidden="true"></div>
+
     <div class="container lp-hero__inner">
       <div class="row align-items-center gy-2">
+
         <div class="col-lg-6">
-          <div class="lp-eyebrow">
+          <div class="lp-eyebrow" aria-hidden="true">
             <span class="lp-eyebrow__dot"></span>
-            Plataforma de Viajantes
+            Plataforma de conexão entre viajantes
           </div>
+
           <h1 class="lp-hero__h1">
-            Explore novos destinos.<br>
-            <mark class="m-0 p-0">Conecte-se</mark> com o mundo!
+            Planeje sua viagem com mais tranquilidade.<br>
+            <mark class="m-0 p-0">Conecte-se</mark> com quem vai para o mesmo destino.
           </h1>
+
           <p class="lp-hero__lead">
-            Encontre pessoas com o mesmo destino e período de viagem.
-            Faça amizades, compartilhe custos e crie memórias inesquecíveis.
+            Encontre pessoas com planos semelhantes, compartilhe experiências
+            e organize sua viagem de forma mais segura e colaborativa.
           </p>
+
           <div class="lp-hero__cta">
             <a href="{% url 'usuarios:cadastro' %}" class="btn-lp-primary">
-              <i class="bi bi-rocket-takeoff"></i> Comece Agora — Grátis
+              <i class="bi bi-rocket-takeoff" aria-hidden="true"></i>
+              Criar Conta Gratuitamente
             </a>
             <a href="{% url 'usuarios:login' %}" class="btn-lp-ghost">
-              <i class="bi bi-box-arrow-in-right"></i> Já Tenho Conta
+              <i class="bi bi-box-arrow-in-right" aria-hidden="true"></i>
+              Acessar minha conta
             </a>
           </div>
-          <div class="lp-trust">
-            <span class="lp-trust__item"><i class="bi bi-check-circle-fill"></i> Cadastro gratuito</span>
-            <span class="lp-trust__item"><i class="bi bi-shield-fill-check"></i> 100% seguro</span>
-            <span class="lp-trust__item"><i class="bi bi-star-fill"></i> 98% satisfação</span>
-          </div>
+
+          <ul class="lp-trust" aria-label="Diferenciais da plataforma">
+            <li class="lp-trust__item">
+              <i class="bi bi-check-circle-fill" aria-hidden="true"></i> Uso gratuito
+            </li>
+            <li class="lp-trust__item">
+              <i class="bi bi-shield-fill-check" aria-hidden="true"></i> Ambiente colaborativo
+            </li>
+            <li class="lp-trust__item">
+              <i class="bi bi-people-fill" aria-hidden="true"></i> Conexões reais
+            </li>
+          </ul>
         </div>
-        <div class="col-lg-6 d-none d-lg-block">
-          <div class="lp-hero__visual">
+
+        <div class="col-9 col-md-6 col-lg-5 offset-lg-1 mx-auto">
+          <div class="lp-hero__visual" aria-hidden="true">
             <div class="lp-globe-ring"></div>
-            <div class="lp-globe-center"><i class="bi bi-globe2"></i></div>
+            <div class="lp-globe-center">🌍</div>
+
             <div class="lp-fc lp-fc--1">
-              <div class="lp-fc__icon"><i class="bi bi-airplane-engines"></i></div>
-              <div><div class="lp-fc__value">150+</div><div class="lp-fc__label">Destinos</div></div>
-            </div>
-            <div class="lp-fc lp-fc--2">
               <div class="lp-fc__icon"><i class="bi bi-people-fill"></i></div>
-              <div><div class="lp-fc__value">5.000+</div><div class="lp-fc__label">Viajantes</div></div>
+              <div>
+                <div class="lp-fc__value">+2.400</div>
+                <div class="lp-fc__label">Viajantes ativos</div>
+              </div>
             </div>
+
+            <div class="lp-fc lp-fc--2">
+              <div class="lp-fc__icon"><i class="bi bi-map-fill"></i></div>
+              <div>
+                <div class="lp-fc__value">+180</div>
+                <div class="lp-fc__label">Destinos cadastrados</div>
+              </div>
+            </div>
+
             <div class="lp-fc lp-fc--3">
               <div class="lp-fc__icon"><i class="bi bi-chat-dots-fill"></i></div>
-              <div><div class="lp-fc__value">Chat</div><div class="lp-fc__label">Tempo Real</div></div>
+              <div>
+                <div class="lp-fc__value">+8.700</div>
+                <div class="lp-fc__label">Conexões realizadas</div>
+              </div>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- ② HOW IT WORKS -->
-  <section class="lp-how">
+
+  <!-- ② COMO FUNCIONA ─────────────────────────────────── -->
+  <section class="lp-how" aria-labelledby="como-funciona-titulo">
     <div class="container">
       <div class="text-center mb-5 reveal">
         <span class="lp-section-label">Como funciona</span>
-        <h2 class="lp-section-title">Simples, Rápido e Seguro</h2>
-        <p class="lp-section-sub">Em três passos você já está conectado a viajantes com o mesmo destino.</p>
+        <h2 class="lp-section-title" id="como-funciona-titulo">Simples e direto</h2>
+        <p class="lp-section-sub">
+          Em poucos passos, você já pode encontrar pessoas com planos de viagem semelhantes.
+        </p>
       </div>
-      <div class="row g-4 align-items-stretch">
+
+      <div class="row g-4">
         <div class="col-md-4 reveal d1">
           <div class="lp-step">
             <div class="lp-step__num">Passo 01</div>
-            <div class="lp-step__icon"><i class="bi bi-person-check"></i></div>
-            <h3 class="lp-step__title">Cadastre-se</h3>
-            <p class="lp-step__text">Crie sua conta gratuitamente em menos de 2 minutos e configure seu perfil com suas preferências de viagem.</p>
+            <div class="lp-step__icon" aria-hidden="true"><i class="bi bi-person-check"></i></div>
+            <h3 class="lp-step__title">Crie seu perfil</h3>
+            <p class="lp-step__text">
+              Cadastre-se gratuitamente e informe suas preferências de viagem,
+              destinos e período desejado.
+            </p>
           </div>
         </div>
         <div class="col-md-4 reveal d2">
           <div class="lp-step">
             <div class="lp-step__num">Passo 02</div>
-            <div class="lp-step__icon"><i class="bi bi-pin-map"></i></div>
-            <h3 class="lp-step__title">Planeje sua Viagem</h3>
-            <p class="lp-step__text">Adicione destino, datas e preferências. Use nosso mapa interativo para explorar e organizar cada detalhe.</p>
+            <div class="lp-step__icon" aria-hidden="true"><i class="bi bi-pin-map"></i></div>
+            <h3 class="lp-step__title">Adicione seu plano</h3>
+            <p class="lp-step__text">
+              Defina seu destino e organize as informações principais da sua viagem
+              de forma simples.
+            </p>
           </div>
         </div>
         <div class="col-md-4 reveal d3">
           <div class="lp-step">
             <div class="lp-step__num">Passo 03</div>
-            <div class="lp-step__icon"><i class="bi bi-people-fill"></i></div>
+            <div class="lp-step__icon" aria-hidden="true"><i class="bi bi-people-fill"></i></div>
             <h3 class="lp-step__title">Conecte-se</h3>
-            <p class="lp-step__text">Encontre viajantes com planos similares, envie solicitações e comece a conversar em tempo real!</p>
+            <p class="lp-step__text">
+              Encontre viajantes com planos similares, visualize perfis
+              e inicie conversas diretamente pela plataforma.
+            </p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ③ BENEFITS -->
-  <section class="lp-benefits">
-    <div class="lp-benefits__bg"></div>
-    <div class="lp-benefits__dots"></div>
+
+  <!-- ③ BENEFÍCIOS ────────────────────────────────────── -->
+  <section class="lp-benefits" aria-labelledby="beneficios-titulo">
+    <div class="lp-benefits__bg" aria-hidden="true"></div>
+    <div class="lp-benefits__dots" aria-hidden="true"></div>
+
     <div class="container" style="position:relative;z-index:2;">
       <div class="row align-items-center gy-5">
-        <div class="col-lg-6">
-          <span class="lp-section-label reveal from-left">Por que usar</span>
-          <h2 class="lp-section-title text-white reveal from-left d1" style="max-width:420px;">
-            Por Que Viajar <br>Conectado?
+
+        <div class="col-lg-6 reveal from-left">
+          <span class="lp-section-label">Por que usar</span>
+          <h2 class="lp-section-title text-white" id="beneficios-titulo">
+            Uma forma mais simples de viajar acompanhado
           </h2>
+
           <div class="mt-4">
-            <div class="lp-benefit reveal from-left d1">
-              <div class="lp-benefit__icon"><i class="bi bi-shield-check"></i></div>
+            <div class="lp-benefit">
+              <div class="lp-benefit__icon" aria-hidden="true"><i class="bi bi-shield-check"></i></div>
               <div>
-                <h4 class="lp-benefit__title">Segurança em Grupo</h4>
-                <p class="lp-benefit__text">Viajar acompanhado aumenta sua segurança, especialmente em destinos desconhecidos.</p>
+                <h4 class="lp-benefit__title">Mais segurança</h4>
+                <p class="lp-benefit__text">
+                  Viajar com outras pessoas pode trazer mais tranquilidade,
+                  especialmente em destinos desconhecidos.
+                </p>
               </div>
             </div>
-            <div class="lp-benefit reveal from-left d2">
-              <div class="lp-benefit__icon"><i class="bi bi-wallet2"></i></div>
+            <div class="lp-benefit">
+              <div class="lp-benefit__icon" aria-hidden="true"><i class="bi bi-wallet2"></i></div>
               <div>
-                <h4 class="lp-benefit__title">Economize Dinheiro</h4>
-                <p class="lp-benefit__text">Divida custos de hospedagem, transporte e passeios com seus novos amigos de viagem.</p>
+                <h4 class="lp-benefit__title">Divisão de custos</h4>
+                <p class="lp-benefit__text">
+                  Compartilhe despesas como hospedagem e transporte,
+                  tornando a viagem mais acessível.
+                </p>
               </div>
             </div>
-            <div class="lp-benefit reveal from-left d3">
-              <div class="lp-benefit__icon"><i class="bi bi-emoji-smile"></i></div>
+            <div class="lp-benefit">
+              <div class="lp-benefit__icon" aria-hidden="true"><i class="bi bi-people"></i></div>
               <div>
-                <h4 class="lp-benefit__title">Faça Amizades</h4>
-                <p class="lp-benefit__text">Conheça pessoas com interesses similares e crie conexões que duram para sempre.</p>
+                <h4 class="lp-benefit__title">Novas conexões</h4>
+                <p class="lp-benefit__text">
+                  Conheça pessoas com interesses em comum e amplie seu círculo
+                  de contatos de forma natural.
+                </p>
               </div>
             </div>
-            <div class="lp-benefit reveal from-left d4">
-              <div class="lp-benefit__icon"><i class="bi bi-lightbulb"></i></div>
+            <div class="lp-benefit">
+              <div class="lp-benefit__icon" aria-hidden="true"><i class="bi bi-lightbulb"></i></div>
               <div>
-                <h4 class="lp-benefit__title">Troca de Experiências</h4>
-                <p class="lp-benefit__text">Aprenda com viajantes experientes e compartilhe suas próprias dicas e conhecimentos.</p>
+                <h4 class="lp-benefit__title">Troca de experiências</h4>
+                <p class="lp-benefit__text">
+                  Compartilhe dicas, sugestões e aprendizados com outros viajantes.
+                </p>
               </div>
             </div>
           </div>
         </div>
-        <div class="col-lg-6">
-          <div class="lp-stats reveal from-right">
+
+        <div class="col-lg-5 offset-lg-1 reveal from-right">
+          <div class="lp-stats" role="region" aria-label="Estatísticas da plataforma">
             <div class="lp-stat">
-              <span class="lp-stat__num" data-target="5000" data-suffix="+">5.000+</span>
-              <span class="lp-stat__label">Viajantes Registrados</span>
+              <span class="lp-stat__num" data-target="2400" data-suffix="+">2.400+</span>
+              <span class="lp-stat__label">Viajantes</span>
             </div>
             <div class="lp-stat">
-              <span class="lp-stat__num" data-target="150" data-suffix="+">150+</span>
-              <span class="lp-stat__label">Países Disponíveis</span>
+              <span class="lp-stat__num" data-target="180" data-suffix="+">180+</span>
+              <span class="lp-stat__label">Destinos</span>
             </div>
             <div class="lp-stat">
-              <span class="lp-stat__num" data-target="10000" data-suffix="+">10.000+</span>
-              <span class="lp-stat__label">Conexões Realizadas</span>
+              <span class="lp-stat__num" data-target="8700" data-suffix="+">8.700+</span>
+              <span class="lp-stat__label">Conexões</span>
             </div>
             <div class="lp-stat">
               <span class="lp-stat__num" data-target="98" data-suffix="%">98%</span>
-              <span class="lp-stat__label">Satisfação dos Usuários</span>
+              <span class="lp-stat__label">Satisfação</span>
             </div>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- ④ TESTIMONIALS -->
-  <section class="lp-testimonials">
+
+  <!-- ④ DEPOIMENTOS ──────────────────────────────────── -->
+  <section class="lp-testimonials" aria-labelledby="depoimentos-titulo">
     <div class="container">
       <div class="text-center mb-5 reveal">
-        <span class="lp-section-label">Depoimentos</span>
-        <h2 class="lp-section-title">O Que Nossos Viajantes Dizem</h2>
-        <p class="lp-section-sub">Histórias reais de conexões que ficaram para sempre.</p>
+        <span class="lp-section-label">Experiência dos usuários</span>
+        <h2 class="lp-section-title" id="depoimentos-titulo">Construindo conexões reais</h2>
+        <p class="lp-section-sub">
+          A plataforma foi criada para facilitar encontros entre pessoas com objetivos em comum.
+        </p>
       </div>
       <div class="row g-4">
         <div class="col-md-4 reveal d1">
-          <div class="lp-tcard">
-            <span class="lp-tcard__quote">"</span>
-            <div class="lp-tcard__stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-            <p class="lp-tcard__text">Conheci pessoas incríveis que se tornaram grandes amigos! A viagem para a Tailândia ficou muito mais especial e significativa.</p>
-            <div class="lp-tcard__author">
-              <div class="lp-tcard__avatar">MS</div>
-              <div>
-                <p class="lp-tcard__name">Maria Silva</p>
-                <p class="lp-tcard__dest"><i class="bi bi-geo-alt-fill" style="color:var(--lp-gold)"></i> Bangkok, Tailândia</p>
-              </div>
-            </div>
-          </div>
+          <blockquote class="lp-tcard">
+            <span class="lp-tcard__quote" aria-hidden="true">"</span>
+            <p class="lp-tcard__text">
+              A ideia de encontrar pessoas com o mesmo destino torna o planejamento
+              muito mais simples e interessante.
+            </p>
+          </blockquote>
         </div>
         <div class="col-md-4 reveal d2">
-          <div class="lp-tcard">
-            <span class="lp-tcard__quote">"</span>
-            <div class="lp-tcard__stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-            <p class="lp-tcard__text">Economizei muito dividindo os custos e ainda fiz amigos de diferentes países. Uma experiência que não teria de outra forma!</p>
-            <div class="lp-tcard__author">
-              <div class="lp-tcard__avatar">JS</div>
-              <div>
-                <p class="lp-tcard__name">João Santos</p>
-                <p class="lp-tcard__dest"><i class="bi bi-geo-alt-fill" style="color:var(--lp-gold)"></i> Lisboa, Portugal</p>
-              </div>
-            </div>
-          </div>
+          <blockquote class="lp-tcard">
+            <span class="lp-tcard__quote" aria-hidden="true">"</span>
+            <p class="lp-tcard__text">
+              Uma forma prática de organizar viagens e conhecer novas pessoas
+              sem complicação.
+            </p>
+          </blockquote>
         </div>
         <div class="col-md-4 reveal d3">
-          <div class="lp-tcard">
-            <span class="lp-tcard__quote">"</span>
-            <div class="lp-tcard__stars"><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i><i class="bi bi-star-fill"></i></div>
-            <p class="lp-tcard__text">Plataforma segura e muito fácil de usar. O chat em tempo real facilitou demais o planejamento conjunto com meu grupo.</p>
-            <div class="lp-tcard__author">
-              <div class="lp-tcard__avatar">AC</div>
-              <div>
-                <p class="lp-tcard__name">Ana Costa</p>
-                <p class="lp-tcard__dest"><i class="bi bi-geo-alt-fill" style="color:var(--lp-gold)"></i> Paris, França</p>
-              </div>
-            </div>
-          </div>
+          <blockquote class="lp-tcard">
+            <span class="lp-tcard__quote" aria-hidden="true">"</span>
+            <p class="lp-tcard__text">
+              Útil para quem busca companhia ou apenas quer trocar experiências
+              antes de viajar.
+            </p>
+          </blockquote>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ⑤ CTA FINAL -->
-  <section class="lp-cta">
-    <div class="container lp-cta__inner">
-      <div class="row align-items-center gy-5">
-        <div class="col-lg-6 reveal from-left">
-          <span class="lp-section-label">Comece agora</span>
-          <h2 class="lp-cta__title">
-            Pronto Para Sua <br>
-            <span class="pe-2">Próxima Aventura?</span>
-          </h2>
-          <p class="lp-cta__sub">
-            Junte-se a milhares de viajantes e comece a planejar sua próxima viagem hoje mesmo. Grátis, rápido e seguro.
-          </p>
-          <div class="lp-cta__features">
-            <span class="lp-cta__feat"><i class="bi bi-check-circle-fill"></i> Cadastro gratuito e sem cartão</span>
-            <span class="lp-cta__feat"><i class="bi bi-check-circle-fill"></i> Match por destino e período</span>
-            <span class="lp-cta__feat"><i class="bi bi-check-circle-fill"></i> Chat em tempo real</span>
-            <span class="lp-cta__feat"><i class="bi bi-check-circle-fill"></i> Comunidade verificada</span>
-          </div>
-          <a href="{% url 'usuarios:cadastro' %}" class="btn-lp-primary">
-            <i class="bi bi-rocket-takeoff"></i> Criar Conta Gratuita
-          </a>
-        </div>
-        <div class="col-lg-5 offset-lg-1 reveal from-right d2">
-          <div class="lp-cta__card">
-            <div class="lp-cta__card-title">
-              <i class="bi bi-fire me-1" style="color:var(--lp-gold)"></i>
-              Destinos Populares Agora
-            </div>
-            <div class="lp-dest-row">
-              <img src="https://flagcdn.com/w40/jp.png" alt="Japão" class="lp-dest-row__flag">
-              <span class="lp-dest-row__name">Japão — Tóquio</span>
-              <span class="lp-dest-row__count">24 viajantes</span>
-            </div>
-            <div class="lp-dest-row">
-              <img src="https://flagcdn.com/w40/th.png" alt="Tailândia" class="lp-dest-row__flag">
-              <span class="lp-dest-row__name">Tailândia — Bangkok</span>
-              <span class="lp-dest-row__count">18 viajantes</span>
-            </div>
-            <div class="lp-dest-row">
-              <img src="https://flagcdn.com/w40/pt.png" alt="Portugal" class="lp-dest-row__flag">
-              <span class="lp-dest-row__name">Portugal — Lisboa</span>
-              <span class="lp-dest-row__count">31 viajantes</span>
-            </div>
-            <div class="lp-dest-row">
-              <img src="https://flagcdn.com/w40/fr.png" alt="França" class="lp-dest-row__flag">
-              <span class="lp-dest-row__name">França — Paris</span>
-              <span class="lp-dest-row__count">15 viajantes</span>
-            </div>
-            <div class="lp-dest-row">
-              <img src="https://flagcdn.com/w40/it.png" alt="Itália" class="lp-dest-row__flag">
-              <span class="lp-dest-row__name">Itália — Roma</span>
-              <span class="lp-dest-row__count">21 viajantes</span>
-            </div>
+
+  <!-- ⑤ CTA FINAL ─────────────────────────────────────── -->
+  <section class="lp-cta" aria-labelledby="cta-titulo">
+    <div class="container">
+      <div class="lp-cta__inner">
+        <div class="row align-items-center">
+          <div class="col-lg-6 reveal">
+            <span class="lp-section-label">Comece agora</span>
+            <h2 class="lp-cta__title" id="cta-titulo">
+              Pronto para organizar sua<br>
+              <span>próxima viagem?</span>
+            </h2>
+            <p class="lp-cta__sub">
+              Crie sua conta gratuitamente e comece a explorar destinos,
+              encontrar viajantes e planejar sua jornada com mais facilidade.
+            </p>
+            <a href="{% url 'usuarios:cadastro' %}" class="btn-lp-primary" style="width:auto;">
+              <i class="bi bi-rocket-takeoff" aria-hidden="true"></i>
+              Criar Conta Gratuita
+            </a>
           </div>
         </div>
       </div>
@@ -1032,43 +1479,68 @@
 
 
 {% block scripts_extras %}
-{% if not user.is_authenticated %}
 <script>
 (function () {
   'use strict';
-  /* Scroll-reveal — somente na landing */
-  const revealObserver = new IntersectionObserver((entries) => {
-    entries.forEach(e => {
-      if (e.isIntersecting) { e.target.classList.add('visible'); revealObserver.unobserve(e.target); }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 
-  /* Counter animation */
+  /* ── Scroll-reveal (landing + home) ────────────────── */
+  if ('IntersectionObserver' in window) {
+    const revealObs = new IntersectionObserver(
+      (entries) => entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-visible');
+          revealObs.unobserve(e.target);
+        }
+      }),
+      { threshold: 0.10, rootMargin: '0px 0px -36px 0px' }
+    );
+    document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+  } else {
+    /* Fallback: mostra tudo imediatamente */
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('is-visible'));
+  }
+
+{% if not user.is_authenticated %}
+  /* ── Contador animado de estatísticas (landing) ────── */
   let countersStarted = false;
-  function startCounters() {
+
+  function animateCounters() {
     if (countersStarted) return;
     countersStarted = true;
+
     document.querySelectorAll('.lp-stat__num[data-target]').forEach(el => {
-      const target = parseInt(el.dataset.target, 10);
-      const suffix = el.dataset.suffix || '';
+      const target  = parseInt(el.dataset.target, 10);
+      const suffix  = el.dataset.suffix || '';
+      const start   = performance.now();
       const duration = 1800;
-      const step = target / (duration / 16);
-      let current = 0;
-      el.textContent = '0' + suffix;
-      const tick = setInterval(() => {
-        current += step;
-        if (current >= target) { current = target; clearInterval(tick); }
-        el.textContent = Math.floor(current).toLocaleString('pt-BR') + suffix;
-      }, 16);
+
+      function step(now) {
+        const elapsed  = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        /* easing: ease-out cubic */
+        const eased    = 1 - Math.pow(1 - progress, 3);
+        const value    = Math.floor(eased * target);
+
+        el.textContent = value.toLocaleString('pt-BR') + suffix;
+
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     });
   }
-  const statsObs = new IntersectionObserver((entries) => {
-    entries.forEach(e => { if (e.isIntersecting) startCounters(); });
-  }, { threshold: 0.4 });
-  const statsContainer = document.querySelector('.lp-stats');
-  if (statsContainer) statsObs.observe(statsContainer);
+
+  if ('IntersectionObserver' in window) {
+    const statsEl = document.querySelector('.lp-stats');
+    if (statsEl) {
+      const statsObs = new IntersectionObserver(
+        (entries) => entries.forEach(e => { if (e.isIntersecting) animateCounters(); }),
+        { threshold: 0.35 }
+      );
+      statsObs.observe(statsEl);
+    }
+  }
+{% endif %}
+
 })();
 </script>
-{% endif %}
 {% endblock %}

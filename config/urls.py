@@ -98,6 +98,8 @@ urlpatterns = [
     path("destinos/", include("apps.destinos.urls")),
     path("conexoes/", include("apps.conexoes.urls")),
     path("chat/", include("apps.chat.urls")),
+    # Adicionando a URL para recuperação de senha
+    path("password-reset/", include("apps.core.urls_password_reset")),
 ]
 
 # Servir arquivos estáticos e mídia

@@ -1,3 +1,6 @@
+import logging
+import threading
+
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
@@ -11,7 +14,18 @@ from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
+
+
+def _enviar_email_reset(email_msg, user_email):
+    """Envia o email em thread separada para não bloquear o worker."""
+    try:
+        email_msg.send()
+        logger.info(f"Email de reset enviado para: {user_email}")
+    except Exception as e:
+        logger.error(f"Erro ao enviar email de reset para {user_email}: {str(e)}")
 
 
 def password_reset_request(request):
@@ -22,61 +36,45 @@ def password_reset_request(request):
             email = form.cleaned_data["email"]
             users = User.objects.filter(Q(email__iexact=email))
 
-            # ⚠️ segurança: não revela se o email existe
             if users.exists():
                 for user in users:
-                    try:
-                        subject = "Redefinição de senha - Viajantes Conectados"
+                    token = default_token_generator.make_token(user)
+                    uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
 
-                        token = default_token_generator.make_token(user)
-                        uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+                    reset_path = reverse(
+                        "password_reset_confirm",
+                        kwargs={"uidb64": uidb64, "token": token},
+                    )
+                    reset_url = f"{settings.SITE_URL.rstrip('/')}{reset_path}"
 
-                        # ✅ URL correta usando reverse
-                        reset_path = reverse(
-                            "password_reset_confirm",
-                            kwargs={"uidb64": uidb64, "token": token},
-                        )
+                    html_content = render_to_string(
+                        "registration/password_reset_email.html",
+                        {"user": user, "reset_url": reset_url},
+                    )
 
-                        reset_url = f"{settings.SITE_URL}{reset_path}"
+                    text_content = (
+                        f"Olá,\n\n"
+                        f"Recebemos uma solicitação para redefinir sua senha.\n\n"
+                        f"Acesse o link abaixo:\n{reset_url}\n\n"
+                        f"Se você não solicitou, ignore este e-mail."
+                    )
 
-                        # HTML do e-mail
-                        html_content = render_to_string(
-                            "registration/password_reset_email.html",
-                            {
-                                "user": user,
-                                "reset_url": reset_url,
-                            },
-                        )
+                    email_msg = EmailMultiAlternatives(
+                        subject="Redefinição de senha - Viajantes Conectados",
+                        body=text_content,
+                        from_email=settings.DEFAULT_FROM_EMAIL,
+                        to=[user.email],
+                    )
+                    email_msg.attach_alternative(html_content, "text/html")
 
-                        # Texto simples (fallback)
-                        text_content = f"""
-Olá,
+                    # Envia em background — não trava o worker
+                    threading.Thread(
+                        target=_enviar_email_reset,
+                        args=(email_msg, user.email),
+                        daemon=True,
+                    ).start()
 
-Recebemos uma solicitação para redefinir sua senha.
-
-Acesse o link abaixo:
-{reset_url}
-
-Se você não solicitou, ignore este e-mail.
-"""
-
-                        email_msg = EmailMultiAlternatives(
-                            subject,
-                            text_content,
-                            settings.DEFAULT_FROM_EMAIL,
-                            [user.email],
-                        )
-
-                        email_msg.attach_alternative(html_content, "text/html")
-                        email_msg.send()
-
-                    except Exception:
-                        messages.error(
-                            request,
-                            "Erro ao enviar o e-mail. Tente novamente mais tarde.",
-                        )
-                        return redirect("password_reset")
-
+            # Sempre a mesma mensagem — não revela se email existe
             messages.info(
                 request,
                 "Se o e-mail existir, você receberá instruções para redefinir sua senha.",
@@ -102,17 +100,16 @@ def password_reset_confirm(request, uidb64, token):
         user = None
 
     if user and default_token_generator.check_token(user, token):
-
         if request.method == "POST":
             form = SetPasswordForm(user, request.POST)
 
             if form.is_valid():
                 form.save()
+                logger.info(f"Senha redefinida com sucesso: {user.email}")
                 messages.success(request, "Senha redefinida com sucesso!")
                 return redirect("usuarios:login")
             else:
                 messages.error(request, "Corrija os erros abaixo.")
-
         else:
             form = SetPasswordForm(user)
 

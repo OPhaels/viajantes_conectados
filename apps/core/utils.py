@@ -5,6 +5,7 @@ Evita redundância de código entre os apps.
 
 import logging
 import re
+import threading
 from datetime import timedelta
 
 from django.conf import settings
@@ -17,29 +18,22 @@ logger = logging.getLogger(__name__)
 
 
 def enviar_email_assincrono(destino, assunto, mensagem, template=None):
-    """
-    Envia email de forma segura (pode ser adaptado para usar Celery).
+    def _enviar():
+        try:
+            send_mail(
+                subject=assunto,
+                message=mensagem,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[destino],
+                html_message=template,
+                fail_silently=False,
+            )
+            logger.info(f"Email enviado para: {destino}")
+        except Exception as e:
+            logger.error(f"Erro ao enviar email para {destino}: {str(e)}")
 
-    Args:
-        destino: Email do destinatário
-        assunto: Assunto do email
-        mensagem: Conteúdo do email
-        template: Template HTML (opcional)
-    """
-    try:
-        send_mail(
-            subject=assunto,
-            message=mensagem,
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[destino],
-            html_message=template,
-            fail_silently=False,
-        )
-        logger.info(f"Email enviado para: {destino}")
-        return True
-    except Exception as e:
-        logger.error(f"Erro ao enviar email para {destino}: {str(e)}")
-        return False
+    threading.Thread(target=_enviar, daemon=True).start()
+    return True
 
 
 def gerar_token_verificacao(usuario):

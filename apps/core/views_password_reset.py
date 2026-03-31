@@ -1,12 +1,12 @@
 import logging
 import threading
 
+import requests
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordResetForm, SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.template.loader import render_to_string
@@ -19,10 +19,24 @@ logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
-def _enviar_email_reset(email_msg, user_email):
-    """Envia o email em thread separada para não bloquear o worker."""
+def _enviar_email_reset(html_content, text_content, user_email):
     try:
-        email_msg.send()
+        response = requests.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {settings.RESEND_API_KEY}",
+                "Content-Type": "application/json",
+            },
+            json={
+                "from": settings.DEFAULT_FROM_EMAIL,
+                "to": [user_email],
+                "subject": "Redefinição de senha - Viajantes Conectados",
+                "html": html_content,
+                "text": text_content,
+            },
+            timeout=10,
+        )
+        response.raise_for_status()
         logger.info(f"Email de reset enviado para: {user_email}")
     except Exception as e:
         logger.error(f"Erro ao enviar email de reset para {user_email}: {str(e)}")
@@ -59,22 +73,12 @@ def password_reset_request(request):
                         f"Se você não solicitou, ignore este e-mail."
                     )
 
-                    email_msg = EmailMultiAlternatives(
-                        subject="Redefinição de senha - Viajantes Conectados",
-                        body=text_content,
-                        from_email=settings.DEFAULT_FROM_EMAIL,
-                        to=[user.email],
-                    )
-                    email_msg.attach_alternative(html_content, "text/html")
-
-                    # Envia em background — não trava o worker
                     threading.Thread(
                         target=_enviar_email_reset,
-                        args=(email_msg, user.email),
+                        args=(html_content, text_content, user.email),
                         daemon=True,
                     ).start()
 
-            # Sempre a mesma mensagem — não revela se email existe
             messages.info(
                 request,
                 "Se o e-mail existir, você receberá instruções para redefinir sua senha.",

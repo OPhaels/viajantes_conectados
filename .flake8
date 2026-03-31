@@ -1,0 +1,5 @@
+# Serve para a leitura SOMENTE do projeto, ignorando outras pastas como .venv, __pycache__, migrations, etc. Além disso, define o limite de caracteres por linha para 120, permitindo um código mais legível e organizado.
+
+[flake8]
+exclude = .venv, __pycache__, migrations
+max-line-length = 200

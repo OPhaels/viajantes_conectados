@@ -1,23 +1,23 @@
 function validarFormulario(formularioId) {
     const formulario = document.getElementById(formularioId);
-    
+
     if (!formulario) return true;
-    
+
     const camposInvalidos = formulario.querySelectorAll(':invalid');
-    
+
     if (camposInvalidos.length > 0) {
         camposInvalidos[0].focus();
-        
+
         camposInvalidos.forEach(campo => {
             campo.classList.add('shake');
             setTimeout(() => {
                 campo.classList.remove('shake');
             }, 500);
         });
-        
+
         return false;
     }
-    
+
     return true;
 }
 
@@ -54,7 +54,7 @@ estiloShake.textContent = `
         10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
         20%, 40%, 60%, 80% { transform: translateX(5px); }
     }
-    
+
     .shake {
         animation: shake 0.5s;
         border-color: var(--cor-acento) !important;
@@ -65,15 +65,15 @@ document.head.appendChild(estiloShake);
 // Prevenir múltiplos envios de formulário
 document.addEventListener('DOMContentLoaded', () => {
     const formularios = document.querySelectorAll('form');
-    
+
     formularios.forEach(formulario => {
         formulario.addEventListener('submit', function(e) {
             const botaoSubmit = this.querySelector('[type="submit"]');
-            
+
             if (botaoSubmit && !botaoSubmit.disabled) {
                 botaoSubmit.disabled = true;
                 botaoSubmit.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processando...';
-                
+
                 // Reabilitar após 3 segundos (caso não redirecione)
                 setTimeout(() => {
                     botaoSubmit.disabled = false;

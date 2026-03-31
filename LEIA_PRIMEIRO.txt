@@ -13,10 +13,10 @@
 
    1️⃣  PRIMEIROS PASSOS (Recomendado)
        👉 docs/guias/GUIA_PROXIMOS_PASSOS.md
-       
+
    2️⃣  ENTENDER TUDO (Visão geral)
        👉 README.md (na raiz)
-       
+
    3️⃣  ÍNDICE COMPLETO (Procurando algo?)
        👉 docs/README.md
 

@@ -4,8 +4,8 @@
 
 A API REST do Viajantes Conectados é uma plataforma para conectar viajantes que compartilham os mesmos destinos. Todos os endpoints requerem autenticação via JWT, exceto os de registro e login.
 
-**URL Base:** `https://api.viajantesconectados.com/`  
-**Versão:** 1.0  
+**URL Base:** `https://api.viajantesconectados.com/`
+**Versão:** 1.0
 **Formato de Resposta:** JSON
 
 ---

@@ -62,16 +62,16 @@ TEMPO_EXPIRACAO_TOKEN = timedelta(minutes=60)
 def enviar_email_verificacao(usuario):
     """
     Envia um email de verificação para o usuário.
-    
+
     Args:
         usuario (Usuario): Objeto do usuário para enviar email
-    
+
     Returns:
         bool: True se enviado com sucesso, False caso contrário
-    
+
     Raises:
         EmailError: Se houver erro ao enviar email
-    
+
     Examples:
         >>> usuario = Usuario.objects.get(email='teste@exemplo.com')
         >>> enviar_email_verificacao(usuario)
@@ -82,7 +82,7 @@ def enviar_email_verificacao(usuario):
 class UsuarioSerializer(serializers.ModelSerializer):
     """
     Serializer para exibir dados públicos de usuários.
-    
+
     Atributos:
         - uuid: Identificador único
         - nome_completo: Nome visível
@@ -108,14 +108,6 @@ from rest_framework import serializers
 
 # Local
 from apps.core.exceptions import ValidacaoDadosException
-from apps.usuarios.models import Usuario
-
-# ❌ RUIM: Misturado
-from datetime import timedelta
-from apps.usuarios.models import Usuario
-from django.db import models
-import logging
-from rest_framework import serializers
 ```
 
 #### 5. Tamanho de Funções/Classes
@@ -145,13 +137,13 @@ def fazer_tudo_nessa_funcao():
 # ✅ BOM
 def criar_solicitacao(request):
     email = request.POST.get('email', '').strip()
-    
+
     if not email:
         raise ValidacaoDadosException("Email é obrigatório")
-    
+
     if len(email) > 254:
         raise ValidacaoDadosException("Email muito longo")
-    
+
     try:
         usuario = Usuario.objects.get(email=email)
     except Usuario.DoesNotExist:
@@ -232,7 +224,7 @@ usuarios = Usuario.objects.raw(
 # tests.py ou tests/
 class UsuarioModelTests(TestCase):
     """Testes para o modelo Usuario."""
-    
+
     def setUp(self):
         """Executado antes de cada teste."""
         self.usuario = Usuario.objects.create_user(
@@ -240,12 +232,12 @@ class UsuarioModelTests(TestCase):
             password='Teste123!',
             nome_completo='Teste User'
         )
-    
+
     def test_usuario_criacao(self):
         """Testa se usuário é criado corretamente."""
         self.assertEqual(self.usuario.email, 'teste@exemplo.com')
         self.assertTrue(self.usuario.check_password('Teste123!'))
-    
+
     def test_email_unico(self):
         """Testa se email é único."""
         with self.assertRaises(IntegrityError):
@@ -257,7 +249,7 @@ class UsuarioModelTests(TestCase):
 
 class UsuarioAPITests(APITestCase):
     """Testes para a API de usuários."""
-    
+
     def test_registrar_usuario(self):
         """Testa endpoint de registro."""
         response = self.client.post(
@@ -346,7 +338,7 @@ pip install isort
 black apps/
 
 # Verificar linting
-flake8 apps/ --max-line-length=120
+flake8 apps/ --max-line-length=200
 
 # Type checking
 mypy apps/usuarios/models.py
@@ -419,7 +411,7 @@ def obter_usuario(uuid):
 # ✅ BOM: Usar paginação
 class UsuarioViewSet(viewsets.ModelViewSet):
     pagination_class = PageNumberPagination
-    
+
     def get_paginated_response(self, data):
         # Retorna count, next, previous, results
         pass
@@ -556,7 +548,162 @@ tail -f logs/django.log | grep ERROR
 - [OWASP Top 10](https://owasp.org/www-project-top-ten/)
 
 ---
+## 🤖 Bot de Análise de Código
 
+O projeto inclui um sistema automatizado de análise de código que ajuda a manter qualidade, segurança e consistência.
+
+### Ferramentas Integradas
+
+- **Black**: Formatação automática de código Python
+- **Flake8**: Linting e verificação de estilo
+- **Bandit**: Análise de segurança para código Python
+- **Pre-commit**: Hooks automáticos para execução antes de commits
+
+### Como Usar
+
+#### Comando Django (Recomendado)
+```bash
+# Análise completa
+python manage.py code_analysis
+
+# Apenas verificação de segurança
+python manage.py code_analysis --security-only
+
+# Apenas linting
+python manage.py code_analysis --lint-only
+
+# Corrigir problemas automaticamente
+python manage.py code_analysis --fix
+```
+
+#### Bot Standalone
+```bash
+# Análise completa com relatórios detalhados
+python scripts/bot_code_analysis.py
+
+# Apenas linting
+python scripts/bot_code_analysis.py --lint-only
+
+# Apenas segurança
+python scripts/bot_code_analysis.py --security-only
+
+# Corrigir automaticamente
+python scripts/bot_code_analysis.py --fix
+
+# Criar issues no GitHub
+python scripts/bot_code_analysis.py --create-issues --github-repo usuario/repo --github-token YOUR_TOKEN
+```
+
+#### Integração com GitHub
+
+O bot pode criar e gerenciar issues automaticamente no GitHub:
+
+```bash
+# Configurar token do GitHub (recomendado)
+export GITHUB_TOKEN=your_personal_access_token
+
+# Executar com criação de issues
+python scripts/bot_code_analysis.py --create-issues --github-repo seu-usuario/viajantes_conectados
+
+# Ou especificar token diretamente
+python scripts/bot_code_analysis.py --create-issues --github-repo seu-usuario/viajantes_conectados --github-token YOUR_TOKEN
+```
+
+**Funcionalidades do GitHub:**
+- 📝 **Criação automática de issues** para problemas detectados
+- 🔄 **Atualização de issues** existentes com novos detalhes
+- ✅ **Fechamento automático** quando problemas são resolvidos
+- 🏷️ **Labels automáticas**: `code-analysis`, `automated`, `black`, `flake8`, `bandit`, etc.
+
+#### Pre-commit Hooks
+Os hooks são executados automaticamente antes de cada commit:
+```bash
+# Instalar hooks (feito automaticamente no setup)
+pre-commit install
+
+# Executar manualmente em todos os arquivos
+pre-commit run --all-files
+```
+
+### Relatórios
+
+Os relatórios são salvos em `logs/code_analysis/`:
+- **JSON**: Dados estruturados para processamento automatizado
+- **Markdown**: Relatórios legíveis para humanos
+
+### Configuração
+
+- **Black**: Linha máxima de 88 caracteres
+- **Flake8**: Ignora E203, W503 (conflitos com Black)
+- **Bandit**: Exclui migrations e __pycache__
+
+### Configuração do GitHub
+
+Para usar as funcionalidades de issues do GitHub:
+
+1. **Criar Personal Access Token:**
+   - Vá para [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+   - Crie um token com permissões `repo` (para repositórios privados) ou `public_repo` (para públicos)
+   - Copie o token gerado
+
+2. **Configurar variável de ambiente:**
+   ```bash
+   export GITHUB_TOKEN=seu_token_aqui
+   ```
+
+3. **Ou passar diretamente:**
+   ```bash
+   python scripts/bot_code_analysis.py --github-token seu_token_aqui --github-repo usuario/repo
+   ```
+
+4. **Permissões necessárias:**
+   - `Issues`: read/write (para criar, atualizar e fechar issues)
+   - `Repository`: read (para acessar informações do repositório)
+
+### Integração CI/CD
+
+Para integração com GitHub Actions ou outros sistemas de CI:
+
+```yaml
+name: Code Analysis
+on: [push, pull_request]
+
+jobs:
+  code-analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+    - name: Run code analysis
+      run: python scripts/bot_code_analysis.py --no-tests
+    - name: Create GitHub issues (optional)
+      if: failure()
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        python scripts/bot_code_analysis.py --create-issues --github-repo ${{ github.repository }} --no-tests
+```
+
+**Variáveis de ambiente necessárias:**
+- `GITHUB_TOKEN`: Token automático fornecido pelo GitHub Actions
+- Para repositórios privados, configure um Personal Access Token como secret
+
+### Desenvolvimento
+
+Para adicionar novas ferramentas ou modificar configurações:
+
+1. Edite `.pre-commit-config.yaml` para hooks
+2. Modifique `apps/core/management/commands/code_analysis.py` para o comando Django
+3. Atualize `scripts/bot_code_analysis.py` para o bot standalone
+
+---
 ## 🎯 Resumo das Boas Práticas
 
 ```

@@ -1,7 +1,7 @@
 # 📋 Relatório de Melhorias - Viajantes Conectados
 
-**Data:** Fevereiro 2025  
-**Versão:** 2.0  
+**Data:** Fevereiro 2025
+**Versão:** 2.0
 **Status:** ✅ Concluído
 
 ---
@@ -217,7 +217,7 @@ if not usuario.ativo:
 # apps/core/permissions.py
 class EmailVerificado(permissions.BasePermission):
     """Reutilizável em qualquer ViewSet"""
-    
+
 class ContaAtiva(permissions.BasePermission):
     """Reutilizável em qualquer ViewSet"""
 ```
@@ -271,7 +271,7 @@ viajantes_conectados/
 │   └── viewsets.py                # ViewSets otimizados
 ├── static/css/
 │   └── style.css                  # 🎨 Novo design system
-├── templates/          
+├── templates/
 │   └── [outros templates...]
 ├── config/
 │   └── settings.py                # ✅ Atualizado com core app

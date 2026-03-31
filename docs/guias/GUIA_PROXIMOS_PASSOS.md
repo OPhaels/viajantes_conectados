@@ -136,7 +136,7 @@ Crie um arquivo `test_cors.html` e abra no navegador:
 <body>
     <button onclick="testCORS()">Testar CORS</button>
     <pre id="resultado"></pre>
-    
+
     <script>
         function testCORS() {
             fetch('http://localhost:8000/usuarios/api/usuarios/', {
@@ -147,7 +147,7 @@ Crie um arquivo `test_cors.html` e abra no navegador:
             })
             .then(r => r.json())
             .then(data => {
-                document.getElementById('resultado').textContent = 
+                document.getElementById('resultado').textContent =
                     JSON.stringify(data, null, 2);
             })
             .catch(e => {

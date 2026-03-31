@@ -464,5 +464,5 @@ Se tiver dúvidas sobre segurança, abra uma issue ou entre em contato.
 
 ---
 
-Versão: 2.0  
+Versão: 2.0
 Última Atualização: Fevereiro de 2025

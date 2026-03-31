@@ -1,6 +1,6 @@
 # 📚 Índice de Documentação - Viajantes Conectados
 
-**Última Atualização:** Fevereiro de 2025  
+**Última Atualização:** Fevereiro de 2025
 **Versão:** 2.0
 
 ---
@@ -87,7 +87,7 @@ viajantes_conectados/
 │   └── style.css                    ← 🎨 Design System profissional
 │
 ├── templates/
-│   
+│
 │
 └── config/
     └── settings.py                  ← Atualizado com segurança
@@ -271,19 +271,19 @@ permission_classes = [EmailVerificado]
 
 ## ❓ FAQ
 
-**P: Por onde começo?**  
+**P: Por onde começo?**
 R: Leia [SUMMARY.md](SUMMARY.md) e [README_NOVO.md](README_NOVO.md)
 
-**P: Como adiciono uma nova feature?**  
+**P: Como adiciono uma nova feature?**
 R: Siga [DEVELOPMENT_GUIDE.md](DEVELOPMENT_GUIDE.md)
 
-**P: A API é documentada?**  
+**P: A API é documentada?**
 R: Sim, veja [API_DOCUMENTATION.md](API_DOCUMENTATION.md)
 
-**P: Como faço deploy?**  
+**P: Como faço deploy?**
 R: Veja [README_NOVO.md#deployment](README_NOVO.md#-deployment)
 
-**P: É seguro?**  
+**P: É seguro?**
 R: Sim, veja [SECURITY_GUIDE.md](SECURITY_GUIDE.md)
 
 ---
@@ -329,8 +329,8 @@ R: Sim, veja [SECURITY_GUIDE.md](SECURITY_GUIDE.md)
 
 ---
 
-**Última Atualização:** Fevereiro de 2025  
-**Mantido por:** Equipe de Desenvolvimento  
+**Última Atualização:** Fevereiro de 2025
+**Mantido por:** Equipe de Desenvolvimento
 **Versionamento:** v2.0
 
 ---

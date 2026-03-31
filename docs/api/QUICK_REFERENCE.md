@@ -74,7 +74,7 @@ from django.utils.translation import gettext_lazy as _
 
 class MeuModelo(models.Model):
     """Descrição do modelo."""
-    
+
     nome = models.CharField(
         _('nome'),
         max_length=100,
@@ -82,12 +82,12 @@ class MeuModelo(models.Model):
     )
     ativo = models.BooleanField(_('ativo'), default=True)
     data_criacao = models.DateTimeField(_('data de criação'), auto_now_add=True)
-    
+
     class Meta:
         verbose_name = _('meu modelo')
         verbose_name_plural = _('meus modelos')
         ordering = ['-data_criacao']
-    
+
     def __str__(self):
         return self.nome
 ```
@@ -100,7 +100,7 @@ from .models import MeuModelo
 
 class MeuModeloSerializer(serializers.ModelSerializer):
     """Serializer para MeuModelo."""
-    
+
     class Meta:
         model = MeuModelo
         fields = ['id', 'nome', 'ativo', 'data_criacao']
@@ -117,7 +117,7 @@ from apps.core.permissions import IsAuthenticated, EhProprietario
 
 class MeuModeloViewSet(viewsets.ModelViewSet):
     """ViewSet para MeuModelo."""
-    
+
     queryset = MeuModelo.objects.all()
     serializer_class = MeuModeloSerializer
     permission_classes = [IsAuthenticated, EhProprietario]
@@ -131,13 +131,13 @@ from django.utils.translation import gettext_lazy as _
 
 class MinhaPermission(permissions.BasePermission):
     """Descrição da permissão."""
-    
+
     message = _('Você não tem permissão.')
-    
+
     def has_permission(self, request, view):
         # Verificação em nível de view
         return True
-    
+
     def has_object_permission(self, request, view, obj):
         # Verificação em nível de objeto
         return obj.usuario == request.user
@@ -297,10 +297,10 @@ class UsuarioTests(TestCase):
             password='<SENHA_TESTE>',
             nome_completo='Teste User'
         )
-    
+
     def test_criar_usuario(self):
         self.assertEqual(self.usuario.email, 'teste@exemplo.com')
-    
+
     def test_senha_criptografada(self):
         self.assertTrue(self.usuario.check_password('<SENHA_TESTE>'))
 ```
@@ -314,7 +314,7 @@ class UsuarioAPITests(APITestCase):
     def test_listar_usuarios(self):
         response = self.client.get('/usuarios/api/usuarios/')
         self.assertEqual(response.status_code, 200)
-    
+
     def test_registrar_usuario(self):
         response = self.client.post('/usuarios/api/usuarios/registrar/', {
             'email': 'novo@exemplo.com',
@@ -524,7 +524,7 @@ for plano in PlanoViagem.objects.all():
 class MeuModelo(models.Model):
     email = models.EmailField(db_index=True)  # Index simples
     ativo = models.BooleanField()
-    
+
     class Meta:
         indexes = [
             models.Index(fields=['ativo', 'data_criacao']),

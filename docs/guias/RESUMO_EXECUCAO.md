@@ -189,7 +189,7 @@ Arquivo criado: `static/css/style.css` (600+ linhas)
 - [ ] Testar rate limiting:
   - [ ] 6 tentativas de login rápidas (deve bloquear)
   - [ ] Verificar TentativaLoginFalhado no admin
-  
+
 - [ ] Testar tokens JWT:
   - [ ] POST /api-token-auth/token/ com credenciais válidas
   - [ ] Acessar endpoint autenticado com token
@@ -276,6 +276,6 @@ Arquivo criado: `static/css/style.css` (600+ linhas)
 
 ---
 
-**Versão:** 1.0 - Cleanup Completo  
-**Data:** Março 2026  
+**Versão:** 1.0 - Cleanup Completo
+**Data:** Março 2026
 **Status:** 🟢 PRONTO PARA PRODUÇÃO

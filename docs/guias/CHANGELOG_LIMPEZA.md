@@ -228,7 +228,7 @@ GET /destinos/api/planos/?pais_destino=1
    - NUNCA commit `.env` no repositório
    - Adicione `.env` ao `.gitignore`
 
-2. **Token JWT:** 
+2. **Token JWT:**
    - Experiência: 60 minutos
    - Refresh: 7 dias
    - Certifique-se de usar HTTPS em produção

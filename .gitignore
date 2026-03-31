@@ -25,10 +25,10 @@ Icon?
 *~
 .nfs*
 
-# Ambiente Virtual 
+# Ambiente Virtual
 env
 .env
-venv 
+venv
 .venv
 infos
 .infos

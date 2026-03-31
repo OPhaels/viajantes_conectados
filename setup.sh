@@ -48,6 +48,29 @@ echo ""
 
 # 7. Testes
 echo -e "${YELLOW}[7]${NC} Executando testes..."
+python manage.py test
+
+# 8. Instalar Pre-commit Hooks
+echo -e "${YELLOW}[8]${NC} Instalando pre-commit hooks..."
+pip install pre-commit
+pre-commit install
+
+echo -e "${GREEN}✓ Pre-commit hooks instalados${NC}"
+echo ""
+
+echo -e "${GREEN}🎉 Setup concluído!${NC}"
+echo ""
+echo "Para executar análise de código manualmente:"
+echo "  python manage.py code_analysis"
+echo ""
+echo "Para executar apenas verificação de segurança:"
+echo "  python manage.py code_analysis --security-only"
+echo ""
+echo "Para corrigir problemas automaticamente:"
+echo "  python manage.py code_analysis --fix"
+echo ""
+echo "Para usar o bot com GitHub:"
+echo "  python scripts/bot_code_analysis.py --create-issues --github-repo usuario/repo"
 python manage.py test --verbosity=2
 echo ""
 

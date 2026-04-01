@@ -676,7 +676,6 @@ body {
   left: 0;
   right: 0;
   height: 4px;
-  background: linear-gradient(90deg, var(--primary) 0%, var(--accent) 48%, var(--accent-light) 100%);
 }
 
 .auth-header {
@@ -1991,7 +1990,6 @@ small.text-muted {
   font-size: var(--fs-xs);
   font-weight: 700;
   border-radius: var(--radius-sm) !important;
-  padding: .3rem .62rem;
   min-height: 36px;
   transition: var(--t-fast);
 }

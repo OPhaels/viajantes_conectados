@@ -170,9 +170,9 @@
                     name="aceita_termos" id="aceita_termos" required>
                   <label class="form-check-label" for="aceita_termos">
                     Li e aceito os
-                    <a href="#" class="auth-link">Termos de Uso</a>
+                    <a href="{% static 'seguranca/termos_de_uso.docx' %}" download class="auth-link">Termos de Uso</a>
                     e a
-                    <a href="#" class="auth-link">Política de Privacidade</a>
+                    <a href="{% static 'seguranca/politica_de_privacidade.docx' %}" download class="auth-link">Política de Privacidade</a>
                   </label>
                   <div class="invalid-feedback">
                     Você deve aceitar os termos para continuar.

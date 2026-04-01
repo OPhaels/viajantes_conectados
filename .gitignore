@@ -161,9 +161,10 @@ secrets/
 #        OUTROS
 # =========================
 
-# Logs
-*.log
 logs/
+*.log
+logs
+.log
 
 # Compilados binários
 *.exe

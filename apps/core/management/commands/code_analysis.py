@@ -1,8 +1,25 @@
-import subprocess  # nosec B404
 import sys
+import time
 from pathlib import Path
 
 from django.core.management.base import BaseCommand
+
+# Garante que scripts/ está no sys.path para importar o bot standalone
+_PROJECT_ROOT = Path(__file__).resolve().parents[4]
+if str(_PROJECT_ROOT / "scripts") not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT / "scripts"))
+
+from scripts.bot_code_analysis import (  # noqa: E402
+    C,
+    CodeAnalysisBot,
+    _duration_str,
+    _get_env_info,
+    _p,
+    _print_header,
+    _print_info,
+    _print_section,
+    _print_summary_table,
+)
 
 
 class Command(BaseCommand):
@@ -25,117 +42,48 @@ class Command(BaseCommand):
             help="Executa apenas Flake8 e Black",
         )
 
-    def _safe_print(self, message: str) -> None:
-        """Evita UnicodeEncodeError no Windows (cp1252)."""
-        try:
-            self.stdout.write(message)
-        except UnicodeEncodeError:
-            self.stdout.write(
-                message.encode("utf-8", errors="replace").decode(
-                    "ascii", errors="replace"
-                )
-            )
-
-    def _run_tool(self, tool_name: str, args: list) -> tuple[bool, str, str]:
-        """Executa uma ferramenta de linha de comando com seguranca."""
-        try:
-            cmd = [sys.executable, "-m", tool_name] + args
-            result = subprocess.run(  # nosec B603
-                cmd,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                cwd=Path.cwd(),
-                check=False,
-            )
-            return result.returncode == 0, result.stdout, result.stderr
-        except Exception as e:
-            return False, "", str(e)
-
     def handle(self, *args, **options):
-        project_root = Path(__file__).resolve().parents[4]
-        apps_dir = project_root / "apps"
+        bot = CodeAnalysisBot(project_root=_PROJECT_ROOT)
+        env = _get_env_info()
 
-        self._safe_print("\n[START] Code Analysis\n")
+        _print_header("  CODE ANALYSIS BOT  ")
+        _print_info(f"Projeto  : {_PROJECT_ROOT}")
+        _print_info(f"Apps dir : {bot.apps_dir}")
+        _print_info(f"Python   : {env['python']}  |  {env['os']}")
+        _print_info(f"Branch   : {env['branch']}  |  Commit: {env['commit']}")
 
-        has_errors = False
+        if options["fix"]:
+            _print_info("Modo     : FIX - Black ira reformatar arquivos")
+        if options["security_only"]:
+            _print_info("Escopo   : apenas seguranca (Bandit)")
+        if options["lint_only"]:
+            _print_info("Escopo   : apenas lint (Black + Flake8)")
 
-        # -------------------------
-        # BLACK
-        # -------------------------
-        if options["fix"] and not options["security_only"]:
-            self._safe_print("[BLACK] Formatando...")
+        t_start = time.monotonic()
+        results, durations = bot.run_analysis(
+            fix=options["fix"],
+            security_only=options["security_only"],
+            lint_only=options["lint_only"],
+        )
+        total_duration = time.monotonic() - t_start
 
-            success, stdout, stderr = self._run_tool(
-                "black", [str(apps_dir), "--line-length=88"]
+        tool_results = {
+            k: bool(v) for k, v in results.items() if not k.endswith("_output")
+        }
+
+        _print_section(f"RESULTADO FINAL  ({_duration_str(total_duration)} total)")
+
+        if not tool_results:
+            _print_info("Nenhuma ferramenta foi executada.")
+            return
+
+        _print_summary_table(tool_results, durations)
+
+        if all(tool_results.values()):
+            _p(
+                f"\n  {C.BG_GREEN}{C.BOLD}  OK  TODAS AS VERIFICACOES PASSARAM  {C.RESET}\n"
             )
-
-            if success:
-                self._safe_print("[OK] Black passou")
-            else:
-                self._safe_print("[WARN] Black encontrou problemas")
-                self.stdout.write(stdout or stderr)
-                has_errors = True
-
-        # -------------------------
-        # FLAKE8
-        # -------------------------
-        if not options["security_only"]:
-            self._safe_print("[FLAKE8] Executando...")
-
-            success, stdout, stderr = self._run_tool(
-                "flake8",
-                [
-                    str(apps_dir),
-                    "--max-line-length=200",
-                    "--extend-ignore=E203,W503",
-                ],
-            )
-
-            if success:
-                self._safe_print("[OK] Nenhum problema de lint")
-            else:
-                self._safe_print("[WARN] Problemas de lint encontrados")
-                self.stdout.write(stdout or stderr)
-                has_errors = True
-
-        # -------------------------
-        # BANDIT
-        # -------------------------
-        if not options["lint_only"]:
-            self._safe_print("[BANDIT] Executando...")
-
-            success, stdout, stderr = self._run_tool(
-                "bandit",
-                [
-                    "-r",
-                    str(apps_dir),
-                    "-f",
-                    "txt",
-                    "--exclude",
-                    "*/migrations/*,*/__pycache__/*",
-                ],
-            )
-
-            # Falha somente se encontrar Medium ou High — ignora Low
-            if not ("Severity: Medium" in stdout or "Severity: High" in stdout):
-                success = True
-
-            if success:
-                self._safe_print("[OK] Nenhum problema de seguranca")
-            else:
-                self._safe_print("[WARN] Problemas de seguranca encontrados")
-                self.stdout.write(stdout or stderr)
-                has_errors = True
-
-        # -------------------------
-        # RESULTADO FINAL
-        # -------------------------
-        self.stdout.write("\n" + "=" * 40)
-
-        if has_errors:
-            self.stdout.write("[FAIL] Ha problemas no codigo")
-            sys.exit(1)
         else:
-            self.stdout.write("[SUCCESS] Tudo OK")
+            failed = [k.upper() for k, v in tool_results.items() if not v]
+            _p(f"\n  {C.BG_RED}{C.BOLD}  FALHA EM: {', '.join(failed)}  {C.RESET}\n")
+            sys.exit(1)

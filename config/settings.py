@@ -377,3 +377,4 @@ DEFAULT_FROM_EMAIL = config(
     "DEFAULT_FROM_EMAIL", default="noreply@viajantesconectados.com"
 )
 RESEND_API_KEY = config("RESEND_API_KEY", default="")
+GITHUB_TOKEN = config("GITHUB_TOKEN", default="")

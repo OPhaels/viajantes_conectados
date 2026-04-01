@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from pathlib import Path
 
@@ -140,6 +141,7 @@ USE_TZ = True
 
 # Arquivos Estáticos e Media
 STATIC_URL = "/static/"
+os.makedirs(BASE_DIR / "logs", exist_ok=True)
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "docs",
